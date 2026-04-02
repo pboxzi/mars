@@ -60,14 +60,15 @@ const HomePage = () => {
       </nav>
 
       <main id="main-content">
-        {/* Store Block - Entire section is clickable */}
-        <a 
-          href="https://shop.brunomars.com" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="block"
-        >
-          <section className="relative min-h-screen flex items-center justify-center overflow-hidden group" data-testid="store-section">
+        {/* Store and Tour Blocks - Side by Side */}
+        <section className="min-h-screen flex flex-col md:flex-row" data-testid="store-tour-section">
+          {/* Store Block - Entire section is clickable */}
+          <a 
+            href="https://shop.brunomars.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex-1 relative overflow-hidden group"
+          >
             <div className="absolute inset-0">
               <img 
                 src="https://images.unsplash.com/photo-1669801158950-f663cf15298c?w=1920&q=80" 
@@ -76,21 +77,19 @@ const HomePage = () => {
               />
               <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition-all duration-500"></div>
             </div>
-            <div className="relative z-10 text-center px-4">
+            <div className="relative z-10 h-full min-h-screen flex flex-col items-center justify-center px-4">
               <p className="text-xl md:text-2xl mb-6 tracking-widest font-light">Store</p>
               <span className="inline-block bg-white text-black font-bold py-4 px-12 rounded-full hover:bg-gray-200 hover:scale-105 transition-all text-lg">
                 SHOP THE ROMANTIC
               </span>
             </div>
-          </section>
-        </a>
+          </a>
 
-        {/* Tour Block - Clickable */}
-        <button 
-          onClick={scrollToTourDates}
-          className="block w-full"
-        >
-          <section className="relative min-h-screen flex items-center justify-center overflow-hidden group" data-testid="tour-block">
+          {/* Tour Block - Clickable */}
+          <button 
+            onClick={scrollToTourDates}
+            className="flex-1 relative overflow-hidden group"
+          >
             <div className="absolute inset-0">
               <img 
                 src="https://images.unsplash.com/photo-1568286453307-ec8dd11413bf?w=1920&q=80" 
@@ -99,14 +98,14 @@ const HomePage = () => {
               />
               <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition-all duration-500"></div>
             </div>
-            <div className="relative z-10 text-center px-4">
+            <div className="relative z-10 h-full min-h-screen flex flex-col items-center justify-center px-4">
               <p className="text-xl md:text-2xl mb-6 tracking-widest font-light">Tour</p>
               <span className="inline-block bg-white text-black font-bold py-4 px-12 rounded-full hover:bg-gray-200 hover:scale-105 transition-all text-lg">
                 TICKETS
               </span>
             </div>
-          </section>
-        </button>
+          </button>
+        </section>
 
         {/* Risk It All Video - Entire section clickable */}
         <a 
