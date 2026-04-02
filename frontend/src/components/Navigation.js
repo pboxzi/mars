@@ -81,12 +81,13 @@ const Navigation = () => {
             textAlign: 'center'
           }}>
             <h1 style={{
-              fontSize: '3rem',
+              fontSize: '1.04vw',
               fontFamily: 'Poppins, sans-serif',
               fontWeight: 600,
-              letterSpacing: '0',
+              letterSpacing: 'normal',
               color: '#000',
-              margin: 0
+              margin: 0,
+              textTransform: 'uppercase'
             }}>
               BRUNO MARS
             </h1>
@@ -126,16 +127,17 @@ const Navigation = () => {
               to="/tour" 
               onClick={() => setIsMenuOpen(false)}
               style={{
-                fontSize: '3rem',
+                fontSize: '1.04vw',
                 fontFamily: 'Poppins, sans-serif',
                 fontWeight: 600,
-                letterSpacing: '0',
+                letterSpacing: 'normal',
                 color: '#000',
                 textDecoration: 'none',
-                transition: 'color 0.2s'
+                textTransform: 'uppercase',
+                transition: 'opacity 0.2s'
               }}
-              onMouseEnter={(e) => e.target.style.color = '#666'}
-              onMouseLeave={(e) => e.target.style.color = '#000'}
+              onMouseEnter={(e) => e.target.style.opacity = '0.6'}
+              onMouseLeave={(e) => e.target.style.opacity = '1'}
             >
               TOUR
             </Link>
@@ -144,16 +146,17 @@ const Navigation = () => {
               target="_blank" 
               rel="noopener noreferrer"
               style={{
-                fontSize: '3rem',
+                fontSize: '1.04vw',
                 fontFamily: 'Poppins, sans-serif',
                 fontWeight: 600,
-                letterSpacing: '0',
+                letterSpacing: 'normal',
                 color: '#000',
                 textDecoration: 'none',
-                transition: 'color 0.2s'
+                textTransform: 'uppercase',
+                transition: 'opacity 0.2s'
               }}
-              onMouseEnter={(e) => e.target.style.color = '#666'}
-              onMouseLeave={(e) => e.target.style.color = '#000'}
+              onMouseEnter={(e) => e.target.style.opacity = '0.6'}
+              onMouseLeave={(e) => e.target.style.opacity = '1'}
             >
               STORE
             </a>
@@ -161,16 +164,17 @@ const Navigation = () => {
               to="/music" 
               onClick={() => setIsMenuOpen(false)}
               style={{
-                fontSize: '3rem',
+                fontSize: '1.04vw',
                 fontFamily: 'Poppins, sans-serif',
                 fontWeight: 600,
-                letterSpacing: '0',
+                letterSpacing: 'normal',
                 color: '#000',
                 textDecoration: 'none',
-                transition: 'color 0.2s'
+                textTransform: 'uppercase',
+                transition: 'opacity 0.2s'
               }}
-              onMouseEnter={(e) => e.target.style.color = '#666'}
-              onMouseLeave={(e) => e.target.style.color = '#000'}
+              onMouseEnter={(e) => e.target.style.opacity = '0.6'}
+              onMouseLeave={(e) => e.target.style.opacity = '1'}
             >
               MUSIC
             </Link>
@@ -178,16 +182,17 @@ const Navigation = () => {
               to="/booking-status" 
               onClick={() => setIsMenuOpen(false)}
               style={{
-                fontSize: '3rem',
+                fontSize: '1.04vw',
                 fontFamily: 'Poppins, sans-serif',
                 fontWeight: 600,
-                letterSpacing: '0',
+                letterSpacing: 'normal',
                 color: '#000',
                 textDecoration: 'none',
-                transition: 'color 0.2s'
+                textTransform: 'uppercase',
+                transition: 'opacity 0.2s'
               }}
-              onMouseEnter={(e) => e.target.style.color = '#666'}
-              onMouseLeave={(e) => e.target.style.color = '#000'}
+              onMouseEnter={(e) => e.target.style.opacity = '0.6'}
+              onMouseLeave={(e) => e.target.style.opacity = '1'}
             >
               SUBSCRIBE
             </Link>
