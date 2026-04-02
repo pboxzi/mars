@@ -26,50 +26,193 @@ const TourPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <>
+      <style>{`
+        /* Tour Page Official Styling */
+        body {
+          font-family: "poppins", sans-serif;
+          font-style: normal;
+        }
+        
+        .tour-page-wrapper {
+          background: #000;
+          color: #666666;
+          font-family: 'helvetica', 'arial', sans-serif;
+          font-size: 12px;
+          min-height: 94vh;
+          padding-top: 6.41vw;
+        }
+        
+        .tour-title-image {
+          margin-top: 1.5vw;
+          text-align: center;
+          width: 50%;
+          margin-left: auto;
+          margin-right: auto;
+        }
+        
+        .seated-events-table {
+          border-top: none;
+          max-width: 41%;
+          display: inline-block;
+          vertical-align: bottom;
+          margin: 0 auto;
+          width: 100%;
+        }
+        
+        .seated-event-row {
+          border-bottom: 2px solid #ccc;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 15px 0;
+        }
+        
+        .seated-event-description-cells {
+          width: 65%;
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+        }
+        
+        .seated-event-date-cell {
+          min-width: 160px;
+          text-align: left;
+          color: #666666;
+        }
+        
+        .seated-event-venue-cell {
+          display: flex;
+          flex-direction: column;
+          min-width: 191px;
+          text-align: left;
+        }
+        
+        .seated-event-venue-name {
+          width: auto;
+          color: #666666;
+        }
+        
+        .seated-event-venue-location {
+          width: auto;
+          color: #666666;
+        }
+        
+        .seated-event-link-cells {
+          width: 25%;
+        }
+        
+        .seated-event-link-cell a,
+        .seated-event-link1,
+        .seated-event-link {
+          display: block;
+          width: 100%;
+          padding: 8px 0px;
+          text-transform: uppercase;
+          text-align: center;
+          background: #ed3d3d;
+          color: #fff;
+          margin: 4px auto;
+          text-decoration: none;
+          border: none;
+          border-radius: 0;
+          cursor: pointer;
+          font-family: 'helvetica', 'arial', sans-serif;
+          font-size: 12px;
+        }
+        
+        .seated-event-link-cell a:hover,
+        .seated-event-link1:hover,
+        .seated-event-link:hover {
+          color: #c08800;
+          background: #fff;
+          border: none;
+          padding: 8px 0px;
+          margin: 4px 0;
+          border-radius: 0;
+        }
+        
+        @media only screen and (max-width:1024px) and (orientation:portrait) {
+          .tour-title-image {
+            margin-top: 6.5vw;
+            width: 100%;
+          }
+          
+          .seated-events-table {
+            max-width: 100%;
+            width: 100%;
+          }
+          
+          .seated-event-venue-cell {
+            min-width: 31vw;
+            align-items: start;
+          }
+          
+          .tour-page-wrapper {
+            padding-top: 20vw;
+          }
+        }
+        
+        @media only screen and (max-width:1023px) {
+          .seated-events-table {
+            max-width: 100%;
+            width: 100%;
+          }
+        }
+      `}</style>
+      
       <Navigation />
       
-      <main className="pt-24 pb-20 px-4">
-        <div className="max-w-7xl mx-auto">
+      <div className="tour-page-wrapper">
+        <div style={{ textAlign: 'center', margin: '0 auto' }}>
           {/* Tour Header Image */}
-          <div className="mb-16 text-center">
-            <h1 className="text-6xl font-bold mb-8 tracking-wider">THE ROMANTIC TOUR</h1>
+          <div className="tour-title-image">
+            <img 
+              src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-03/BrunoTheRomanticTour_Creative10_1080x1440hetvdvre.jpg"
+              alt="The Romantic Tour"
+              style={{ width: '100%', height: 'auto' }}
+            />
           </div>
 
           {/* Tour Dates List */}
-          <div className="space-y-4">
+          <div className="seated-events-table" style={{ marginTop: '40px' }}>
             {events.length === 0 ? (
-              <p className="text-center text-gray-400 text-xl py-12">
+              <p style={{ textAlign: 'center', color: '#666', padding: '40px 0' }}>
                 Tour dates coming soon. Check back for updates!
               </p>
             ) : (
               events.map((event) => (
-                <div 
-                  key={event.id}
-                  className="border border-zinc-800 rounded-lg p-6 hover:bg-zinc-900 transition-all group"
-                >
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <p className="text-gray-400 text-sm mb-2">{event.date}</p>
-                      <h3 className="text-xl font-bold mb-1">{event.venue}</h3>
-                      <p className="text-gray-400">{event.city}</p>
+                <div key={event.id} className="seated-event-row">
+                  <div className="seated-event-description-cells">
+                    <div className="seated-event-date-cell">
+                      {event.date}
                     </div>
-                    <button 
-                      onClick={() => {
-                        setSelectedEvent(event);
-                        setShowBookingModal(true);
-                      }}
-                      className="bg-white text-black font-bold py-3 px-10 rounded-full hover:bg-gray-200 hover:scale-105 transition-all whitespace-nowrap"
-                    >
-                      Tickets
-                    </button>
+                    <div className="seated-event-venue-cell">
+                      <div className="seated-event-venue-name">{event.venue}</div>
+                      <div className="seated-event-venue-location">{event.city}</div>
+                    </div>
+                  </div>
+                  <div className="seated-event-link-cells">
+                    <div className="seated-event-link-cell">
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setSelectedEvent(event);
+                          setShowBookingModal(true);
+                        }}
+                        className="seated-event-link"
+                      >
+                        Tickets
+                      </a>
+                    </div>
                   </div>
                 </div>
               ))
             )}
           </div>
         </div>
-      </main>
+      </div>
 
       <Footer />
 
@@ -82,7 +225,7 @@ const TourPage = () => {
           }}
         />
       )}
-    </div>
+    </>
   );
 };
 
