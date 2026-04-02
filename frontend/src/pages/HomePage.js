@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import BookingModal from '../components/BookingModal';
-import { Link } from 'react-router-dom';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -42,15 +42,9 @@ const HomePage = () => {
         Skip to main content
       </a>
 
-      {/* Check Booking - top right */}
-      <Link 
-        to="/booking-status"
-        className="fixed top-6 right-6 z-50 text-sm tracking-wider hover:opacity-70 transition-opacity"
-      >
-        CHECK BOOKING
-      </Link>
+      <Navigation />
 
-      <main id="main-content">
+      <main id="main-content" className="pt-16">
         {/* Store and Tour Section - Side by Side */}
         <section className="flex flex-col md:flex-row min-h-screen">
           {/* Store Section */}
