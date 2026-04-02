@@ -571,7 +571,7 @@ const HomePage = () => {
 
       {/* Footer */}
       <div className={`site-footer-custom ${footerOpen ? 'show' : ''}`}>
-        <Footer />
+        <HomeFooter />
       </div>
 
       {/* Booking Modal */}
