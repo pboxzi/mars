@@ -155,8 +155,14 @@ const TourPage = () => {
       <Navigation />
       
       <div className="tour-page-container">
-        {/* Tour Title */}
-        <h1 className="tour-title">The Romantic Tour</h1>
+        {/* Tour Title Image */}
+        <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+          <img 
+            src="https://www.brunomars.com/sites/g/files/g2000021186/files/2026-01/Tour_title_img.png"
+            alt="The Romantic Tour"
+            style={{ maxWidth: '600px', width: '100%', height: 'auto', margin: '0 auto', display: 'block' }}
+          />
+        </div>
 
         {/* Tour Dates List */}
         <div className="tour-dates-container">
