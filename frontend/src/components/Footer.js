@@ -67,63 +67,83 @@ const Footer = () => {
           opacity: 0.6;
         }
         
+        .footer-subscribe-section {
+          margin-bottom: 50px;
+        }
+        
         .footer-subscribe-title {
           font-family: 'Poppins', sans-serif;
-          font-weight: 600;
-          font-size: 2rem;
-          margin-bottom: 30px;
-          letter-spacing: 0.05em;
+          font-weight: 700;
+          font-size: 1.8rem;
+          margin-bottom: 15px;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+        
+        .footer-subscribe-subtitle {
+          font-family: 'Poppins', sans-serif;
+          font-weight: 400;
+          font-size: 0.95rem;
+          margin-bottom: 25px;
+          color: #ccc;
         }
         
         .footer-subscribe-form {
           max-width: 400px;
-          margin: 0 auto 50px;
+          margin: 0 auto;
         }
         
-        .footer-email-label {
-          display: block;
+        .footer-form-group {
+          margin-bottom: 20px;
           text-align: left;
-          font-size: 0.9rem;
-          margin-bottom: 10px;
-          color: #ccc;
+        }
+        
+        .footer-form-group label {
+          display: block;
+          font-family: 'Poppins', sans-serif;
+          font-weight: 600;
+          font-size: 0.75rem;
+          margin-bottom: 8px;
+          color: #fff;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
         }
         
         .footer-email-input {
           width: 100%;
-          background: #222;
-          border: 1px solid #444;
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid #444;
           color: #fff;
-          padding: 12px 15px;
-          font-size: 0.95rem;
-          margin-bottom: 15px;
+          padding: 10px 0;
+          font-size: 1rem;
           font-family: 'Poppins', sans-serif;
-        }
-        
-        .footer-email-input::placeholder {
-          color: #666;
+          transition: border-color 0.3s;
         }
         
         .footer-email-input:focus {
           outline: none;
-          border-color: #fff;
+          border-bottom-color: #fff;
         }
         
         .footer-subscribe-button {
           width: 100%;
-          background: #fff;
-          color: #000;
-          border: none;
-          padding: 12px 30px;
+          background: transparent;
+          color: #fff;
+          border: 2px solid #fff;
+          padding: 14px 30px;
           font-family: 'Poppins', sans-serif;
-          font-weight: 600;
-          font-size: 0.95rem;
+          font-weight: 700;
+          font-size: 0.9rem;
           cursor: pointer;
-          transition: opacity 0.2s;
+          transition: all 0.3s;
           text-transform: uppercase;
+          letter-spacing: 0.15em;
         }
         
         .footer-subscribe-button:hover {
-          opacity: 0.8;
+          background: #fff;
+          color: #000;
         }
         
         .footer-success-message {
@@ -221,28 +241,33 @@ const Footer = () => {
           </div>
           
           {/* Subscribe Section */}
-          <div className="footer-subscribe-title">Subscribe</div>
-          
-          <form className="footer-subscribe-form" onSubmit={handleSubmit}>
-            <label className="footer-email-label">Email Address (Required)</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@email.com"
-              className="footer-email-input"
-              required
-            />
-            <button type="submit" className="footer-subscribe-button">
-              <svg style={{ display: 'inline-block', marginRight: '8px', verticalAlign: 'middle' }} width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-              </svg>
-              Subscribe
-            </button>
-            {submitted && (
-              <div className="footer-success-message">✓ Thank you for subscribing!</div>
-            )}
-          </form>
+          <div className="footer-subscribe-section">
+            <h2 className="footer-subscribe-title">SUBSCRIBE</h2>
+            <p className="footer-subscribe-subtitle">
+              Sign up for Bruno Mars news and updates
+            </p>
+            
+            <form className="footer-subscribe-form" onSubmit={handleSubmit}>
+              <div className="footer-form-group">
+                <label htmlFor="email">EMAIL</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder=""
+                  className="footer-email-input"
+                  required
+                />
+              </div>
+              <button type="submit" className="footer-subscribe-button">
+                SUBMIT
+              </button>
+              {submitted && (
+                <div className="footer-success-message">✓ THANK YOU FOR SUBSCRIBING</div>
+              )}
+            </form>
+          </div>
           
           {/* Copyright */}
           <div className="footer-copyright">
