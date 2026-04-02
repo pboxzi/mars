@@ -5,6 +5,8 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import asyncio
+import resend
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
@@ -28,6 +30,12 @@ db = client[os.environ['DB_NAME']]
 JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production')
 JWT_ALGORITHM = 'HS256'
 JWT_EXPIRATION_HOURS = 24
+
+# Email Configuration
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', '')
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
+resend.api_key = RESEND_API_KEY
 
 # Security
 security = HTTPBearer()
@@ -304,6 +312,132 @@ def get_btc_price() -> float:
         return 50000.0  # Fallback price
 
 
+# ==================== EMAIL NOTIFICATIONS ====================
+async def send_booking_notification(booking: dict, event: dict, ticket: dict):
+    """Send email notification to admin when new booking is submitted"""
+    try:
+        ticket_type_labels = {
+            "general": "General Admission",
+            "vip": "VIP Access",
+            "meetgreet": "Meet & Greet",
+            "backstage": "Backstage Pass"
+        }
+        
+        ticket_label = ticket_type_labels.get(booking['ticket_type'], booking['ticket_type'])
+        total_price = ticket['price_usd'] * booking['quantity']
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: #d32f2f; color: white; padding: 20px; text-align: center; }}
+                .content {{ background: #f9f9f9; padding: 20px; }}
+                .booking-details {{ background: white; padding: 15px; margin: 15px 0; border-left: 4px solid #d32f2f; }}
+                .detail-row {{ padding: 8px 0; border-bottom: 1px solid #eee; }}
+                .label {{ font-weight: bold; color: #d32f2f; }}
+                .button {{ background: #d32f2f; color: white; padding: 12px 30px; text-decoration: none; display: inline-block; margin: 20px 0; border-radius: 4px; }}
+                .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🎫 New VIP Booking Request!</h1>
+                </div>
+                <div class="content">
+                    <p><strong>You have a new booking request for The Romantic Tour!</strong></p>
+                    
+                    <div class="booking-details">
+                        <h3>📋 Booking Details</h3>
+                        <div class="detail-row">
+                            <span class="label">Confirmation Number:</span> {booking['confirmation_number']}
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Status:</span> PENDING APPROVAL
+                        </div>
+                    </div>
+                    
+                    <div class="booking-details">
+                        <h3>🎤 Event Information</h3>
+                        <div class="detail-row">
+                            <span class="label">Event:</span> {event['title']}
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Venue:</span> {event['venue']}
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Location:</span> {event['city']}
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Date:</span> {event['date']} at {event['time']}
+                        </div>
+                    </div>
+                    
+                    <div class="booking-details">
+                        <h3>👤 Customer Information</h3>
+                        <div class="detail-row">
+                            <span class="label">Name:</span> {booking['customer_name']}
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Email:</span> {booking['email']}
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Phone:</span> {booking['phone']}
+                        </div>
+                    </div>
+                    
+                    <div class="booking-details">
+                        <h3>💰 Ticket Information</h3>
+                        <div class="detail-row">
+                            <span class="label">Ticket Type:</span> {ticket_label}
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Quantity:</span> {booking['quantity']}
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Price per Ticket:</span> ${ticket['price_usd']:,.2f}
+                        </div>
+                        <div class="detail-row" style="border-bottom: none;">
+                            <span class="label">Total Amount:</span> <strong style="color: #d32f2f; font-size: 18px;">${total_price:,.2f}</strong>
+                        </div>
+                    </div>
+                    
+                    {f'<div class="booking-details"><h3>💬 Customer Message</h3><p>{booking["message"]}</p></div>' if booking.get('message') else ''}
+                    
+                    <div style="text-align: center;">
+                        <a href="{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/admin-secret/bookings" class="button">
+                            Review & Approve Booking
+                        </a>
+                    </div>
+                </div>
+                <div class="footer">
+                    <p>This is an automated notification from your Bruno Mars VIP Concierge System</p>
+                    <p>Login to your admin panel to manage this booking</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        params = {
+            "from": SENDER_EMAIL,
+            "to": [ADMIN_EMAIL],
+            "subject": f"🎫 New VIP Booking: {ticket_label} - {event['venue']} ({event['date']})",
+            "html": html_content
+        }
+        
+        # Send email in background (non-blocking)
+        await asyncio.to_thread(resend.Emails.send, params)
+        logging.info(f"Booking notification sent to {ADMIN_EMAIL}")
+        
+    except Exception as e:
+        logging.error(f"Failed to send booking notification: {str(e)}")
+        # Don't raise exception - we don't want email failure to block booking
+
+
 # ==================== PUBLIC API ROUTES ====================
 
 @api_router.get("/")
@@ -362,7 +496,7 @@ async def get_event_details(event_id: str):
 async def create_booking_request(booking: BookingRequestCreate):
     """Submit a booking request"""
     # Verify event exists
-    event = await db.events.find_one({"id": booking.event_id, "status": "active"})
+    event = await db.events.find_one({"id": booking.event_id, "status": "active"}, {"_id": 0})
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     
@@ -370,7 +504,7 @@ async def create_booking_request(booking: BookingRequestCreate):
     ticket = await db.ticket_types.find_one({
         "event_id": booking.event_id,
         "type": booking.ticket_type
-    })
+    }, {"_id": 0})
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket type not found")
     
@@ -383,6 +517,9 @@ async def create_booking_request(booking: BookingRequestCreate):
     doc['request_date'] = doc['request_date'].isoformat()
     
     await db.booking_requests.insert_one(doc)
+    
+    # Send email notification to admin (non-blocking)
+    asyncio.create_task(send_booking_notification(doc, event, ticket))
     
     return booking_obj
 
