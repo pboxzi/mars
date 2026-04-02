@@ -75,7 +75,7 @@ const Navigation = () => {
           {/* BRUNO MARS Header */}
           <div style={{
             position: 'absolute',
-            top: '2rem',
+            top: '2.5rem',
             left: 0,
             right: 0,
             textAlign: 'center'
@@ -83,7 +83,7 @@ const Navigation = () => {
             <h1 style={{
               fontSize: '3rem',
               fontFamily: 'Poppins, sans-serif',
-              fontWeight: 900,
+              fontWeight: 700,
               letterSpacing: '-0.025em',
               color: '#000',
               margin: 0
@@ -97,7 +97,7 @@ const Navigation = () => {
             onClick={() => setIsMenuOpen(false)}
             style={{
               position: 'absolute',
-              top: '2rem',
+              top: '2.5rem',
               right: '2rem',
               background: 'transparent',
               border: 'none',
@@ -120,7 +120,7 @@ const Navigation = () => {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '1.5rem'
+            gap: '2rem'
           }}>
             <Link 
               to="/tour" 
