@@ -83,8 +83,8 @@ const Navigation = () => {
             <h1 style={{
               fontSize: '3rem',
               fontFamily: 'Poppins, sans-serif',
-              fontWeight: 700,
-              letterSpacing: '-0.025em',
+              fontWeight: 600,
+              letterSpacing: '0',
               color: '#000',
               margin: 0
             }}>
@@ -128,8 +128,8 @@ const Navigation = () => {
               style={{
                 fontSize: '3rem',
                 fontFamily: 'Poppins, sans-serif',
-                fontWeight: 700,
-                letterSpacing: '-0.025em',
+                fontWeight: 600,
+                letterSpacing: '0',
                 color: '#000',
                 textDecoration: 'none',
                 transition: 'color 0.2s'
@@ -146,8 +146,8 @@ const Navigation = () => {
               style={{
                 fontSize: '3rem',
                 fontFamily: 'Poppins, sans-serif',
-                fontWeight: 700,
-                letterSpacing: '-0.025em',
+                fontWeight: 600,
+                letterSpacing: '0',
                 color: '#000',
                 textDecoration: 'none',
                 transition: 'color 0.2s'
@@ -163,8 +163,8 @@ const Navigation = () => {
               style={{
                 fontSize: '3rem',
                 fontFamily: 'Poppins, sans-serif',
-                fontWeight: 700,
-                letterSpacing: '-0.025em',
+                fontWeight: 600,
+                letterSpacing: '0',
                 color: '#000',
                 textDecoration: 'none',
                 transition: 'color 0.2s'
@@ -180,8 +180,8 @@ const Navigation = () => {
               style={{
                 fontSize: '3rem',
                 fontFamily: 'Poppins, sans-serif',
-                fontWeight: 700,
-                letterSpacing: '-0.025em',
+                fontWeight: 600,
+                letterSpacing: '0',
                 color: '#000',
                 textDecoration: 'none',
                 transition: 'color 0.2s'
