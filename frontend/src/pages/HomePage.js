@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import BookingModal from '../components/BookingModal';
-import { Play } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -12,10 +11,135 @@ const HomePage = () => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [footerOpen, setFooterOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  const slideRefs = useRef([]);
+  const touchStartY = useRef(0);
+
+  // Define slide IDs based on viewport
+  const SLIDE_IDS = isMobile 
+    ? ['store-tour-section', 'video-section-1', 'header-section', 'video-section-2']
+    : ['store-tour-section', 'video-section-1', 'header-section', 'video-section-2'];
+  
+  const totalSlides = SLIDE_IDS.length;
 
   useEffect(() => {
     fetchEvents();
+    
+    // Check if mobile
+    const checkMobile = () => {
+      setIsMobile(window.matchMedia('(max-width:1024px) and (orientation:portrait)').matches);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Smooth scroll logic
+  useEffect(() => {
+    const toggleFooter = (show) => {
+      setIsAnimating(true);
+      setFooterOpen(show);
+      setTimeout(() => setIsAnimating(false), 600);
+    };
+
+    const goToSlide = (targetIndex) => {
+      if (isAnimating || targetIndex === currentSlide || targetIndex < 0) return;
+
+      if (targetIndex >= totalSlides) {
+        if (!footerOpen) toggleFooter(true);
+        return;
+      }
+
+      if (footerOpen && targetIndex < totalSlides) {
+        toggleFooter(false);
+        return;
+      }
+
+      setIsAnimating(true);
+      const direction = targetIndex > currentSlide ? 'down' : 'up';
+
+      if (direction === 'down') {
+        for (let i = currentSlide + 1; i <= targetIndex; i++) {
+          if (slideRefs.current[i]) {
+            slideRefs.current[i].classList.add('transitioning');
+            slideRefs.current[i].style.transform = 'translateY(0)';
+          }
+        }
+      } else {
+        for (let i = currentSlide; i > targetIndex; i--) {
+          if (slideRefs.current[i]) {
+            slideRefs.current[i].classList.add('transitioning');
+            slideRefs.current[i].style.transform = 'translateY(100%)';
+          }
+        }
+      }
+
+      setCurrentSlide(targetIndex);
+      setTimeout(() => {
+        slideRefs.current.forEach(s => s && s.classList.remove('transitioning'));
+        setIsAnimating(false);
+      }, 600);
+    };
+
+    // Wheel event
+    const handleWheel = (e) => {
+      if (isAnimating) return;
+      if (e.deltaY > 20) {
+        if (currentSlide === totalSlides - 1 && !footerOpen) toggleFooter(true);
+        else if (!footerOpen) goToSlide(currentSlide + 1);
+      } else if (e.deltaY < -20) {
+        if (footerOpen) toggleFooter(false);
+        else goToSlide(currentSlide - 1);
+      }
+    };
+
+    // Touch events
+    const handleTouchStart = (e) => {
+      touchStartY.current = e.changedTouches[0].screenY;
+    };
+
+    const handleTouchEnd = (e) => {
+      const touchEndY = e.changedTouches[0].screenY;
+      const diff = touchStartY.current - touchEndY;
+      if (isAnimating) return;
+      if (diff > 50) {
+        if (currentSlide === totalSlides - 1 && !footerOpen) toggleFooter(true);
+        else if (!footerOpen) goToSlide(currentSlide + 1);
+      } else if (diff < -50) {
+        if (footerOpen) toggleFooter(false);
+        else goToSlide(currentSlide - 1);
+      }
+    };
+
+    // Keyboard events
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowDown') {
+        if (currentSlide === totalSlides - 1 && !footerOpen) toggleFooter(true);
+        else if (!footerOpen) goToSlide(currentSlide + 1);
+      }
+      if (e.key === 'ArrowUp') {
+        if (footerOpen) toggleFooter(false);
+        else goToSlide(currentSlide - 1);
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [currentSlide, isAnimating, footerOpen, totalSlides]);
 
   const fetchEvents = async () => {
     try {
@@ -34,7 +158,98 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
+      <style>{`
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        body {
+          overflow: hidden;
+        }
+
+        .smoothslide {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          will-change: transform;
+          text-align: center;
+          box-sizing: border-box;
+        }
+
+        .smoothslide.transitioning {
+          transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        #store-tour-section {
+          z-index: 1;
+        }
+
+        #video-section-1 {
+          z-index: 2;
+          transform: translateY(100%);
+        }
+
+        #header-section {
+          z-index: 3;
+          transform: translateY(100%);
+        }
+
+        #video-section-2 {
+          z-index: 4;
+          transform: translateY(100%);
+        }
+
+        .site-footer-custom {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          width: 100vw;
+          background: #fff;
+          color: #000;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 5;
+          transform: translateY(100%);
+          transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        body.showfooter .site-footer-custom {
+          transform: translateY(0);
+          z-index: 1;
+        }
+
+        .flex-container-split {
+          display: flex;
+          width: 100%;
+          height: 100%;
+        }
+
+        .flex-container-split > div {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+        }
+
+        @media only screen and (max-width: 1024px) and (orientation: portrait) {
+          .flex-container-split {
+            flex-direction: column;
+          }
+        }
+      `}</style>
+
       <a 
         href="#main-content" 
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-black focus:text-white focus:px-4 focus:py-2"
@@ -44,151 +259,209 @@ const HomePage = () => {
 
       <Navigation />
 
-      <main id="main-content" className="pt-20">
-        {/* Store and Tour Section - Side by Side */}
-        <section className="min-h-screen flex flex-col md:flex-row">
-          {/* STORE Section - LEFT */}
-          <div className="flex-1 relative bg-gray-50 flex flex-col items-center justify-center p-8 md:p-16">
-            <div className="max-w-xl w-full">
-              {/* Placeholder for merchandise image */}
-              <div className="mb-8">
+      <main id="main-content">
+        {/* Section 1: Store and Tour */}
+        <div 
+          id="store-tour-section" 
+          className="smoothslide"
+          ref={el => slideRefs.current[0] = el}
+        >
+          <div className="flex-container-split">
+            {/* STORE */}
+            <div style={{ backgroundColor: '#ffffff' }}>
+              <a href="https://brunomars.lnk.to/officialstore" target="_blank" rel="noopener noreferrer">
                 <img 
-                  src="https://images.unsplash.com/photo-1669801158950-f663cf15298c?w=800&q=80"
-                  alt="The Romantic Merchandise"
-                  className="w-full h-auto rounded-lg shadow-lg"
+                  src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-03/Store_Block-img43dfddf.jpg"
+                  alt="Store"
+                  style={{ width: '100%', maxWidth: '600px', marginBottom: '2rem' }}
                 />
-              </div>
-              <p className="text-center text-2xl font-bold mb-6 tracking-wider">STORE</p>
-              <a
-                href="https://shop.brunomars.com"
-                target="_blank"
+              </a>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem', color: '#000' }}>Store</div>
+              <a 
+                href="https://brunomars.lnk.to/officialstore" 
+                target="_blank" 
                 rel="noopener noreferrer"
-                className="block w-full bg-black text-white text-center font-bold py-4 px-8 hover:bg-gray-800 transition-colors"
+                style={{
+                  display: 'inline-block',
+                  backgroundColor: '#000',
+                  color: '#fff',
+                  padding: '1rem 2rem',
+                  fontWeight: 'bold',
+                  textDecoration: 'none',
+                  textTransform: 'uppercase'
+                }}
               >
                 SHOP THE ROMANTIC
               </a>
             </div>
-          </div>
 
-          {/* TOUR Section - RIGHT */}
-          <div className="flex-1 relative bg-red-700 flex flex-col items-center justify-center p-8 md:p-16">
-            <div className="max-w-xl w-full text-white">
-              {/* Tour Poster Content */}
-              <div className="border-4 border-white p-8 mb-8">
-                <h2 className="text-5xl md:text-6xl font-black text-center mb-4">BRUNO MARS</h2>
-                <div className="border-t-2 border-white my-6"></div>
-                <h3 className="text-4xl md:text-5xl font-black text-center mb-6">THE ROMANTIC TOUR</h3>
-                <p className="text-center text-sm mb-2">ANDERSON .PAAK AS DJ PEE-WEE</p>
-                <p className="text-center text-sm mb-2">LEON THOMAS • RAVE • VICTORIA MONET</p>
-                <p className="text-center text-xs mt-4">IN SELECT CITIES</p>
-                <p className="text-center text-xs font-bold">NORTH AMERICA, EUROPE, UK & MEXICO</p>
-              </div>
-              <p className="text-center text-2xl font-bold mb-6 tracking-wider">TOUR</p>
+            {/* TOUR */}
+            <div style={{ backgroundColor: '#ffffff' }}>
+              <a href="https://www.brunomars.com/tour" target="_blank" rel="noopener noreferrer">
+                <img 
+                  src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-03/BrunoTheRomanticTour_Creative10_1080x1440hetvdvre.jpg"
+                  alt="Tour"
+                  style={{ width: '100%', maxWidth: '600px', marginBottom: '2rem' }}
+                />
+              </a>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem', color: '#000' }}>Tour</div>
               <button
                 onClick={handleTicketsClick}
-                className="block w-full bg-black text-white text-center font-bold py-4 px-8 hover:bg-gray-900 transition-colors"
+                style={{
+                  backgroundColor: '#000',
+                  color: '#fff',
+                  padding: '1rem 2rem',
+                  fontWeight: 'bold',
+                  border: 'none',
+                  cursor: 'pointer',
+                  textTransform: 'uppercase'
+                }}
               >
                 TICKETS
               </button>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* Risk It All Video Section */}
-        <section className="relative min-h-screen bg-black flex items-center justify-center">
-          <div className="absolute inset-0">
-            <img 
-              src="https://images.unsplash.com/photo-1660150509350-ff505601d094?w=1920&q=80"
-              alt="Risk It All"
-              className="w-full h-full object-cover opacity-60"
-            />
-          </div>
-          <div className="relative z-10 text-center text-white px-4">
-            <div className="w-20 h-20 mx-auto mb-8 bg-white rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform">
-              <Play className="w-10 h-10 text-black ml-1" />
-            </div>
-            <h2 className="text-5xl md:text-6xl font-black mb-8 tracking-wide">RISK IT ALL</h2>
-            <a
-              href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-white text-black font-bold py-4 px-12 hover:bg-gray-200 transition-colors"
-            >
-              WATCH NOW
-            </a>
-          </div>
-        </section>
-
-        {/* Album Header Banner Section */}
-        <a
-          href="https://shop.brunomars.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block"
+        {/* Section 2: Risk It All Video */}
+        <div 
+          id="video-section-1" 
+          className="smoothslide"
+          ref={el => slideRefs.current[1] = el}
+          style={{ backgroundColor: '#000' }}
         >
-          <section className="relative min-h-[70vh] bg-gray-900 overflow-hidden group">
-            <img 
-              src="https://images.unsplash.com/photo-1561447920-ee278fe828a2?w=1920&q=80"
-              alt="Album"
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-            />
-          </section>
-        </a>
-
-        {/* Vinyl Colors Banner with Text Overlay */}
-        <section className="relative min-h-screen bg-black overflow-hidden">
-          <a
-            href="https://shop.brunomars.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block h-full"
-          >
-            <div className="absolute inset-0">
-              <img 
-                src="https://images.unsplash.com/photo-1602848597941-0d3d3a2c1241?w=1920&q=80"
-                alt="Vinyl"
-                className="w-full h-full object-cover"
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            <picture>
+              <source 
+                media="(max-width: 1024px)" 
+                srcSet="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-02/home_mobbb.jpg"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+              <img 
+                src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-03/Group%205%402x.jpg"
+                alt="Risk It All"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
+              />
+            </picture>
+            <div style={{ position: 'absolute', bottom: '20%', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', color: '#fff', zIndex: 10 }}>
+              <a href="https://brunomars.lnk.to/theromantic/youtube" target="_blank" rel="noopener noreferrer">
+                <img 
+                  src="https://www.brunomars.com/sites/g/files/g2000021861/files/2025-12/lance_playicon.svg"
+                  alt="Play"
+                  style={{ width: '60px', margin: '0 auto 1rem' }}
+                />
+              </a>
+              <div style={{ fontSize: '3rem', fontWeight: '900', marginBottom: '1rem' }}>RISK IT ALL</div>
+              <a 
+                href="https://brunomars.lnk.to/theromantic/youtube" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-block',
+                  backgroundColor: '#fff',
+                  color: '#000',
+                  padding: '1rem 2rem',
+                  fontWeight: 'bold',
+                  textDecoration: 'none',
+                  textTransform: 'uppercase'
+                }}
+              >
+                WATCH NOW
+              </a>
             </div>
-            <div className="relative z-10 h-screen flex flex-col items-center justify-center text-white px-4">
-              <h2 className="text-4xl md:text-5xl font-black mb-8 tracking-wide text-center">
-                EXCLUSIVE VINYL COLORS
-              </h2>
-              <span className="inline-block bg-white text-black font-bold py-4 px-12 hover:bg-gray-200 transition-colors">
-                FIND RETAILERS
-              </span>
-            </div>
-          </a>
-        </section>
-
-        {/* I Just Might Video Section */}
-        <section className="relative min-h-screen bg-black flex items-center justify-center">
-          <div className="absolute inset-0">
-            <img 
-              src="https://images.pexels.com/photos/6311811/pexels-photo-6311811.jpeg?w=1920&q=80"
-              alt="I Just Might"
-              className="w-full h-full object-cover opacity-60"
-            />
           </div>
-          <div className="relative z-10 text-center text-white px-4">
-            <div className="w-20 h-20 mx-auto mb-8 bg-white rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform">
-              <Play className="w-10 h-10 text-black ml-1" />
-            </div>
-            <h2 className="text-5xl md:text-6xl font-black mb-8 tracking-wide">I JUST MIGHT</h2>
-            <a
-              href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-white text-black font-bold py-4 px-12 hover:bg-gray-200 transition-colors"
-            >
-              WATCH NOW
+        </div>
+
+        {/* Section 3: Header Banner - Vinyl Colors */}
+        <div 
+          id="header-section" 
+          className="smoothslide"
+          ref={el => slideRefs.current[2] = el}
+        >
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            <a href="https://brunomars.lnk.to/theromantic" target="_blank" rel="noopener noreferrer">
+              <picture>
+                <source 
+                  media="(max-width: 1024px)" 
+                  srcSet="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-01/Vinyl.png"
+                />
+                <img 
+                  src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-01/allstore_desktop_wider_1_0.jpg"
+                  alt="Exclusive Vinyl Colors"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
+                />
+              </picture>
+              <div style={{ position: 'absolute', bottom: '10%', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', zIndex: 10 }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem', color: '#000' }}>EXCLUSIVE VINYL COLORS</div>
+                <span 
+                  style={{
+                    display: 'inline-block',
+                    backgroundColor: '#000',
+                    color: '#fff',
+                    padding: '0.75rem 2rem',
+                    fontWeight: 'bold',
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  FIND RETAILERS
+                </span>
+              </div>
             </a>
           </div>
-        </section>
+        </div>
+
+        {/* Section 4: I Just Might Video */}
+        <div 
+          id="video-section-2" 
+          className="smoothslide"
+          ref={el => slideRefs.current[3] = el}
+          style={{ backgroundColor: '#000' }}
+        >
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            <picture>
+              <source 
+                media="(max-width: 1024px)" 
+                srcSet="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-01/Group%208%402x.jpg"
+              />
+              <img 
+                src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-01/Video_Desktop-s3ff.jpg"
+                alt="I Just Might"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
+              />
+            </picture>
+            <div style={{ position: 'absolute', bottom: '20%', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', color: '#fff', zIndex: 10 }}>
+              <a href="http://brunomars.lnk.to/ijustmight/youtube" target="_blank" rel="noopener noreferrer">
+                <img 
+                  src="https://www.brunomars.com/sites/g/files/g2000021861/files/2025-12/lance_playicon.svg"
+                  alt="Play"
+                  style={{ width: '60px', margin: '0 auto 1rem' }}
+                />
+              </a>
+              <div style={{ fontSize: '3rem', fontWeight: '900', marginBottom: '1rem' }}>I JUST MIGHT</div>
+              <a 
+                href="http://brunomars.lnk.to/ijustmight/youtube" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-block',
+                  backgroundColor: '#fff',
+                  color: '#000',
+                  padding: '1rem 2rem',
+                  fontWeight: 'bold',
+                  textDecoration: 'none',
+                  textTransform: 'uppercase'
+                }}
+              >
+                WATCH NOW
+              </a>
+            </div>
+          </div>
+        </div>
       </main>
 
-      <Footer />
+      {/* Footer */}
+      <div className={`site-footer-custom ${footerOpen ? 'show' : ''}`}>
+        <Footer />
+      </div>
 
       {/* Booking Modal */}
       {showBookingModal && selectedEvent && (
@@ -200,7 +473,7 @@ const HomePage = () => {
           }}
         />
       )}
-    </div>
+    </>
   );
 };
 
