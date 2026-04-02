@@ -28,189 +28,166 @@ const TourPage = () => {
   return (
     <>
       <style>{`
-        /* Tour Page Official Styling */
         body {
           font-family: "poppins", sans-serif;
           font-style: normal;
+          background: #fff;
         }
         
-        .tour-page-wrapper {
-          background: #000;
-          color: #666666;
-          font-family: 'helvetica', 'arial', sans-serif;
-          font-size: 12px;
-          min-height: 94vh;
-          padding-top: 6.41vw;
+        .tour-page-container {
+          background: #fff;
+          min-height: 100vh;
+          padding-top: 100px;
+          padding-bottom: 60px;
         }
         
-        .tour-title-image {
-          margin-top: 1.5vw;
+        .tour-title {
           text-align: center;
-          width: 50%;
-          margin-left: auto;
-          margin-right: auto;
+          font-family: 'Poppins', sans-serif;
+          font-weight: 300;
+          font-size: 4.5rem;
+          letter-spacing: 0.1em;
+          color: #d32f2f;
+          margin: 60px auto 80px;
+          text-transform: uppercase;
+          line-height: 1.2;
         }
         
-        .seated-events-table {
-          border-top: none;
-          max-width: 41%;
-          display: inline-block;
-          vertical-align: bottom;
+        .tour-dates-container {
+          max-width: 900px;
           margin: 0 auto;
-          width: 100%;
+          padding: 0 20px;
         }
         
-        .seated-event-row {
-          border-bottom: 2px solid #ccc;
+        .tour-event-row {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 15px 0;
+          padding: 25px 0;
+          border-bottom: 1px solid #e0e0e0;
         }
         
-        .seated-event-description-cells {
-          width: 65%;
+        .tour-event-row:last-child {
+          border-bottom: none;
+        }
+        
+        .tour-event-info {
           display: flex;
-          flex-direction: row;
-          justify-content: space-between;
+          gap: 60px;
+          flex: 1;
         }
         
-        .seated-event-date-cell {
-          min-width: 160px;
-          text-align: left;
-          color: #666666;
-        }
-        
-        .seated-event-venue-cell {
-          display: flex;
-          flex-direction: column;
-          min-width: 191px;
-          text-align: left;
-        }
-        
-        .seated-event-venue-name {
-          width: auto;
-          color: #666666;
-        }
-        
-        .seated-event-venue-location {
-          width: auto;
-          color: #666666;
-        }
-        
-        .seated-event-link-cells {
-          width: 25%;
-        }
-        
-        .seated-event-link-cell a,
-        .seated-event-link1,
-        .seated-event-link {
-          display: block;
-          width: 100%;
-          padding: 8px 0px;
+        .tour-event-date {
+          font-family: 'Poppins', sans-serif;
+          font-weight: 400;
+          font-size: 0.95rem;
+          color: #000;
           text-transform: uppercase;
-          text-align: center;
-          background: #ed3d3d;
+          min-width: 120px;
+        }
+        
+        .tour-event-venue {
+          flex: 1;
+        }
+        
+        .tour-venue-name {
+          font-family: 'Poppins', sans-serif;
+          font-weight: 600;
+          font-size: 0.95rem;
+          color: #000;
+          text-transform: uppercase;
+          margin-bottom: 4px;
+        }
+        
+        .tour-venue-location {
+          font-family: 'Poppins', sans-serif;
+          font-weight: 400;
+          font-size: 0.95rem;
+          color: #000;
+          text-transform: uppercase;
+        }
+        
+        .tour-ticket-button {
+          background: #000;
           color: #fff;
-          margin: 4px auto;
-          text-decoration: none;
           border: none;
-          border-radius: 0;
+          padding: 12px 40px;
+          font-family: 'Poppins', sans-serif;
+          font-weight: 600;
+          font-size: 0.85rem;
+          text-transform: uppercase;
           cursor: pointer;
-          font-family: 'helvetica', 'arial', sans-serif;
-          font-size: 12px;
+          transition: all 0.2s ease;
+          text-decoration: none;
+          display: inline-block;
         }
         
-        .seated-event-link-cell a:hover,
-        .seated-event-link1:hover,
-        .seated-event-link:hover {
-          color: #c08800;
-          background: #fff;
-          border: none;
-          padding: 8px 0px;
-          margin: 4px 0;
-          border-radius: 0;
+        .tour-ticket-button:hover {
+          background: #333;
         }
         
-        @media only screen and (max-width:1024px) and (orientation:portrait) {
-          .tour-title-image {
-            margin-top: 6.5vw;
+        @media only screen and (max-width: 768px) {
+          .tour-title {
+            font-size: 2.5rem;
+            margin: 40px auto 50px;
+          }
+          
+          .tour-event-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px 0;
+          }
+          
+          .tour-event-info {
+            flex-direction: column;
+            gap: 10px;
             width: 100%;
           }
           
-          .seated-events-table {
-            max-width: 100%;
+          .tour-ticket-button {
             width: 100%;
-          }
-          
-          .seated-event-venue-cell {
-            min-width: 31vw;
-            align-items: start;
-          }
-          
-          .tour-page-wrapper {
-            padding-top: 20vw;
-          }
-        }
-        
-        @media only screen and (max-width:1023px) {
-          .seated-events-table {
-            max-width: 100%;
-            width: 100%;
+            text-align: center;
           }
         }
       `}</style>
       
       <Navigation />
       
-      <div className="tour-page-wrapper">
-        <div style={{ textAlign: 'center', margin: '0 auto' }}>
-          {/* Tour Header Image */}
-          <div className="tour-title-image">
-            <img 
-              src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-03/BrunoTheRomanticTour_Creative10_1080x1440hetvdvre.jpg"
-              alt="The Romantic Tour"
-              style={{ width: '100%', height: 'auto' }}
-            />
-          </div>
+      <div className="tour-page-container">
+        {/* Tour Title */}
+        <h1 className="tour-title">The Romantic Tour</h1>
 
-          {/* Tour Dates List */}
-          <div className="seated-events-table" style={{ marginTop: '40px' }}>
-            {events.length === 0 ? (
-              <p style={{ textAlign: 'center', color: '#666', padding: '40px 0' }}>
-                Tour dates coming soon. Check back for updates!
-              </p>
-            ) : (
-              events.map((event) => (
-                <div key={event.id} className="seated-event-row">
-                  <div className="seated-event-description-cells">
-                    <div className="seated-event-date-cell">
-                      {event.date}
-                    </div>
-                    <div className="seated-event-venue-cell">
-                      <div className="seated-event-venue-name">{event.venue}</div>
-                      <div className="seated-event-venue-location">{event.city}</div>
-                    </div>
+        {/* Tour Dates List */}
+        <div className="tour-dates-container">
+          {events.length === 0 ? (
+            <p style={{ textAlign: 'center', color: '#666', padding: '40px 0', fontFamily: 'Poppins, sans-serif' }}>
+              Tour dates coming soon. Check back for updates!
+            </p>
+          ) : (
+            events.map((event) => (
+              <div key={event.id} className="tour-event-row">
+                <div className="tour-event-info">
+                  <div className="tour-event-date">
+                    {event.date}
                   </div>
-                  <div className="seated-event-link-cells">
-                    <div className="seated-event-link-cell">
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setSelectedEvent(event);
-                          setShowBookingModal(true);
-                        }}
-                        className="seated-event-link"
-                      >
-                        Tickets
-                      </a>
-                    </div>
+                  <div className="tour-event-venue">
+                    <div className="tour-venue-name">{event.venue}</div>
+                    <div className="tour-venue-location">{event.city}</div>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+                <button
+                  onClick={() => {
+                    setSelectedEvent(event);
+                    setShowBookingModal(true);
+                  }}
+                  className="tour-ticket-button"
+                >
+                  Tickets
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
