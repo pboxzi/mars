@@ -248,7 +248,7 @@ const Navigation = () => {
               MUSIC
             </Link>
             <Link 
-              to="/booking-status" 
+              to="/subscribe" 
               onClick={() => setIsMenuOpen(false)}
               className="nav-menu-item"
               style={{

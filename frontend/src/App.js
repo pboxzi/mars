@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import TourPage from './pages/TourPage';
+import MusicPage from './pages/MusicPage';
+import SubscribePage from './pages/SubscribePage';
 import BookingStatus from './pages/BookingStatus';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -17,7 +19,8 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/tour" element={<TourPage />} />
-        <Route path="/music" element={<HomePage />} />
+        <Route path="/music" element={<MusicPage />} />
+        <Route path="/subscribe" element={<SubscribePage />} />
         <Route path="/booking-status" element={<BookingStatus />} />
         <Route path="/admin-secret" element={<AdminLogin />} />
         <Route path="/admin-secret/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
