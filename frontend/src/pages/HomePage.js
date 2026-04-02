@@ -119,6 +119,49 @@ const HomePage = () => {
           </div>
         </section>
 
+        {/* Album Header Banner Section */}
+        <a
+          href="https://shop.brunomars.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block"
+        >
+          <section className="relative min-h-[70vh] bg-gray-900 overflow-hidden group">
+            <img 
+              src="https://images.unsplash.com/photo-1561447920-ee278fe828a2?w=1920&q=80"
+              alt="Album"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            />
+          </section>
+        </a>
+
+        {/* Vinyl Colors Banner with Text Overlay */}
+        <section className="relative min-h-screen bg-black overflow-hidden">
+          <a
+            href="https://shop.brunomars.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block h-full"
+          >
+            <div className="absolute inset-0">
+              <img 
+                src="https://images.unsplash.com/photo-1602848597941-0d3d3a2c1241?w=1920&q=80"
+                alt="Vinyl"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+            </div>
+            <div className="relative z-10 h-screen flex flex-col items-center justify-center text-white px-4">
+              <h2 className="text-4xl md:text-5xl font-black mb-8 tracking-wide text-center">
+                EXCLUSIVE VINYL COLORS
+              </h2>
+              <span className="inline-block bg-white text-black font-bold py-4 px-12 hover:bg-gray-200 transition-colors">
+                FIND RETAILERS
+              </span>
+            </div>
+          </a>
+        </section>
+
         {/* I Just Might Video Section */}
         <section className="relative min-h-screen bg-black flex items-center justify-center">
           <div className="absolute inset-0">
