@@ -120,13 +120,13 @@ const Navigation = () => {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '2.5rem'
+            gap: '1.5rem'
           }}>
             <Link 
               to="/tour" 
               onClick={() => setIsMenuOpen(false)}
               style={{
-                fontSize: '3.5rem',
+                fontSize: '3rem',
                 fontFamily: 'Poppins, sans-serif',
                 fontWeight: 700,
                 letterSpacing: '-0.025em',
@@ -144,7 +144,7 @@ const Navigation = () => {
               target="_blank" 
               rel="noopener noreferrer"
               style={{
-                fontSize: '3.5rem',
+                fontSize: '3rem',
                 fontFamily: 'Poppins, sans-serif',
                 fontWeight: 700,
                 letterSpacing: '-0.025em',
@@ -161,7 +161,7 @@ const Navigation = () => {
               to="/music" 
               onClick={() => setIsMenuOpen(false)}
               style={{
-                fontSize: '3.5rem',
+                fontSize: '3rem',
                 fontFamily: 'Poppins, sans-serif',
                 fontWeight: 700,
                 letterSpacing: '-0.025em',
@@ -178,7 +178,7 @@ const Navigation = () => {
               to="/booking-status" 
               onClick={() => setIsMenuOpen(false)}
               style={{
-                fontSize: '3.5rem',
+                fontSize: '3rem',
                 fontFamily: 'Poppins, sans-serif',
                 fontWeight: 700,
                 letterSpacing: '-0.025em',
