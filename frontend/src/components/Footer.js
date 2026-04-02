@@ -7,19 +7,44 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4">
         {/* Social Media Links */}
         <div className="flex justify-center gap-6 mb-8">
-          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-red-600 transition-colors">
+          <a 
+            href="https://www.facebook.com/brunomars" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="hover:text-red-600 hover:scale-110 transition-all cursor-pointer"
+          >
             <Facebook className="w-6 h-6" />
           </a>
-          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-red-600 transition-colors">
+          <a 
+            href="https://twitter.com/BRUNOMARS" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="hover:text-red-600 hover:scale-110 transition-all cursor-pointer"
+          >
             <Twitter className="w-6 h-6" />
           </a>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-red-600 transition-colors">
+          <a 
+            href="https://www.instagram.com/brunomars/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="hover:text-red-600 hover:scale-110 transition-all cursor-pointer"
+          >
             <Instagram className="w-6 h-6" />
           </a>
-          <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-red-600 transition-colors">
+          <a 
+            href="https://www.youtube.com/brunomars" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="hover:text-red-600 hover:scale-110 transition-all cursor-pointer"
+          >
             <Youtube className="w-6 h-6" />
           </a>
-          <a href="https://spotify.com" target="_blank" rel="noopener noreferrer" className="hover:text-red-600 transition-colors">
+          <a 
+            href="https://open.spotify.com/artist/0du5cEVh5yTK9QJze8zA0C" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="hover:text-red-600 hover:scale-110 transition-all cursor-pointer"
+          >
             <Music className="w-6 h-6" />
           </a>
         </div>
@@ -28,9 +53,9 @@ const Footer = () => {
         <div className="text-center text-gray-400 text-sm">
           <p className="mb-4">© 2026 Atlantic Records</p>
           <div className="flex justify-center gap-6 flex-wrap">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Use</a>
-            <a href="#" className="hover:text-white transition-colors">Cookies Policy</a>
+            <a href="https://privacy.wmg.com/atlantic/privacy-policy" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors cursor-pointer">Privacy Policy</a>
+            <a href="https://www.atlanticrecords.com/terms-of-use" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors cursor-pointer">Terms of Use</a>
+            <a href="https://www.wminewmedia.com/cookies-policy/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors cursor-pointer">Cookies Policy</a>
           </div>
         </div>
       </div>

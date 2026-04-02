@@ -31,114 +31,151 @@ const HomePage = () => {
     setShowBookingModal(true);
   };
 
+  const scrollToTourDates = (e) => {
+    e.preventDefault();
+    const tourSection = document.getElementById('tour-dates');
+    if (tourSection) {
+      tourSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black">
       <Navbar />
       
       {/* Store Block */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden" data-testid="store-section">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden cursor-pointer group" data-testid="store-section">
         <div className="absolute inset-0">
           <img 
             src="https://images.unsplash.com/photo-1669801158950-f663cf15298c?w=1920&q=80" 
             alt="Store" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
-          <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+          <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition-all duration-500"></div>
         </div>
         <div className="relative z-10 text-center px-4">
           <p className="text-xl md:text-2xl mb-6 tracking-widest">Store</p>
-          <button className="bg-white text-black font-bold py-4 px-12 rounded-full hover:bg-gray-200 transition-all text-lg">
-            SHOP THE ROMANTIC
-          </button>
-        </div>
-      </section>
-
-      {/* Tour Block */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden" data-testid="tour-block">
-        <div className="absolute inset-0">
-          <img 
-            src="https://images.unsplash.com/photo-1568286453307-ec8dd11413bf?w=1920&q=80" 
-            alt="Tour" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-        </div>
-        <div className="relative z-10 text-center px-4">
-          <p className="text-xl md:text-2xl mb-6 tracking-widest">Tour</p>
           <a 
-            href="#tour-dates"
-            className="inline-block bg-white text-black font-bold py-4 px-12 rounded-full hover:bg-gray-200 transition-all text-lg"
+            href="https://shop.brunomars.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-block bg-white text-black font-bold py-4 px-12 rounded-full hover:bg-gray-200 hover:scale-105 transition-all text-lg"
           >
-            TICKETS
+            SHOP THE ROMANTIC
           </a>
         </div>
       </section>
 
+      {/* Tour Block */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden cursor-pointer group" data-testid="tour-block">
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1568286453307-ec8dd11413bf?w=1920&q=80" 
+            alt="Tour" 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition-all duration-500"></div>
+        </div>
+        <div className="relative z-10 text-center px-4">
+          <p className="text-xl md:text-2xl mb-6 tracking-widest">Tour</p>
+          <button 
+            onClick={scrollToTourDates}
+            className="bg-white text-black font-bold py-4 px-12 rounded-full hover:bg-gray-200 hover:scale-105 transition-all text-lg"
+          >
+            TICKETS
+          </button>
+        </div>
+      </section>
+
       {/* Risk It All Video */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden" data-testid="video-risk-it-all">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden cursor-pointer group" data-testid="video-risk-it-all">
         <div className="absolute inset-0">
           <img 
             src="https://images.unsplash.com/photo-1660150509350-ff505601d094?w=1920&q=80" 
             alt="Risk It All" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
-          <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+          <div className="absolute inset-0 bg-black bg-opacity-50 group-hover:bg-opacity-40 transition-all duration-500"></div>
         </div>
         <div className="relative z-10 text-center">
-          <Play className="w-20 h-20 mx-auto mb-6 text-white cursor-pointer hover:scale-110 transition-transform" />
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-wider">RISK IT ALL</h2>
-          <button className="bg-white text-black font-bold py-3 px-10 rounded-full hover:bg-gray-200 transition-all">
-            WATCH NOW
-          </button>
+          <a 
+            href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-block"
+          >
+            <Play className="w-20 h-20 mx-auto mb-6 text-white cursor-pointer hover:scale-125 transition-transform duration-300" />
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-wider">RISK IT ALL</h2>
+            <span className="inline-block bg-white text-black font-bold py-3 px-10 rounded-full hover:bg-gray-200 hover:scale-105 transition-all">
+              WATCH NOW
+            </span>
+          </a>
         </div>
       </section>
 
       {/* Album Promotion */}
-      <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0">
+      <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden cursor-pointer group">
+        <a 
+          href="https://shop.brunomars.com" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="absolute inset-0"
+        >
           <img 
             src="https://images.unsplash.com/photo-1561447920-ee278fe828a2?w=1920&q=80" 
             alt="Album" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
-          <div className="absolute inset-0 bg-black bg-opacity-30"></div>
-        </div>
+          <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-500"></div>
+        </a>
       </section>
 
       {/* Vinyl Colors */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden" data-testid="vinyl-section">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden cursor-pointer group" data-testid="vinyl-section">
         <div className="absolute inset-0">
           <img 
             src="https://images.unsplash.com/photo-1602848597941-0d3d3a2c1241?w=1920&q=80" 
             alt="Vinyl" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
-          <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+          <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition-all duration-500"></div>
         </div>
         <div className="relative z-10 text-center px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-wider">EXCLUSIVE VINYL COLORS</h2>
-          <button className="bg-white text-black font-bold py-3 px-10 rounded-full hover:bg-gray-200 transition-all">
+          <a 
+            href="https://shop.brunomars.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-block bg-white text-black font-bold py-3 px-10 rounded-full hover:bg-gray-200 hover:scale-105 transition-all"
+          >
             FIND RETAILERS
-          </button>
+          </a>
         </div>
       </section>
 
       {/* I Just Might Video */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden" data-testid="video-i-just-might">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden cursor-pointer group" data-testid="video-i-just-might">
         <div className="absolute inset-0">
           <img 
             src="https://images.pexels.com/photos/6311811/pexels-photo-6311811.jpeg?w=1920&q=80" 
             alt="I Just Might" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
-          <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+          <div className="absolute inset-0 bg-black bg-opacity-50 group-hover:bg-opacity-40 transition-all duration-500"></div>
         </div>
         <div className="relative z-10 text-center">
-          <Play className="w-20 h-20 mx-auto mb-6 text-white cursor-pointer hover:scale-110 transition-transform" />
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-wider">I JUST MIGHT</h2>
-          <button className="bg-white text-black font-bold py-3 px-10 rounded-full hover:bg-gray-200 transition-all">
-            WATCH NOW
-          </button>
+          <a 
+            href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-block"
+          >
+            <Play className="w-20 h-20 mx-auto mb-6 text-white cursor-pointer hover:scale-125 transition-transform duration-300" />
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-wider">I JUST MIGHT</h2>
+            <span className="inline-block bg-white text-black font-bold py-3 px-10 rounded-full hover:bg-gray-200 hover:scale-105 transition-all">
+              WATCH NOW
+            </span>
+          </a>
         </div>
       </section>
 
@@ -154,17 +191,17 @@ const HomePage = () => {
               {events.map((event) => (
                 <div 
                   key={event.id} 
-                  className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 flex flex-col md:flex-row items-center justify-between hover:bg-zinc-800 transition-all"
+                  className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 flex flex-col md:flex-row items-center justify-between hover:bg-zinc-800 hover:border-zinc-700 transition-all group"
                   data-testid={`event-row-${event.id}`}
                 >
                   <div className="flex-1 mb-4 md:mb-0">
-                    <h3 className="text-2xl font-bold mb-2">{event.title}</h3>
+                    <h3 className="text-2xl font-bold mb-2 group-hover:text-white transition-colors">{event.title}</h3>
                     <p className="text-gray-400 mb-1">{event.date} • {event.time}</p>
                     <p className="text-gray-400">{event.venue} • {event.city}</p>
                   </div>
                   <button 
                     onClick={() => handleRequestTickets(event)}
-                    className="bg-white text-black font-bold py-3 px-10 rounded-full hover:bg-gray-200 transition-all whitespace-nowrap"
+                    className="bg-white text-black font-bold py-3 px-10 rounded-full hover:bg-gray-200 hover:scale-105 transition-all whitespace-nowrap"
                     data-testid={`request-tickets-button-${event.id}`}
                   >
                     TICKETS
