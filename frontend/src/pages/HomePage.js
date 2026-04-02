@@ -160,10 +160,13 @@ const HomePage = () => {
   return (
     <>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+        
         * {
           margin: 0;
           padding: 0;
           box-sizing: border-box;
+          font-family: 'Poppins', sans-serif;
         }
         
         body {
@@ -240,7 +243,67 @@ const HomePage = () => {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 2rem;
+          padding: 4rem 2rem;
+        }
+
+        .section-title {
+          font-family: 'Poppins', sans-serif;
+          font-size: 2.5rem;
+          font-weight: 700;
+          letter-spacing: 0.05em;
+          color: #000;
+          margin: 2rem 0 1.5rem;
+          text-transform: uppercase;
+        }
+
+        .section-button {
+          font-family: 'Poppins', sans-serif;
+          font-size: 1rem;
+          font-weight: 600;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+          background-color: #000;
+          color: #fff;
+          padding: 1rem 3rem;
+          border: 2px solid #000;
+          cursor: pointer;
+          text-decoration: none;
+          display: inline-block;
+          transition: all 0.3s;
+        }
+
+        .section-button:hover {
+          background-color: #fff;
+          color: #000;
+        }
+
+        .video-title {
+          font-family: 'Poppins', sans-serif;
+          font-size: 3.5rem;
+          font-weight: 900;
+          letter-spacing: 0.02em;
+          text-transform: uppercase;
+        }
+
+        .video-button {
+          font-family: 'Poppins', sans-serif;
+          font-size: 1rem;
+          font-weight: 600;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+          background-color: #fff;
+          color: #000;
+          padding: 1rem 3rem;
+          border: none;
+          cursor: pointer;
+          text-decoration: none;
+          display: inline-block;
+          transition: all 0.3s;
+        }
+
+        .video-button:hover {
+          background-color: #000;
+          color: #fff;
         }
 
         @media only screen and (max-width: 1024px) and (orientation: portrait) {
@@ -268,28 +331,20 @@ const HomePage = () => {
         >
           <div className="flex-container-split">
             {/* STORE */}
-            <div style={{ backgroundColor: '#ffffff' }}>
+            <div style={{ backgroundColor: '#f7f7f7' }}>
               <a href="https://brunomars.lnk.to/officialstore" target="_blank" rel="noopener noreferrer">
                 <img 
                   src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-03/Store_Block-img43dfddf.jpg"
                   alt="Store"
-                  style={{ width: '100%', maxWidth: '600px', marginBottom: '2rem' }}
+                  style={{ width: '100%', maxWidth: '700px', height: 'auto' }}
                 />
               </a>
-              <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem', color: '#000' }}>Store</div>
+              <div className="section-title">Store</div>
               <a 
                 href="https://brunomars.lnk.to/officialstore" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                style={{
-                  display: 'inline-block',
-                  backgroundColor: '#000',
-                  color: '#fff',
-                  padding: '1rem 2rem',
-                  fontWeight: 'bold',
-                  textDecoration: 'none',
-                  textTransform: 'uppercase'
-                }}
+                className="section-button"
               >
                 SHOP THE ROMANTIC
               </a>
@@ -301,21 +356,13 @@ const HomePage = () => {
                 <img 
                   src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-03/BrunoTheRomanticTour_Creative10_1080x1440hetvdvre.jpg"
                   alt="Tour"
-                  style={{ width: '100%', maxWidth: '600px', marginBottom: '2rem' }}
+                  style={{ width: '100%', maxWidth: '700px', height: 'auto' }}
                 />
               </a>
-              <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem', color: '#000' }}>Tour</div>
+              <div className="section-title">Tour</div>
               <button
                 onClick={handleTicketsClick}
-                style={{
-                  backgroundColor: '#000',
-                  color: '#fff',
-                  padding: '1rem 2rem',
-                  fontWeight: 'bold',
-                  border: 'none',
-                  cursor: 'pointer',
-                  textTransform: 'uppercase'
-                }}
+                className="section-button"
               >
                 TICKETS
               </button>
@@ -342,28 +389,20 @@ const HomePage = () => {
                 style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
               />
             </picture>
-            <div style={{ position: 'absolute', bottom: '20%', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', color: '#fff', zIndex: 10 }}>
+            <div style={{ position: 'absolute', bottom: '15%', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', color: '#fff', zIndex: 10, width: '90%' }}>
               <a href="https://brunomars.lnk.to/theromantic/youtube" target="_blank" rel="noopener noreferrer">
                 <img 
                   src="https://www.brunomars.com/sites/g/files/g2000021861/files/2025-12/lance_playicon.svg"
                   alt="Play"
-                  style={{ width: '60px', margin: '0 auto 1rem' }}
+                  style={{ width: '80px', height: 'auto', margin: '0 auto 2rem', display: 'block', cursor: 'pointer' }}
                 />
               </a>
-              <div style={{ fontSize: '3rem', fontWeight: '900', marginBottom: '1rem' }}>RISK IT ALL</div>
+              <div className="video-title" style={{ marginBottom: '2rem' }}>RISK IT ALL</div>
               <a 
                 href="https://brunomars.lnk.to/theromantic/youtube" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                style={{
-                  display: 'inline-block',
-                  backgroundColor: '#fff',
-                  color: '#000',
-                  padding: '1rem 2rem',
-                  fontWeight: 'bold',
-                  textDecoration: 'none',
-                  textTransform: 'uppercase'
-                }}
+                className="video-button"
               >
                 WATCH NOW
               </a>
@@ -390,17 +429,21 @@ const HomePage = () => {
                   style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
                 />
               </picture>
-              <div style={{ position: 'absolute', bottom: '10%', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', zIndex: 10 }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem', color: '#000' }}>EXCLUSIVE VINYL COLORS</div>
+              <div style={{ position: 'absolute', bottom: '8%', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', zIndex: 10 }}>
+                <div style={{ 
+                  fontFamily: 'Poppins, sans-serif',
+                  fontSize: '1.75rem', 
+                  fontWeight: 700, 
+                  marginBottom: '1.5rem', 
+                  color: '#000',
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase'
+                }}>
+                  EXCLUSIVE VINYL COLORS
+                </div>
                 <span 
-                  style={{
-                    display: 'inline-block',
-                    backgroundColor: '#000',
-                    color: '#fff',
-                    padding: '0.75rem 2rem',
-                    fontWeight: 'bold',
-                    textTransform: 'uppercase'
-                  }}
+                  className="section-button"
+                  style={{ backgroundColor: '#000', color: '#fff' }}
                 >
                   FIND RETAILERS
                 </span>
@@ -428,28 +471,20 @@ const HomePage = () => {
                 style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
               />
             </picture>
-            <div style={{ position: 'absolute', bottom: '20%', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', color: '#fff', zIndex: 10 }}>
+            <div style={{ position: 'absolute', bottom: '15%', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', color: '#fff', zIndex: 10, width: '90%' }}>
               <a href="http://brunomars.lnk.to/ijustmight/youtube" target="_blank" rel="noopener noreferrer">
                 <img 
                   src="https://www.brunomars.com/sites/g/files/g2000021861/files/2025-12/lance_playicon.svg"
                   alt="Play"
-                  style={{ width: '60px', margin: '0 auto 1rem' }}
+                  style={{ width: '80px', height: 'auto', margin: '0 auto 2rem', display: 'block', cursor: 'pointer' }}
                 />
               </a>
-              <div style={{ fontSize: '3rem', fontWeight: '900', marginBottom: '1rem' }}>I JUST MIGHT</div>
+              <div className="video-title" style={{ marginBottom: '2rem' }}>I JUST MIGHT</div>
               <a 
                 href="http://brunomars.lnk.to/ijustmight/youtube" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                style={{
-                  display: 'inline-block',
-                  backgroundColor: '#fff',
-                  color: '#000',
-                  padding: '1rem 2rem',
-                  fontWeight: 'bold',
-                  textDecoration: 'none',
-                  textTransform: 'uppercase'
-                }}
+                className="video-button"
               >
                 WATCH NOW
               </a>

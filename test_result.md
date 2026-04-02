@@ -189,15 +189,99 @@ frontend:
           agent: "testing"
           comment: "SHOP THE ROMANTIC link correctly points to brunomars.lnk.to/officialstore. Two WATCH NOW links found pointing to correct YouTube URLs."
 
+  - task: "Poppins font application"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/HomePage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Poppins font successfully loaded and applied to all text elements. Section titles, video titles, buttons, and navigation menu all use Poppins font family correctly."
+
+  - task: "Font weights verification"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/HomePage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Font weights are correct: section titles (700), video titles (900), buttons (600), navigation header (900), menu items (700). All within expected range of 700-900 for headings and 400-600 for body text."
+
+  - task: "Letter-spacing and text-transform"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/HomePage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Letter-spacing applied correctly: section titles (2px/0.05em), buttons (0.8px/0.05em), video titles (0.02em). Text-transform uppercase applied to all titles and buttons as expected."
+
+  - task: "Navigation menu styling"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/Navigation.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Navigation menu matches official site design. BRUNO MARS header appears at top (48px, font-weight 900). All 4 menu items (TOUR, STORE, MUSIC, SUBSCRIBE) properly styled at 56px with font-weight 700. Close button (×) works correctly. Hover states change color to #666."
+
+  - task: "Store/Tour section styling"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/HomePage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Store and Tour images load correctly from brunomars.com CDN. Section titles (STORE, TOUR) styled at 40px with font-weight 700. Buttons (SHOP THE ROMANTIC, TICKETS) have proper styling with black background and white text. Hover effects work perfectly - colors invert from black bg/white text to white bg/black text."
+
+  - task: "Video sections typography"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/HomePage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Play icon SVG loads correctly from brunomars.com CDN (lance_playicon.svg). Video titles (RISK IT ALL, I JUST MIGHT) are 56px (3.5rem) with font-weight 900 as specified. WATCH NOW buttons styled correctly with white background and black text. Hover effects invert colors. All external YouTube links are correct."
+
+  - task: "Visual design and color scheme"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/HomePage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Color scheme matches design specs: black (#000), white (#fff), gray backgrounds. Video sections have black backgrounds. Store/Tour section has appropriate light backgrounds. Typography is bold and impactful throughout. Spacing, padding, and margins appear correct."
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
-  test_sequence: 1
+  test_sequence: 2
   run_ui: true
 
 test_plan:
   current_focus:
-    - "All tests completed successfully"
+    - "All typography and visual design tests completed successfully"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
@@ -205,3 +289,5 @@ test_plan:
 agent_communication:
     - agent: "testing"
       message: "Comprehensive testing completed. All core functionality working correctly. Smooth scroll behavior, keyboard/wheel/touch navigation, image loading, and booking modal all functioning as expected. One minor UI issue with modal close button overlay interception, but this doesn't affect functionality as users can close modal by clicking outside. No console errors detected."
+    - agent: "testing"
+      message: "Typography and visual design testing completed. All requirements verified: Poppins font applied throughout, font weights correct (headings 700-900, body 400-600), letter-spacing and text-transform on buttons/titles, navigation menu matches official design with BRUNO MARS header, all images from brunomars.com CDN, button hover effects work (color inversion), video titles at 3.5rem with font-weight 900, smooth transitions with cubic-bezier timing. Visual polish is excellent and matches design specifications."

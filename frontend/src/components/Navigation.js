@@ -1,72 +1,193 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const location = useLocation();
 
   return (
     <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+      `}</style>
+
       {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <header style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        backgroundColor: '#fff',
+        borderBottom: '1px solid #e5e7eb'
+      }}>
+        <div style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
+          padding: '1rem 1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
           {/* Logo */}
-          <Link to="/" className="text-3xl font-black tracking-tight">
+          <Link 
+            to="/" 
+            style={{
+              fontSize: '1.875rem',
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: 900,
+              letterSpacing: '-0.025em',
+              color: '#000',
+              textDecoration: 'none'
+            }}
+          >
             BRUNO MARS
           </Link>
           
-          {/* Menu Icon */}
+          {/* Menu Icon - Hamburger */}
           <button 
             onClick={() => setIsMenuOpen(true)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            style={{
+              padding: '0.5rem',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px'
+            }}
             aria-label="Open menu"
           >
-            <Menu className="w-7 h-7 text-black" />
+            <span style={{ display: 'block', width: '24px', height: '3px', backgroundColor: '#000' }}></span>
+            <span style={{ display: 'block', width: '24px', height: '3px', backgroundColor: '#000' }}></span>
+            <span style={{ display: 'block', width: '24px', height: '3px', backgroundColor: '#000' }}></span>
           </button>
         </div>
       </header>
 
       {/* Full Screen Menu Overlay */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-[100] bg-white">
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 100,
+          backgroundColor: '#fff'
+        }}>
+          {/* BRUNO MARS Header */}
+          <div style={{
+            position: 'absolute',
+            top: '2rem',
+            left: 0,
+            right: 0,
+            textAlign: 'center'
+          }}>
+            <h1 style={{
+              fontSize: '3rem',
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: 900,
+              letterSpacing: '-0.025em',
+              color: '#000',
+              margin: 0
+            }}>
+              BRUNO MARS
+            </h1>
+          </div>
+
           {/* Close Button */}
           <button 
             onClick={() => setIsMenuOpen(false)}
-            className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            style={{
+              position: 'absolute',
+              top: '2rem',
+              right: '2rem',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '2.5rem',
+              lineHeight: 1,
+              color: '#000',
+              fontWeight: 300,
+              fontFamily: 'Poppins, sans-serif'
+            }}
             aria-label="Close menu"
           >
-            <X className="w-7 h-7 text-black" />
+            ×
           </button>
 
           {/* Menu Items */}
-          <nav className="h-full flex flex-col items-center justify-center gap-8">
+          <nav style={{
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '2.5rem'
+          }}>
             <Link 
               to="/tour" 
               onClick={() => setIsMenuOpen(false)}
-              className="text-4xl md:text-5xl font-bold tracking-tight hover:text-gray-600 transition-colors"
+              style={{
+                fontSize: '3.5rem',
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 700,
+                letterSpacing: '-0.025em',
+                color: '#000',
+                textDecoration: 'none',
+                transition: 'color 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.color = '#666'}
+              onMouseLeave={(e) => e.target.style.color = '#000'}
             >
               TOUR
             </Link>
             <a 
-              href="https://shop.brunomars.com" 
+              href="https://brunomars.lnk.to/officialstore" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-4xl md:text-5xl font-bold tracking-tight hover:text-gray-600 transition-colors"
+              style={{
+                fontSize: '3.5rem',
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 700,
+                letterSpacing: '-0.025em',
+                color: '#000',
+                textDecoration: 'none',
+                transition: 'color 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.color = '#666'}
+              onMouseLeave={(e) => e.target.style.color = '#000'}
             >
               STORE
             </a>
             <Link 
               to="/music" 
               onClick={() => setIsMenuOpen(false)}
-              className="text-4xl md:text-5xl font-bold tracking-tight hover:text-gray-600 transition-colors"
+              style={{
+                fontSize: '3.5rem',
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 700,
+                letterSpacing: '-0.025em',
+                color: '#000',
+                textDecoration: 'none',
+                transition: 'color 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.color = '#666'}
+              onMouseLeave={(e) => e.target.style.color = '#000'}
             >
               MUSIC
             </Link>
             <Link 
               to="/booking-status" 
               onClick={() => setIsMenuOpen(false)}
-              className="text-4xl md:text-5xl font-bold tracking-tight hover:text-gray-600 transition-colors"
+              style={{
+                fontSize: '3.5rem',
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 700,
+                letterSpacing: '-0.025em',
+                color: '#000',
+                textDecoration: 'none',
+                transition: 'color 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.color = '#666'}
+              onMouseLeave={(e) => e.target.style.color = '#000'}
             >
               SUBSCRIBE
             </Link>
