@@ -177,6 +177,26 @@ const BookingModal = ({ event, onClose }) => {
                 <p className="text-2xl font-bold text-red-600">${getTicketPrice('meetgreet')}</p>
                 <p className="text-sm text-gray-400">{getTicketAvailability('meetgreet')} available</p>
               </div>
+
+              <div 
+                className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                  formData.ticket_type === 'backstage' ? 'border-red-600 bg-red-900/20' : 'border-zinc-700 hover:border-zinc-500'
+                }`}
+                onClick={() => setFormData({...formData, ticket_type: 'backstage'})}
+                data-testid="ticket-type-backstage"
+              >
+                <input
+                  type="radio"
+                  name="ticket_type"
+                  value="backstage"
+                  checked={formData.ticket_type === 'backstage'}
+                  onChange={handleChange}
+                  className="mb-2"
+                />
+                <h4 className="font-bold mb-1">Backstage Pass</h4>
+                <p className="text-2xl font-bold text-red-600">${getTicketPrice('backstage')}</p>
+                <p className="text-sm text-gray-400">{getTicketAvailability('backstage')} available</p>
+              </div>
             </div>
           </div>
 

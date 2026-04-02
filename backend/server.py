@@ -44,6 +44,7 @@ class TicketTypeEnum(str, Enum):
     GENERAL = "general"
     VIP = "vip"
     MEETGREET = "meetgreet"
+    BACKSTAGE = "backstage"
 
 
 class BookingStatusEnum(str, Enum):
