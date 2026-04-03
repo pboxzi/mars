@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
+import HomeFooter from '../components/HomeFooter';
 import BookingModal from '../components/BookingModal';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
