@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react';
+import {
+  PREMIUM_TICKET_TIERS,
+  createEmptyPremiumTicketState
+} from '../../utils/ticketTiers';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -19,12 +23,7 @@ const EventManagement = () => {
     description: '',
     status: 'active'
   });
-  const [ticketData, setTicketData] = useState({
-    general: { price_usd: 0, available_quantity: 0, total_quantity: 0 },
-    vip: { price_usd: 0, available_quantity: 0, total_quantity: 0 },
-    meetgreet: { price_usd: 0, available_quantity: 0, total_quantity: 0 },
-    backstage: { price_usd: 0, available_quantity: 0, total_quantity: 0 }
-  });
+  const [ticketData, setTicketData] = useState(createEmptyPremiumTicketState());
 
   useEffect(() => {
     fetchEvents();
@@ -107,11 +106,7 @@ const EventManagement = () => {
       });
       
       const tickets = response.data;
-      const newTicketData = {
-        general: { price_usd: 0, available_quantity: 0, total_quantity: 0 },
-        vip: { price_usd: 0, available_quantity: 0, total_quantity: 0 },
-        meetgreet: { price_usd: 0, available_quantity: 0, total_quantity: 0 }
-      };
+      const newTicketData = createEmptyPremiumTicketState();
 
       tickets.forEach(ticket => {
         newTicketData[ticket.type] = {
@@ -155,11 +150,7 @@ const EventManagement = () => {
       description: '',
       status: 'active'
     });
-    setTicketData({
-      general: { price_usd: 0, available_quantity: 0, total_quantity: 0 },
-      vip: { price_usd: 0, available_quantity: 0, total_quantity: 0 },
-      meetgreet: { price_usd: 0, available_quantity: 0, total_quantity: 0 }
-    });
+    setTicketData(createEmptyPremiumTicketState());
     setEditingEvent(null);
     setShowForm(false);
   };
@@ -290,127 +281,38 @@ const EventManagement = () => {
 
             {/* Ticket Pricing */}
             <div className="border-t border-zinc-700 pt-6 mb-6">
-              <h3 className="text-xl font-bold mb-4">Ticket Pricing</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {/* General Admission */}
-                <div className="bg-zinc-800 rounded-lg p-4">
-                  <h4 className="font-bold mb-3">General Admission</h4>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm mb-1">Price ($)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={ticketData.general.price_usd}
-                        onChange={(e) => handleTicketChange('general', 'price_usd', e.target.value)}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm mb-1">Total Quantity</label>
-                      <input
-                        type="number"
-                        value={ticketData.general.total_quantity}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value) || 0;
-                          handleTicketChange('general', 'total_quantity', val);
-                          handleTicketChange('general', 'available_quantity', val);
-                        }}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* VIP */}
-                <div className="bg-zinc-800 rounded-lg p-4">
-                  <h4 className="font-bold mb-3">VIP Access</h4>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm mb-1">Price ($)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={ticketData.vip.price_usd}
-                        onChange={(e) => handleTicketChange('vip', 'price_usd', e.target.value)}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm mb-1">Total Quantity</label>
-                      <input
-                        type="number"
-                        value={ticketData.vip.total_quantity}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value) || 0;
-                          handleTicketChange('vip', 'total_quantity', val);
-                          handleTicketChange('vip', 'available_quantity', val);
-                        }}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2"
-                      />
+              <h3 className="text-xl font-bold mb-4">Premium Experience Tiers</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {PREMIUM_TICKET_TIERS.map((tier) => (
+                  <div key={tier.type} className="bg-zinc-800 rounded-lg p-4">
+                    <h4 className="font-bold mb-3">{tier.label}</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm mb-1">Price ($)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={ticketData[tier.type].price_usd}
+                          onChange={(e) => handleTicketChange(tier.type, 'price_usd', e.target.value)}
+                          className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm mb-1">Total Quantity</label>
+                        <input
+                          type="number"
+                          value={ticketData[tier.type].total_quantity}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value, 10) || 0;
+                            handleTicketChange(tier.type, 'total_quantity', val);
+                            handleTicketChange(tier.type, 'available_quantity', val);
+                          }}
+                          className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Meet & Greet */}
-                <div className="bg-zinc-800 rounded-lg p-4">
-                  <h4 className="font-bold mb-3">Meet & Greet</h4>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm mb-1">Price ($)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={ticketData.meetgreet.price_usd}
-                        onChange={(e) => handleTicketChange('meetgreet', 'price_usd', e.target.value)}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm mb-1">Total Quantity</label>
-                      <input
-                        type="number"
-                        value={ticketData.meetgreet.total_quantity}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value) || 0;
-                          handleTicketChange('meetgreet', 'total_quantity', val);
-                          handleTicketChange('meetgreet', 'available_quantity', val);
-                        }}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Backstage */}
-                <div className="bg-zinc-800 rounded-lg p-4">
-                  <h4 className="font-bold mb-3">Backstage Pass</h4>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm mb-1">Price ($)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={ticketData.backstage.price_usd}
-                        onChange={(e) => handleTicketChange('backstage', 'price_usd', e.target.value)}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm mb-1">Total Quantity</label>
-                      <input
-                        type="number"
-                        value={ticketData.backstage.total_quantity}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value) || 0;
-                          handleTicketChange('backstage', 'total_quantity', val);
-                          handleTicketChange('backstage', 'available_quantity', val);
-                        }}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2"
-                      />
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 

@@ -1,271 +1,289 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+const NAV_LINKS = [
+  { label: 'TOUR', to: '/tour', external: false, group: 'left' },
+  { label: 'STORE', to: 'https://brunomars.lnk.to/officialstore', external: true, group: 'left' },
+  { label: 'MUSIC', to: '/music', external: false, group: 'right' },
+  { label: 'SUBSCRIBE', to: '/subscribe', external: false, group: 'right' },
+  { label: 'TRACK BOOKING', to: '/booking-status', external: false, group: 'right' }
+];
+
+const renderLink = (item, className, onClick) => {
+  if (item.external) {
+    return (
+      <a
+        key={item.label}
+        href={item.to}
+        target="_blank"
+        rel="noreferrer"
+        className={className}
+        onClick={onClick}
+      >
+        {item.label}
+      </a>
+    );
+  }
+
+  return (
+    <Link
+      key={item.label}
+      to={item.to}
+      className={className}
+      onClick={onClick}
+    >
+      {item.label}
+    </Link>
+  );
+};
+
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <>
       <style>{`
-        /* devanagari */
-        @font-face {
-          font-family: 'Poppins';
-          font-style: normal;
+        .site-header {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 90;
+          background: #fff;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .site-header-inner {
+          width: 90%;
+          margin: 0 auto;
+          min-height: 6.41vw;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          position: relative;
+        }
+
+        .desktop-header-shell {
+          width: 100%;
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          align-items: center;
+        }
+
+        .desktop-nav {
+          display: flex;
+          align-items: center;
+          gap: 2.6vw;
+        }
+
+        .desktop-nav-right {
+          justify-content: flex-end;
+        }
+
+        .site-logo {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+          border: none;
+        }
+
+        .site-logo img {
+          width: clamp(150px, 12.4vw, 220px);
+          height: auto;
+          display: block;
+        }
+
+        .nav-link {
+          text-decoration: none;
+          color: #000;
+          font-family: 'Poppins', sans-serif;
           font-weight: 600;
-          font-display: swap;
-          src: url(https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLEj6Z11lFc-K.woff2) format('woff2');
-          unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+          font-size: clamp(0.8rem, 1.04vw, 0.95rem);
+          letter-spacing: 0.02em;
+          text-transform: uppercase;
+          transition: opacity 0.2s ease;
+          border: none;
         }
-        /* latin-ext */
-        @font-face {
-          font-family: 'Poppins';
-          font-style: normal;
+
+        .nav-link:hover {
+          opacity: 0.6;
+        }
+
+        .mobile-logo,
+        .mobile-menu-button {
+          display: none;
+        }
+
+        .site-menu-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 120;
+          background: #fff;
+        }
+
+        .site-menu-overlay-header {
+          position: absolute;
+          top: 2.5rem;
+          left: 0;
+          right: 0;
+          text-align: center;
+        }
+
+        .site-menu-close {
+          position: absolute;
+          top: 2rem;
+          right: 2rem;
+          border: none;
+          background: transparent;
+          color: #000;
+          font-size: 2.5rem;
+          font-weight: 300;
+          cursor: pointer;
+          line-height: 1;
+        }
+
+        .site-menu-nav {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 2rem;
+        }
+
+        .site-menu-link {
+          text-decoration: none;
+          color: #000;
+          font-family: 'Poppins', sans-serif;
           font-weight: 600;
-          font-display: swap;
-          src: url(https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLEj6Z1JlFc-K.woff2) format('woff2');
-          unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+          font-size: 1.04vw;
+          letter-spacing: 0.02em;
+          text-transform: uppercase;
+          transition: opacity 0.2s ease;
+          border: none;
         }
-        /* latin */
-        @font-face {
-          font-family: 'Poppins';
-          font-style: normal;
-          font-weight: 600;
-          font-display: swap;
-          src: url(https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLEj6Z1xlFQ.woff2) format('woff2');
-          unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+
+        .site-menu-link:hover {
+          opacity: 0.6;
         }
-        /* devanagari */
-        @font-face {
-          font-family: 'Poppins';
-          font-style: normal;
-          font-weight: 900;
-          font-display: swap;
-          src: url(https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLBT5Z11lFc-K.woff2) format('woff2');
-          unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
-        }
-        /* latin-ext */
-        @font-face {
-          font-family: 'Poppins';
-          font-style: normal;
-          font-weight: 900;
-          font-display: swap;
-          src: url(https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLBT5Z1JlFc-K.woff2) format('woff2');
-          unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-        }
-        /* latin */
-        @font-face {
-          font-family: 'Poppins';
-          font-style: normal;
-          font-weight: 900;
-          font-display: swap;
-          src: url(https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLBT5Z1xlFQ.woff2) format('woff2');
-          unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-        }
-        
-        /* Mobile responsive font sizes */
-        @media only screen and (max-width: 768px) {
-          .nav-menu-item {
-            font-size: 6vw !important;
+
+        @media only screen and (max-width: 1024px) {
+          .site-header-inner {
+            min-height: 17vw;
           }
-          .nav-header-title {
-            font-size: 6vw !important;
+
+          .desktop-header-shell {
+            display: none;
+          }
+
+          .mobile-logo {
+            display: inline-flex;
+            align-items: center;
+          }
+
+          .mobile-logo img {
+            width: 36.8vw;
+            min-width: 140px;
+            max-width: 220px;
+            display: block;
+          }
+
+          .mobile-menu-button {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9vw;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+          }
+
+          .mobile-menu-button span {
+            display: block;
+            width: 5.59vw;
+            min-width: 22px;
+            height: 0.7vw;
+            min-height: 3px;
+            background: #000;
+          }
+
+          .site-menu-overlay-header .site-logo img {
+            width: 36.8vw;
+            min-width: 140px;
+          }
+
+          .site-menu-link {
+            font-size: 6vw;
           }
         }
       `}</style>
 
-      {/* Fixed Header */}
-      <header style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 50,
-        backgroundColor: '#fff',
-        borderBottom: '1px solid #e5e7eb'
-      }}>
-        <div style={{
-          maxWidth: '1280px',
-          margin: '0 auto',
-          padding: '1rem 1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          {/* Logo */}
-          <Link 
-            to="/" 
-            style={{
-              fontSize: '1.875rem',
-              fontFamily: 'Poppins, sans-serif',
-              fontWeight: 900,
-              letterSpacing: '-0.025em',
-              color: '#000',
-              textDecoration: 'none'
-            }}
-          >
-            BRUNO MARS
+      <header className="site-header">
+        <div className="site-header-inner">
+          <div className="desktop-header-shell">
+            <nav className="desktop-nav">
+              {NAV_LINKS.filter((item) => item.group === 'left').map((item) =>
+                renderLink(item, 'nav-link')
+              )}
+            </nav>
+
+            <Link to="/" className="site-logo" aria-label="Bruno Mars home">
+              <img
+                src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-01/BRUNONAME_black.svg"
+                alt="Bruno Mars"
+              />
+            </Link>
+
+            <nav className="desktop-nav desktop-nav-right">
+              {NAV_LINKS.filter((item) => item.group === 'right').map((item) =>
+                renderLink(item, 'nav-link')
+              )}
+            </nav>
+          </div>
+
+          <Link to="/" className="site-logo mobile-logo" aria-label="Bruno Mars home">
+            <img
+              src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-01/BRUNONAME_black.svg"
+              alt="Bruno Mars"
+            />
           </Link>
-          
-          {/* Menu Icon - Hamburger */}
-          <button 
+
+          <button
+            type="button"
+            className="mobile-menu-button"
             onClick={() => setIsMenuOpen(true)}
-            style={{
-              padding: '0.5rem',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '4px'
-            }}
             aria-label="Open menu"
           >
-            <span style={{ display: 'block', width: '24px', height: '3px', backgroundColor: '#000' }}></span>
-            <span style={{ display: 'block', width: '24px', height: '3px', backgroundColor: '#000' }}></span>
-            <span style={{ display: 'block', width: '24px', height: '3px', backgroundColor: '#000' }}></span>
+            <span />
+            <span />
+            <span />
           </button>
         </div>
       </header>
 
-      {/* Full Screen Menu Overlay */}
       {isMenuOpen && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 100,
-          backgroundColor: '#fff'
-        }}>
-          {/* BRUNO MARS Header */}
-          <div style={{
-            position: 'absolute',
-            top: '2.5rem',
-            left: 0,
-            right: 0,
-            textAlign: 'center'
-          }}>
-            <h1 
-              className="nav-header-title"
-              style={{
-                fontSize: '1.04vw',
-                fontFamily: 'Poppins, sans-serif',
-                fontWeight: 600,
-                letterSpacing: 'normal',
-                color: '#000',
-                margin: 0,
-                textTransform: 'uppercase'
-              }}
-            >
-              BRUNO MARS
-            </h1>
+        <div className="site-menu-overlay">
+          <div className="site-menu-overlay-header">
+            <Link to="/" className="site-logo" aria-label="Bruno Mars home" onClick={() => setIsMenuOpen(false)}>
+              <img
+                src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-01/BRUNONAME_black.svg"
+                alt="Bruno Mars"
+              />
+            </Link>
           </div>
 
-          {/* Close Button */}
-          <button 
+          <button
+            type="button"
+            className="site-menu-close"
             onClick={() => setIsMenuOpen(false)}
-            style={{
-              position: 'absolute',
-              top: '2.5rem',
-              right: '2rem',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '2.5rem',
-              lineHeight: 1,
-              color: '#000',
-              fontWeight: 300,
-              fontFamily: 'Poppins, sans-serif'
-            }}
             aria-label="Close menu"
           >
             ×
           </button>
 
-          {/* Menu Items */}
-          <nav style={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '2rem'
-          }}>
-            <Link 
-              to="/tour" 
-              onClick={() => setIsMenuOpen(false)}
-              className="nav-menu-item"
-              style={{
-                fontSize: '1.04vw',
-                fontFamily: 'Poppins, sans-serif',
-                fontWeight: 600,
-                letterSpacing: 'normal',
-                color: '#000',
-                textDecoration: 'none',
-                textTransform: 'uppercase',
-                transition: 'opacity 0.2s'
-              }}
-              onMouseEnter={(e) => e.target.style.opacity = '0.6'}
-              onMouseLeave={(e) => e.target.style.opacity = '1'}
-            >
-              TOUR
-            </Link>
-            <a 
-              href="https://brunomars.lnk.to/officialstore" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="nav-menu-item"
-              style={{
-                fontSize: '1.04vw',
-                fontFamily: 'Poppins, sans-serif',
-                fontWeight: 600,
-                letterSpacing: 'normal',
-                color: '#000',
-                textDecoration: 'none',
-                textTransform: 'uppercase',
-                transition: 'opacity 0.2s'
-              }}
-              onMouseEnter={(e) => e.target.style.opacity = '0.6'}
-              onMouseLeave={(e) => e.target.style.opacity = '1'}
-            >
-              STORE
-            </a>
-            <Link 
-              to="/music" 
-              onClick={() => setIsMenuOpen(false)}
-              className="nav-menu-item"
-              style={{
-                fontSize: '1.04vw',
-                fontFamily: 'Poppins, sans-serif',
-                fontWeight: 600,
-                letterSpacing: 'normal',
-                color: '#000',
-                textDecoration: 'none',
-                textTransform: 'uppercase',
-                transition: 'opacity 0.2s'
-              }}
-              onMouseEnter={(e) => e.target.style.opacity = '0.6'}
-              onMouseLeave={(e) => e.target.style.opacity = '1'}
-            >
-              MUSIC
-            </Link>
-            <Link 
-              to="/subscribe" 
-              onClick={() => setIsMenuOpen(false)}
-              className="nav-menu-item"
-              style={{
-                fontSize: '1.04vw',
-                fontFamily: 'Poppins, sans-serif',
-                fontWeight: 600,
-                letterSpacing: 'normal',
-                color: '#000',
-                textDecoration: 'none',
-                textTransform: 'uppercase',
-                transition: 'opacity 0.2s'
-              }}
-              onMouseEnter={(e) => e.target.style.opacity = '0.6'}
-              onMouseLeave={(e) => e.target.style.opacity = '1'}
-            >
-              SUBSCRIBE
-            </Link>
+          <nav className="site-menu-nav">
+            {NAV_LINKS.map((item) => renderLink(item, 'site-menu-link', () => setIsMenuOpen(false)))}
           </nav>
         </div>
       )}

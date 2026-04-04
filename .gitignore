@@ -83,6 +83,15 @@ android-sdk/-e
 # Environment files
 *.env
 *.env.*
+
+# Local run artifacts
+backend/*.pid
+backend/*.log
+backend/*.err.log
+frontend/*.pid
+backend/live-*-snapshot.json
+backend/verification-*.json
+backend/verification-*.log
 -e 
 # Environment files
 *.env

@@ -1,14 +1,70 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { X, CheckCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CheckCircle, Minus, Plus, X } from 'lucide-react';
+import useSupportSettings from '../hooks/useSupportSettings';
+import {
+  PREMIUM_TICKET_DETAILS,
+  PREMIUM_TICKET_ORDER,
+  getTicketTierBasePrice,
+  getTicketTierDescription,
+  getTicketTierLabel
+} from '../utils/ticketTiers';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const BookingModal = ({ event, onClose }) => {
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0
+});
+
+const eventDateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: '2-digit',
+  year: 'numeric'
+});
+
+const PACKAGE_TICKET_TYPES = new Set(['hospitality', 'birthday', 'corporate', 'privatemeetup']);
+
+const formatEventDate = (dateValue) => {
+  if (!dateValue) {
+    return '';
+  }
+
+  const parsedDate = new Date(`${dateValue}T00:00:00`);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return dateValue;
+  }
+
+  return eventDateFormatter.format(parsedDate);
+};
+
+const formatTicketPrice = (price) => {
+  if (!price || price <= 0) {
+    return 'Contact Team';
+  }
+
+  return currencyFormatter.format(price);
+};
+
+const getDisplayTicketPrice = (ticket) => {
+  if (!ticket) {
+    return 0;
+  }
+
+  if (ticket.price_usd > 0) {
+    return ticket.price_usd;
+  }
+
+  return getTicketTierBasePrice(ticket.type);
+};
+
+const BookingModal = ({ event, onClose, initialTicketType = null }) => {
   const [tickets, setTickets] = useState([]);
   const [formData, setFormData] = useState({
-    ticket_type: 'general',
+    ticket_type: 'vip',
     customer_name: '',
     email: '',
     phone: '',
@@ -19,24 +75,98 @@ const BookingModal = ({ event, onClose }) => {
   const [success, setSuccess] = useState(false);
   const [confirmationNumber, setConfirmationNumber] = useState('');
   const [error, setError] = useState('');
+  const { supportSettings } = useSupportSettings();
 
-  useEffect(() => {
-    if (event) {
-      fetchTickets();
+  const fetchTickets = useCallback(async () => {
+    if (!event) {
+      return;
     }
-  }, [event]);
 
-  const fetchTickets = async () => {
     try {
       const response = await axios.get(`${API}/events/${event.id}`);
-      setTickets(response.data.tickets);
-    } catch (error) {
-      console.error('Error fetching tickets:', error);
+      const apiTickets = response.data.tickets || [];
+      const normalizedTickets = PREMIUM_TICKET_ORDER.map((ticketType) => {
+        const apiTicket = apiTickets.find((ticket) => ticket.type === ticketType);
+        const tierDetails = PREMIUM_TICKET_DETAILS[ticketType];
+
+        return {
+          id: apiTicket?.id || `${event.id}_${ticketType}`,
+          event_id: apiTicket?.event_id || event.id,
+          type: ticketType,
+          price_usd: apiTicket?.price_usd > 0 ? apiTicket.price_usd : tierDetails.priceUsd,
+          available_quantity: apiTicket?.available_quantity ?? tierDetails.availableQuantity,
+          total_quantity: apiTicket?.total_quantity ?? tierDetails.totalQuantity
+        };
+      });
+
+      setTickets(normalizedTickets);
+
+      const firstAvailableTicket = normalizedTickets.find((ticket) => ticket.available_quantity > 0);
+      const preferredTicket =
+        normalizedTickets.find((ticket) => ticket.type === initialTicketType && ticket.available_quantity > 0) ||
+        firstAvailableTicket ||
+        normalizedTickets[0];
+
+      if (preferredTicket) {
+        setFormData((prev) => ({
+          ...prev,
+          ticket_type: preferredTicket.type
+        }));
+      }
+    } catch (fetchError) {
+      console.error('Error fetching tickets:', fetchError);
     }
+  }, [event, initialTicketType]);
+
+  useEffect(() => {
+    fetchTickets();
+  }, [fetchTickets]);
+
+  const orderedTickets = useMemo(
+    () =>
+      [...tickets].sort((left, right) => {
+        return PREMIUM_TICKET_ORDER.indexOf(left.type) - PREMIUM_TICKET_ORDER.indexOf(right.type);
+      }),
+    [tickets]
+  );
+
+  const selectedTicket = useMemo(
+    () => orderedTickets.find((ticket) => ticket.type === formData.ticket_type),
+    [formData.ticket_type, orderedTickets]
+  );
+
+  const selectedTicketPrice = getDisplayTicketPrice(selectedTicket);
+  const selectedTicketLabel = getTicketTierLabel(formData.ticket_type) || 'Select Ticket';
+  const selectedTicketDescription = getTicketTierDescription(formData.ticket_type);
+  const maxQuantity = selectedTicket ? Math.max(0, Math.min(selectedTicket.available_quantity, 10)) : 10;
+  const subtotal = selectedTicketPrice * Number(formData.quantity || 0);
+  const formattedEventDate = formatEventDate(event?.date);
+  const formattedEventTime = event?.time || '';
+  const selectionUnitLabel = PACKAGE_TICKET_TYPES.has(formData.ticket_type) ? 'Per Package' : 'Per Guest';
+  const quantityUnitLabel = PACKAGE_TICKET_TYPES.has(formData.ticket_type) ? 'Packages' : 'Guests';
+  const contactLine = [supportSettings.support_email, supportSettings.support_phone]
+    .filter(Boolean)
+    .join(' | ');
+
+  const updateQuantity = (nextValue) => {
+    const safeMaximum = maxQuantity > 0 ? maxQuantity : 1;
+    const safeValue = Math.max(1, Math.min(safeMaximum, nextValue));
+    setFormData((prev) => ({
+      ...prev,
+      quantity: safeValue
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleChange = (changeEvent) => {
+    const { name, value } = changeEvent.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === 'quantity' ? Number(value) : value
+    }));
+  };
+
+  const handleSubmit = async (submitEvent) => {
+    submitEvent.preventDefault();
     setLoading(true);
     setError('');
 
@@ -47,50 +177,59 @@ const BookingModal = ({ event, onClose }) => {
       });
       setConfirmationNumber(response.data.confirmation_number);
       setSuccess(true);
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to submit booking request');
+    } catch (requestError) {
+      setError(requestError.response?.data?.detail || 'Failed to submit booking request');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const getTicketPrice = (type) => {
-    const ticket = tickets.find(t => t.type === type);
-    return ticket ? ticket.price_usd : 0;
-  };
-
-  const getTicketAvailability = (type) => {
-    const ticket = tickets.find(t => t.type === type);
-    return ticket ? ticket.available_quantity : 0;
-  };
-
   if (success) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" onClick={onClose}>
-        <div className="bg-zinc-900 rounded-lg p-8 max-w-md w-full" onClick={(e) => e.stopPropagation()} data-testid="booking-success-modal">
+      <div className="fixed inset-0 z-[120] bg-black/80 px-4 py-6 backdrop-blur-[2px]" onClick={onClose}>
+        <div
+          className="mx-auto max-w-[640px] rounded-[28px] border border-[#d9ccb9] bg-[#fbf7ef] p-8 text-[#171717] shadow-[0_30px_90px_rgba(0,0,0,0.32)]"
+          onClick={(clickEvent) => clickEvent.stopPropagation()}
+          data-testid="booking-success-modal"
+        >
           <div className="text-center">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold mb-4">Request Submitted!</h2>
-            <p className="text-gray-400 mb-4">Your booking request has been received. Our team will review it shortly.</p>
-            <div className="bg-zinc-800 rounded-lg p-4 mb-6">
-              <p className="text-sm text-gray-400 mb-2">Your Confirmation Number</p>
-              <p className="text-2xl font-bold text-red-600" data-testid="confirmation-number">{confirmationNumber}</p>
+            <CheckCircle className="mx-auto mb-4 h-14 w-14 text-[#9d172b]" />
+            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8c7f72]">Premium Request</div>
+            <h2 className="mt-3 text-[34px] font-black uppercase tracking-[-0.05em]">Request Submitted</h2>
+            <p className="mt-3 text-sm leading-7 text-[#5f564d]">
+              Your premium access request has been received for this Bruno Mars show.
+            </p>
+
+            <div className="mt-6 rounded-[22px] border border-[#dfd2c0] bg-white px-5 py-4">
+              <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8c7f72]">
+                Confirmation Number
+              </div>
+              <div className="mt-2 text-[30px] font-black tracking-[0.08em]" data-testid="confirmation-number">
+                {confirmationNumber}
+              </div>
             </div>
-            <p className="text-sm text-gray-400 mb-6">Save this number to check your booking status</p>
-            <button
-              onClick={onClose}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg w-full transition-all"
-              data-testid="close-success-button"
-            >
-              CLOSE
-            </button>
+
+            {contactLine && (
+              <div className="mt-5 text-sm font-medium text-[#5f564d]">
+                Questions? {contactLine}
+              </div>
+            )}
+
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+              <Link
+                to={`/booking-status?confirmation=${confirmationNumber}`}
+                className="rounded-full bg-[#131313] px-5 py-4 text-center text-sm font-bold uppercase tracking-[0.14em] text-white no-underline transition hover:opacity-90"
+              >
+                Track Booking
+              </Link>
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-full border border-[#cdbba2] px-5 py-4 text-sm font-bold uppercase tracking-[0.14em] text-[#171717] transition hover:bg-[#f2ebdf]"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -98,197 +237,331 @@ const BookingModal = ({ event, onClose }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 overflow-y-auto" onClick={onClose}>
-      <div className="bg-zinc-900 rounded-lg p-8 max-w-2xl w-full my-8" onClick={(e) => e.stopPropagation()} data-testid="booking-modal">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold">Request Tickets</h2>
-          <button onClick={onClose} className="hover:text-red-600 transition-colors">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
-        <div className="mb-6 pb-6 border-b border-zinc-700">
-          <h3 className="text-xl font-bold mb-2">{event.title}</h3>
-          <p className="text-gray-400">{event.venue} • {event.city}</p>
-          <p className="text-gray-400">{event.date} • {event.time}</p>
-        </div>
+    <div className="fixed inset-0 z-[120] overflow-y-auto bg-black/80 px-3 py-4 backdrop-blur-[2px]" onClick={onClose}>
+      <div
+        className="relative mx-auto max-w-[1280px] overflow-hidden rounded-[30px] border border-[#d9ccb9] bg-[#f7efe2] text-[#171717] shadow-[0_32px_96px_rgba(0,0,0,0.36)]"
+        onClick={(clickEvent) => clickEvent.stopPropagation()}
+        data-testid="booking-modal"
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-5 top-5 z-20 rounded-full border border-[#e4d7c5] bg-white/92 p-2.5 text-black shadow-sm transition hover:bg-white"
+          aria-label="Close booking modal"
+        >
+          <X className="h-4 w-4" />
+        </button>
 
         <form onSubmit={handleSubmit}>
-          {/* Ticket Type Selection */}
-          <div className="mb-6">
-            <label className="block text-lg font-bold mb-4">Select Ticket Type</label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div 
-                className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                  formData.ticket_type === 'general' ? 'border-red-600 bg-red-900/20' : 'border-zinc-700 hover:border-zinc-500'
-                }`}
-                onClick={() => setFormData({...formData, ticket_type: 'general'})}
-                data-testid="ticket-type-general"
-              >
-                <input
-                  type="radio"
-                  name="ticket_type"
-                  value="general"
-                  checked={formData.ticket_type === 'general'}
-                  onChange={handleChange}
-                  className="mb-2"
+          <div className="grid lg:grid-cols-[0.78fr_1.22fr]">
+            <div className="flex min-h-[380px] flex-col overflow-hidden bg-[#17110e] lg:min-h-[820px]">
+              <div className="relative h-[290px] border-b border-white/10 bg-[radial-gradient(circle_at_top,#532018_0%,#241613_55%,#17110e_100%)] sm:h-[340px] lg:h-[370px]">
+                <img
+                  src={event?.image_url}
+                  alt="Bruno Mars"
+                  className="absolute inset-0 h-full w-full object-contain object-center p-4 sm:p-6 lg:p-7"
                 />
-                <h4 className="font-bold mb-1">General Admission</h4>
-                <p className="text-2xl font-bold text-red-600">${getTicketPrice('general')}</p>
-                <p className="text-sm text-gray-400">{getTicketAvailability('general')} available</p>
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#17110e] via-[#17110e]/45 to-transparent" />
               </div>
 
-              <div 
-                className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                  formData.ticket_type === 'vip' ? 'border-red-600 bg-red-900/20' : 'border-zinc-700 hover:border-zinc-500'
-                }`}
-                onClick={() => setFormData({...formData, ticket_type: 'vip'})}
-                data-testid="ticket-type-vip"
-              >
-                <input
-                  type="radio"
-                  name="ticket_type"
-                  value="vip"
-                  checked={formData.ticket_type === 'vip'}
-                  onChange={handleChange}
-                  className="mb-2"
-                />
-                <h4 className="font-bold mb-1">VIP Access</h4>
-                <p className="text-2xl font-bold text-red-600">${getTicketPrice('vip')}</p>
-                <p className="text-sm text-gray-400">{getTicketAvailability('vip')} available</p>
+              <div className="flex flex-1 flex-col justify-between p-6 text-white sm:p-8 lg:p-10">
+                <div>
+                  <div className="inline-flex rounded-full border border-white/18 bg-white/8 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#f0c98d] backdrop-blur-sm">
+                    Official Bruno Mars Premium Access
+                  </div>
+
+                  <div className="mt-8">
+                    <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#f0c98d]">
+                      Selected Event
+                    </div>
+                    <h2 className="mt-3 text-[40px] font-black uppercase leading-none tracking-[-0.06em] text-white sm:text-[52px]">
+                      Bruno Mars
+                    </h2>
+                    <p className="mt-4 max-w-[440px] text-sm leading-7 text-white/78">
+                      {formattedEventDate} {formattedEventTime ? `| ${formattedEventTime}` : ''}
+                      <br />
+                      {event?.venue}, {event?.city}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-8">
+                  <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#f0c98d]">
+                    Featured Tier
+                  </div>
+                  <div className="mt-3 rounded-[24px] border border-white/16 bg-white/10 p-5 backdrop-blur-md">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="max-w-[430px]">
+                        <div className="text-[28px] font-black uppercase leading-[0.96] text-white">
+                          {selectedTicketLabel}
+                        </div>
+                        <p className="mt-3 text-sm leading-7 text-white/78">
+                          {selectedTicketDescription}
+                        </p>
+                      </div>
+
+                      <div className="text-left sm:text-right">
+                        <div className="text-[28px] font-black text-white">
+                          {formatTicketPrice(selectedTicketPrice)}
+                        </div>
+                        <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/58">
+                          {selectionUnitLabel}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-[18px] border border-white/14 bg-white/8 px-4 py-4">
+                      <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/58">
+                        Availability
+                      </div>
+                      <div className="mt-2 text-[24px] font-black text-white">
+                        {selectedTicket?.available_quantity ?? 0}
+                      </div>
+                      <div className="text-xs uppercase tracking-[0.12em] text-white/58">
+                        Requests Remaining
+                      </div>
+                    </div>
+
+                    <div className="rounded-[18px] border border-white/14 bg-white/8 px-4 py-4">
+                      <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/58">
+                        Request Total
+                      </div>
+                      <div className="mt-2 text-[24px] font-black text-white">
+                        {formatTicketPrice(subtotal)}
+                      </div>
+                      <div className="text-xs uppercase tracking-[0.12em] text-white/58">
+                        {formData.quantity} {formData.quantity === 1 ? quantityUnitLabel.slice(0, -1) : quantityUnitLabel}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-[#fcfaf6] px-5 pb-6 pt-16 lg:max-h-[820px] lg:overflow-y-auto lg:px-7 lg:pb-8 lg:pt-12">
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8b7c6d]">
+                  Premium Tiers
+                </div>
+                <h3 className="mt-2 text-[28px] font-black uppercase tracking-[-0.05em] text-[#171717] lg:text-[30px]">
+                  Choose Your Access
+                </h3>
+                <p className="mt-2 max-w-[680px] text-[15px] leading-6 text-[#5f564d]">
+                  Select the premium experience that fits your guest plan. Each tier includes private handling,
+                  elevated access, and concierge-level coordination for this show.
+                </p>
               </div>
 
-              <div 
-                className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                  formData.ticket_type === 'meetgreet' ? 'border-red-600 bg-red-900/20' : 'border-zinc-700 hover:border-zinc-500'
-                }`}
-                onClick={() => setFormData({...formData, ticket_type: 'meetgreet'})}
-                data-testid="ticket-type-meetgreet"
-              >
-                <input
-                  type="radio"
-                  name="ticket_type"
-                  value="meetgreet"
-                  checked={formData.ticket_type === 'meetgreet'}
-                  onChange={handleChange}
-                  className="mb-2"
-                />
-                <h4 className="font-bold mb-1">Meet & Greet</h4>
-                <p className="text-2xl font-bold text-red-600">${getTicketPrice('meetgreet')}</p>
-                <p className="text-sm text-gray-400">{getTicketAvailability('meetgreet')} available</p>
+              <div className="mt-5 grid gap-2.5 xl:grid-cols-2">
+                {orderedTickets.map((ticket) => {
+                  const isSelected = formData.ticket_type === ticket.type;
+                  const isSoldOut = ticket.available_quantity <= 0;
+                  const displayPrice = getDisplayTicketPrice(ticket);
+
+                  return (
+                    <button
+                      key={ticket.type}
+                      type="button"
+                      disabled={isSoldOut}
+                      onClick={() =>
+                        !isSoldOut &&
+                        setFormData((prev) => ({
+                          ...prev,
+                          ticket_type: ticket.type,
+                          quantity: Math.min(prev.quantity, Math.min(ticket.available_quantity, 10)) || 1
+                        }))
+                      }
+                      className={`rounded-[20px] border px-4 py-4 text-left transition ${
+                        isSelected
+                          ? 'border-[#9d172b] bg-[#fff8ee] shadow-[0_10px_30px_rgba(157,23,43,0.08)]'
+                          : 'border-[#e3d6c5] bg-white hover:border-[#b89f82] hover:shadow-[0_8px_18px_rgba(0,0,0,0.05)]'
+                      } ${isSoldOut ? 'cursor-not-allowed opacity-40' : ''}`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="max-w-[80%]">
+                          <div className="text-[17px] font-black uppercase leading-tight text-[#171717] lg:text-[18px]">
+                            {getTicketTierLabel(ticket.type)}
+                          </div>
+                          <p className="mt-1.5 text-[15px] leading-6 text-[#5f564d]">
+                            {getTicketTierDescription(ticket.type)}
+                          </p>
+                        </div>
+
+                        <div className="text-right">
+                          <div className="text-[20px] font-black leading-none text-[#171717] lg:text-[21px]">
+                            {formatTicketPrice(displayPrice)}
+                          </div>
+                          <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#8b7c6d]">
+                            Starting
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex items-center justify-between gap-4 border-t border-[#efe4d6] pt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8b7c6d]">
+                        <span>{isSoldOut ? 'Currently unavailable' : `${ticket.available_quantity} remaining`}</span>
+                        <span>{ticket.available_quantity <= 10 ? 'Highly limited' : 'Premium allocation'}</span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
 
-              <div 
-                className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                  formData.ticket_type === 'backstage' ? 'border-red-600 bg-red-900/20' : 'border-zinc-700 hover:border-zinc-500'
-                }`}
-                onClick={() => setFormData({...formData, ticket_type: 'backstage'})}
-                data-testid="ticket-type-backstage"
-              >
-                <input
-                  type="radio"
-                  name="ticket_type"
-                  value="backstage"
-                  checked={formData.ticket_type === 'backstage'}
-                  onChange={handleChange}
-                  className="mb-2"
-                />
-                <h4 className="font-bold mb-1">Backstage Pass</h4>
-                <p className="text-2xl font-bold text-red-600">${getTicketPrice('backstage')}</p>
-                <p className="text-sm text-gray-400">{getTicketAvailability('backstage')} available</p>
+              <div className="mt-6 grid gap-4 xl:grid-cols-[0.84fr_1fr]">
+                <div className="rounded-[22px] border border-[#dfd2c0] bg-[#fffdf9] px-4 py-4">
+                  <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8b7c6d]">
+                    Your Selection
+                  </div>
+
+                  <div className="mt-3 space-y-2.5 border-b border-[#efe4d6] pb-4 text-sm">
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="text-[#6a6055]">Tier</span>
+                      <span className="max-w-[220px] text-right font-bold text-[#171717]">
+                        {selectedTicketLabel}
+                      </span>
+                    </div>
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="text-[#6a6055]">Price</span>
+                      <span className="font-bold text-[#171717]">{formatTicketPrice(selectedTicketPrice)}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8b7c6d]">
+                      Quantity
+                    </div>
+                    <div className="mt-2.5 flex flex-wrap items-center justify-between gap-4">
+                      <div className="inline-flex items-center rounded-full border border-[#dacdbd] bg-[#faf4eb] p-1">
+                        <button
+                          type="button"
+                          className="rounded-full p-2 transition hover:bg-black/[0.04]"
+                          onClick={() => updateQuantity(Number(formData.quantity) - 1)}
+                          disabled={Number(formData.quantity) <= 1}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </button>
+
+                        <input
+                          type="number"
+                          name="quantity"
+                          min="1"
+                          max={maxQuantity || 10}
+                          value={formData.quantity}
+                          onChange={handleChange}
+                          className="w-14 border-0 bg-transparent text-center text-lg font-black outline-none"
+                        />
+
+                        <button
+                          type="button"
+                          className="rounded-full p-2 transition hover:bg-black/[0.04]"
+                          onClick={() => updateQuantity(Number(formData.quantity) + 1)}
+                          disabled={Number(formData.quantity) >= (maxQuantity || 10)}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
+                      </div>
+
+                      <div className="text-sm font-medium text-[#6a6055]">
+                        Maximum {maxQuantity || 0} {quantityUnitLabel.toLowerCase()} for this tier
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-[18px] bg-[#f5ecdf] px-4 py-3.5">
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="text-sm font-bold uppercase tracking-[0.12em] text-[#6a6055]">Total</span>
+                      <span className="text-[24px] font-black text-[#171717]">{formatTicketPrice(subtotal)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-[22px] border border-[#dfd2c0] bg-white px-4 py-4">
+                  <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8b7c6d]">
+                    Guest Details
+                  </div>
+
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-bold uppercase tracking-[0.06em] text-[#171717]">
+                        Name
+                      </label>
+                      <input
+                        type="text"
+                        name="customer_name"
+                        value={formData.customer_name}
+                        onChange={handleChange}
+                        className="w-full rounded-[16px] border border-[#ddcfbe] bg-[#fffdf9] px-4 py-2.5 outline-none transition focus:border-[#9d172b]"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-bold uppercase tracking-[0.06em] text-[#171717]">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full rounded-[16px] border border-[#ddcfbe] bg-[#fffdf9] px-4 py-2.5 outline-none transition focus:border-[#9d172b]"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-3.5">
+                    <label className="mb-2 block text-sm font-bold uppercase tracking-[0.06em] text-[#171717]">
+                      Phone
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="w-full rounded-[16px] border border-[#ddcfbe] bg-[#fffdf9] px-4 py-2.5 outline-none transition focus:border-[#9d172b]"
+                      required
+                    />
+                  </div>
+
+                  <div className="mt-3.5">
+                    <label className="mb-2 block text-sm font-bold uppercase tracking-[0.06em] text-[#171717]">
+                      Message
+                    </label>
+                    <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      rows="3"
+                      className="w-full rounded-[16px] border border-[#ddcfbe] bg-[#fffdf9] px-4 py-3 outline-none transition focus:border-[#9d172b]"
+                      placeholder="Guest names, celebration details, seating preference, or special request."
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="mt-3.5 rounded-[16px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                      {error}
+                    </div>
+                  )}
+
+                  {contactLine && (
+                    <div className="mt-4 text-sm leading-6 text-[#6a6055]">
+                      Questions? {contactLine}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading || !selectedTicket || selectedTicket.available_quantity <= 0}
+                    className="mt-5 w-full rounded-full bg-[#141414] px-6 py-3.5 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:opacity-92 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {loading ? 'Submitting...' : 'Submit Premium Request'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-
-          {/* Customer Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block mb-2">Full Name *</label>
-              <input
-                type="text"
-                name="customer_name"
-                value={formData.customer_name}
-                onChange={handleChange}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
-                data-testid="customer-name-input"
-                required
-              />
-            </div>
-            <div>
-              <label className="block mb-2">Email *</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
-                data-testid="email-input"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block mb-2">Phone *</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
-                data-testid="phone-input"
-                required
-              />
-            </div>
-            <div>
-              <label className="block mb-2">Quantity *</label>
-              <input
-                type="number"
-                name="quantity"
-                min="1"
-                max="10"
-                value={formData.quantity}
-                onChange={handleChange}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
-                data-testid="quantity-input"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <label className="block mb-2">Additional Message (Optional)</label>
-            <textarea
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              rows="3"
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
-              data-testid="message-input"
-            ></textarea>
-          </div>
-
-          {error && (
-            <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 mb-4" data-testid="error-message">
-              <p className="text-red-500">{error}</p>
-            </div>
-          )}
-
-          <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mb-6">
-            <p className="text-sm text-gray-400">
-              <strong>Note:</strong> This is a booking request. Our team will review and contact you with payment instructions if approved.
-            </p>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-lg transition-all disabled:opacity-50"
-            data-testid="submit-booking-button"
-          >
-            {loading ? 'SUBMITTING...' : 'SUBMIT REQUEST'}
-          </button>
         </form>
       </div>
     </div>

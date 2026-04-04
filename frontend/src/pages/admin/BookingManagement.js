@@ -1,26 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { CheckCircle, XCircle, DollarSign, Eye } from 'lucide-react';
+import { getTicketTierLabel } from '../../utils/ticketTiers';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+const defaultPaymentSettings = {
+  zelle: { instructions: '', btc_wallet_address: '' },
+  cashapp: { instructions: '', btc_wallet_address: '' },
+  applepay: { instructions: '', btc_wallet_address: '' },
+  bank: { instructions: '', btc_wallet_address: '' },
+  btc: { instructions: '', btc_wallet_address: '' }
+};
+
+const createApprovalData = (method = 'zelle', paymentSettings = defaultPaymentSettings, adminNotes = '') => ({
+  payment_method: method,
+  payment_instructions: paymentSettings[method]?.instructions || '',
+  btc_wallet_address: method === 'btc' ? paymentSettings.btc?.btc_wallet_address || '' : '',
+  btc_amount: 0,
+  admin_notes: adminNotes
+});
 
 const BookingManagement = () => {
   const [bookings, setBookings] = useState([]);
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [btcPrice, setBtcPrice] = useState(50000);
-  const [approvalData, setApprovalData] = useState({
-    payment_method: 'zelle',
-    payment_instructions: '',
-    btc_wallet_address: '',
-    btc_amount: 0,
-    admin_notes: ''
-  });
+  const [paymentSettings, setPaymentSettings] = useState(defaultPaymentSettings);
+  const [approvalData, setApprovalData] = useState(() => createApprovalData());
 
   useEffect(() => {
     fetchBookings();
     fetchBtcPrice();
+    fetchPaymentSettings();
   }, []);
 
   const fetchBookings = async () => {
@@ -44,6 +56,39 @@ const BookingManagement = () => {
     }
   };
 
+  const fetchPaymentSettings = async () => {
+    try {
+      const token = localStorage.getItem('admin_token');
+      const response = await axios.get(`${API}/admin/payment-settings`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const nextSettings = response.data.reduce((acc, setting) => ({
+        ...acc,
+        [setting.payment_method]: {
+          instructions: setting.instructions || '',
+          btc_wallet_address: setting.btc_wallet_address || ''
+        }
+      }), defaultPaymentSettings);
+
+      setPaymentSettings(nextSettings);
+    } catch (error) {
+      console.error('Error fetching payment settings:', error);
+    }
+  };
+
+  const openBookingDetails = (booking) => {
+    setSelectedBooking(booking);
+    if (booking.status === 'pending') {
+      setApprovalData(createApprovalData('zelle', paymentSettings));
+    }
+  };
+
+  const closeBookingDetails = () => {
+    setSelectedBooking(null);
+    setApprovalData(createApprovalData('zelle', paymentSettings));
+  };
+
   const handleApprove = async (bookingId) => {
     try {
       const token = localStorage.getItem('admin_token');
@@ -52,12 +97,12 @@ const BookingManagement = () => {
         approvalData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      fetchBookings();
-      setSelectedBooking(null);
+      await fetchBookings();
+      closeBookingDetails();
       alert('Booking approved successfully!');
     } catch (error) {
       console.error('Error approving booking:', error);
-      alert('Failed to approve booking');
+      alert(error.response?.data?.detail || 'Failed to approve booking');
     }
   };
 
@@ -74,12 +119,12 @@ const BookingManagement = () => {
         { admin_notes: notes },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      fetchBookings();
-      setSelectedBooking(null);
+      await fetchBookings();
+      closeBookingDetails();
       alert('Booking rejected');
     } catch (error) {
       console.error('Error rejecting booking:', error);
-      alert('Failed to reject booking');
+      alert(error.response?.data?.detail || 'Failed to reject booking');
     }
   };
 
@@ -113,10 +158,6 @@ const BookingManagement = () => {
       console.error('Error confirming booking:', error);
       alert('Failed to confirm booking');
     }
-  };
-
-  const calculateBtcAmount = (usdAmount) => {
-    return (usdAmount / btcPrice).toFixed(8);
   };
 
   const filteredBookings = filterStatus === 'all' 
@@ -186,7 +227,7 @@ const BookingManagement = () => {
                       <div>{booking.email}</div>
                       <div className="text-gray-400">{booking.phone}</div>
                     </td>
-                    <td className="px-6 py-4 capitalize">{booking.ticket_type.replace('meetgreet', 'Meet & Greet')}</td>
+                    <td className="px-6 py-4">{getTicketTierLabel(booking.ticket_type)}</td>
                     <td className="px-6 py-4">{booking.quantity}</td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-bold ${
@@ -205,7 +246,7 @@ const BookingManagement = () => {
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
                         <button
-                          onClick={() => setSelectedBooking(booking)}
+                          onClick={() => openBookingDetails(booking)}
                           className="p-2 bg-blue-600 hover:bg-blue-700 rounded"
                           data-testid={`view-booking-${booking.id}`}
                         >
@@ -214,7 +255,10 @@ const BookingManagement = () => {
                         {booking.status === 'approved' && (
                           <button
                             onClick={() => {
-                              const txid = prompt('Enter transaction ID (optional):');
+                              const txid = prompt(
+                                'Enter transaction ID (optional):',
+                                booking.customer_payment_reference || ''
+                              );
                               if (txid !== null) handleMarkPaid(booking.id, txid);
                             }}
                             className="p-2 bg-green-600 hover:bg-green-700 rounded"
@@ -276,7 +320,7 @@ const BookingManagement = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-gray-400 text-sm">Ticket Type</p>
-                  <p className="capitalize">{selectedBooking.ticket_type.replace('meetgreet', 'Meet & Greet')}</p>
+                  <p>{getTicketTierLabel(selectedBooking.ticket_type)}</p>
                 </div>
                 <div>
                   <p className="text-gray-400 text-sm">Quantity</p>
@@ -287,6 +331,50 @@ const BookingManagement = () => {
                 <div>
                   <p className="text-gray-400 text-sm">Message</p>
                   <p className="bg-zinc-800 p-3 rounded">{selectedBooking.message}</p>
+                </div>
+              )}
+              {selectedBooking.customer_payment_submitted_at && (
+                <div className="bg-emerald-900/20 border border-emerald-700 rounded-lg p-4">
+                  <p className="font-bold mb-3">Customer Payment Update</p>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-400 text-sm">Submitted</p>
+                      <p>{new Date(selectedBooking.customer_payment_submitted_at).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm">Method</p>
+                      <p className="uppercase">{selectedBooking.customer_payment_method}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm">Reference</p>
+                      <p>{selectedBooking.customer_payment_reference}</p>
+                    </div>
+                    {selectedBooking.customer_payment_amount && (
+                      <div>
+                        <p className="text-gray-400 text-sm">Amount</p>
+                        <p>${Number(selectedBooking.customer_payment_amount).toLocaleString()}</p>
+                      </div>
+                    )}
+                  </div>
+                  {selectedBooking.customer_payment_proof_url && (
+                    <div className="mt-3">
+                      <p className="text-gray-400 text-sm">Proof Link</p>
+                      <a
+                        href={selectedBooking.customer_payment_proof_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-red-400 hover:text-red-300 underline break-all"
+                      >
+                        {selectedBooking.customer_payment_proof_url}
+                      </a>
+                    </div>
+                  )}
+                  {selectedBooking.customer_payment_notes && (
+                    <div className="mt-3">
+                      <p className="text-gray-400 text-sm">Notes</p>
+                      <p className="bg-zinc-800 p-3 rounded mt-1">{selectedBooking.customer_payment_notes}</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -300,7 +388,11 @@ const BookingManagement = () => {
                     <label className="block mb-2">Payment Method</label>
                     <select
                       value={approvalData.payment_method}
-                      onChange={(e) => setApprovalData({...approvalData, payment_method: e.target.value})}
+                      onChange={(e) => setApprovalData(createApprovalData(
+                        e.target.value,
+                        paymentSettings,
+                        approvalData.admin_notes
+                      ))}
                       className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3"
                     >
                       <option value="zelle">Zelle</option>
@@ -339,10 +431,13 @@ const BookingManagement = () => {
                         <input
                           type="number"
                           step="0.00000001"
-                          value={approvalData.btc_amount}
-                          onChange={(e) => setApprovalData({...approvalData, btc_amount: parseFloat(e.target.value)})}
+                          value={approvalData.btc_amount || ''}
+                          onChange={(e) => setApprovalData({
+                            ...approvalData,
+                            btc_amount: e.target.value ? parseFloat(e.target.value) || 0 : 0
+                          })}
                           className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3"
-                          placeholder="0.00123456"
+                          placeholder="Leave blank to auto-calculate"
                         />
                         <p className="text-sm text-gray-400 mt-1">Current BTC Price: ${btcPrice.toFixed(2)}</p>
                       </div>
@@ -405,7 +500,7 @@ const BookingManagement = () => {
 
             <div className="flex gap-4 mt-6">
               <button
-                onClick={() => setSelectedBooking(null)}
+                onClick={closeBookingDetails}
                 className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 rounded-lg"
               >
                 Close

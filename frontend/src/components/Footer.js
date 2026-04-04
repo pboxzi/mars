@@ -1,14 +1,28 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { subscribeEmail } from '../utils/subscribe';
 
 const Footer = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
-    setEmail('');
+    setError('');
+    setLoading(true);
+
+    try {
+      await subscribeEmail(email, 'footer');
+      setSubmitted(true);
+      setEmail('');
+      setTimeout(() => setSubmitted(false), 3000);
+    } catch (submitError) {
+      setError(submitError.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -151,6 +165,30 @@ const Footer = () => {
           font-size: 0.9rem;
           margin-top: 10px;
         }
+
+        .footer-error-message {
+          color: #fca5a5;
+          font-size: 0.9rem;
+          margin-top: 10px;
+        }
+
+        .footer-track-link {
+          display: inline-block;
+          margin-top: 16px;
+          color: #fff;
+          text-decoration: none;
+          font-size: 0.85rem;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          border-bottom: 1px solid #666;
+          padding-bottom: 6px;
+          transition: border-color 0.2s, color 0.2s;
+        }
+
+        .footer-track-link:hover {
+          color: #f87171;
+          border-color: #f87171;
+        }
         
         .footer-copyright {
           text-align: center;
@@ -255,18 +293,24 @@ const Footer = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder=""
+                  placeholder="Enter your email"
                   className="footer-email-input"
                   required
                 />
               </div>
-              <button type="submit" className="footer-subscribe-button">
-                SUBMIT
+              <button type="submit" className="footer-subscribe-button" disabled={loading}>
+                {loading ? 'SUBMITTING...' : 'SUBMIT'}
               </button>
               {submitted && (
-                <div className="footer-success-message">✓ THANK YOU FOR SUBSCRIBING</div>
+                <div className="footer-success-message">THANK YOU FOR SUBSCRIBING</div>
+              )}
+              {error && (
+                <div className="footer-error-message">{error}</div>
               )}
             </form>
+            <Link to="/booking-status" className="footer-track-link">
+              Track Existing Booking
+            </Link>
           </div>
           
           {/* Copyright */}
@@ -287,3 +331,4 @@ const Footer = () => {
 };
 
 export default Footer;
+

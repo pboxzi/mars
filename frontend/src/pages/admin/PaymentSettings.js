@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Save, Bitcoin, DollarSign } from 'lucide-react';
+import { emptySupportSettings } from '../../hooks/useSupportSettings';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -15,10 +16,12 @@ const PaymentSettings = () => {
   });
   const [loading, setLoading] = useState(false);
   const [btcPrice, setBtcPrice] = useState(0);
+  const [supportSettings, setSupportSettings] = useState(emptySupportSettings);
 
   useEffect(() => {
     fetchSettings();
     fetchBtcPrice();
+    fetchSupportSettings();
   }, []);
 
   const fetchSettings = async () => {
@@ -51,6 +54,25 @@ const PaymentSettings = () => {
     }
   };
 
+  const fetchSupportSettings = async () => {
+    try {
+      const token = localStorage.getItem('admin_token');
+      const response = await axios.get(`${API}/admin/site-settings`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setSupportSettings({
+        support_email: response.data.support_email || '',
+        support_phone: response.data.support_phone || '',
+        support_whatsapp: response.data.support_whatsapp || '',
+        support_instagram: response.data.support_instagram || '',
+        support_hours: response.data.support_hours || ''
+      });
+    } catch (error) {
+      console.error('Error fetching support settings:', error);
+    }
+  };
+
   const handleSave = async (method) => {
     setLoading(true);
     try {
@@ -77,6 +99,35 @@ const PaymentSettings = () => {
         [field]: value
       }
     });
+  };
+
+  const handleSupportChange = (field, value) => {
+    setSupportSettings((prev) => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSupportSave = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('admin_token');
+      const payload = {
+        ...supportSettings,
+        support_email: supportSettings.support_email || null
+      };
+      await axios.put(
+        `${API}/admin/site-settings`,
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert('Customer support settings updated successfully!');
+    } catch (error) {
+      console.error('Error saving support settings:', error);
+      alert('Failed to save customer support settings');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const paymentMethods = [
@@ -157,12 +208,86 @@ const PaymentSettings = () => {
         ))}
       </div>
 
+      <div className="bg-zinc-900 rounded-lg p-6 border border-zinc-800 mt-8" data-testid="support-settings">
+        <h2 className="text-2xl font-bold mb-2">Customer Support Contact</h2>
+        <p className="text-sm text-gray-400 mb-6">
+          These details appear on the booking confirmation flow, booking status page, and customer email updates.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block mb-2 font-bold">Support Email</label>
+            <input
+              type="email"
+              value={supportSettings.support_email}
+              onChange={(e) => handleSupportChange('support_email', e.target.value)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+              placeholder="booking@yourdomain.com"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-2 font-bold">Support Phone</label>
+            <input
+              type="text"
+              value={supportSettings.support_phone}
+              onChange={(e) => handleSupportChange('support_phone', e.target.value)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+              placeholder="+1 555 123 4567"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-2 font-bold">WhatsApp</label>
+            <input
+              type="text"
+              value={supportSettings.support_whatsapp}
+              onChange={(e) => handleSupportChange('support_whatsapp', e.target.value)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+              placeholder="+1 555 123 4567 or https://wa.me/..."
+            />
+          </div>
+
+          <div>
+            <label className="block mb-2 font-bold">Instagram</label>
+            <input
+              type="text"
+              value={supportSettings.support_instagram}
+              onChange={(e) => handleSupportChange('support_instagram', e.target.value)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+              placeholder="@yourhandle"
+            />
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <label className="block mb-2 font-bold">Response Hours</label>
+          <input
+            type="text"
+            value={supportSettings.support_hours}
+            onChange={(e) => handleSupportChange('support_hours', e.target.value)}
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+            placeholder="Mon-Fri, 9am-6pm"
+          />
+        </div>
+
+        <button
+          onClick={handleSupportSave}
+          disabled={loading}
+          className="mt-6 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center gap-2 disabled:opacity-50"
+        >
+          <Save className="w-5 h-5" />
+          Save Customer Support Settings
+        </button>
+      </div>
+
       <div className="mt-8 bg-blue-900/30 border border-blue-700 rounded-lg p-6">
         <h3 className="text-lg font-bold mb-2">Instructions</h3>
         <ul className="list-disc list-inside space-y-2 text-sm text-gray-400">
           <li>Set up payment instructions for each payment method you want to accept</li>
           <li>These instructions will be shown to customers after their booking is approved</li>
           <li>For Bitcoin payments, provide your wallet address - the BTC amount will be calculated automatically</li>
+          <li>Support contact details help customers know how to reach you and what number to include</li>
           <li>You can update these settings anytime</li>
         </ul>
       </div>

@@ -133,7 +133,7 @@ const MusicPage = () => {
           
           {/* I Just Might Video */}
           <div className="music-item">
-            <a href="http://brunomars.lnk.to/ijustmight/youtube" target="_blank" rel="noopener noreferrer">
+            <a href="https://brunomars.lnk.to/ijustmight/youtube" target="_blank" rel="noopener noreferrer">
               <img 
                 src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-01/Video_Desktop-s3ff.jpg"
                 alt="I Just Might"
@@ -141,7 +141,7 @@ const MusicPage = () => {
             </a>
             <div className="music-item-title">I Just Might</div>
             <a 
-              href="http://brunomars.lnk.to/ijustmight/youtube" 
+              href="https://brunomars.lnk.to/ijustmight/youtube" 
               target="_blank" 
               rel="noopener noreferrer"
               className="music-item-link"

@@ -370,12 +370,12 @@ PUT    /api/admin/payment-settings/:method # Update payment settings
 
 ---
 
-## 📱 Access URLs
+## Access Routes
 
-- **Public Site**: https://mars-beats.preview.emergentagent.com
-- **Admin Panel**: https://mars-beats.preview.emergentagent.com/admin-secret
-- **Booking Status**: https://mars-beats.preview.emergentagent.com/booking-status
-- **Backend API**: https://mars-beats.preview.emergentagent.com/api
+- **Public Site**: /
+- **Admin Panel**: /admin-secret
+- **Booking Status**: /booking-status
+- **Backend API**: /api
 
 ---
 
@@ -392,4 +392,5 @@ PUT    /api/admin/payment-settings/:method # Update payment settings
 
 ---
 
-**Built with ❤️ using Emergent AI**
+**Built as a custom Bruno Mars VIP booking web app**
+

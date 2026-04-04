@@ -85,7 +85,7 @@ const AdminLogin = () => {
 
           <div className="mt-6 pt-6 border-t border-zinc-700">
             <p className="text-xs text-gray-500 text-center">
-              Default credentials: admin@brunomars.com / admin123
+              Use your configured admin credentials to continue.
             </p>
           </div>
         </div>

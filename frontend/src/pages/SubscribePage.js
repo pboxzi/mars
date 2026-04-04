@@ -1,16 +1,29 @@
 import React, { useState } from 'react';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
+import { subscribeEmail } from '../utils/subscribe';
 
 const SubscribePage = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle newsletter subscription
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    setError('');
+    setLoading(true);
+
+    try {
+      await subscribeEmail(email, 'subscribe-page');
+      setSubmitted(true);
+      setEmail('');
+      setTimeout(() => setSubmitted(false), 3000);
+    } catch (submitError) {
+      setError(submitError.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -93,6 +106,15 @@ const SubscribePage = () => {
           color: #d32f2f;
           margin-top: 20px;
         }
+
+        .subscribe-error {
+          text-align: center;
+          font-family: 'Poppins', sans-serif;
+          font-weight: 500;
+          font-size: 0.95rem;
+          color: #a61b1b;
+          margin-top: 16px;
+        }
         
         @media only screen and (max-width: 768px) {
           .subscribe-title {
@@ -125,8 +147,8 @@ const SubscribePage = () => {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <button type="submit" className="subscribe-button">
-            Subscribe
+          <button type="submit" className="subscribe-button" disabled={loading}>
+            {loading ? 'Submitting...' : 'Subscribe'}
           </button>
           
           {submitted && (
@@ -134,6 +156,7 @@ const SubscribePage = () => {
               Thank you for subscribing!
             </div>
           )}
+          {error && <div className="subscribe-error">{error}</div>}
         </form>
       </div>
       

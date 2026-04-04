@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { TrendingUp, Clock, CheckCircle, DollarSign, XCircle } from 'lucide-react';
+import { getTicketTierLabel } from '../../utils/ticketTiers';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -86,7 +87,7 @@ const AdminDashboard = () => {
                   <tr key={booking.id} className="border-t border-zinc-800 hover:bg-zinc-800/50">
                     <td className="px-6 py-4 font-mono text-sm">{booking.confirmation_number}</td>
                     <td className="px-6 py-4">{booking.customer_name}</td>
-                    <td className="px-6 py-4 capitalize">{booking.ticket_type.replace('meetgreet', 'Meet & Greet')}</td>
+                    <td className="px-6 py-4">{getTicketTierLabel(booking.ticket_type)}</td>
                     <td className="px-6 py-4">{booking.quantity}</td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-bold ${

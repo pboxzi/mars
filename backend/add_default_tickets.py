@@ -10,25 +10,55 @@ DB_NAME = os.getenv('DB_NAME', 'bruno_mars_vip')
 
 # Default ticket pricing
 DEFAULT_TICKETS = {
-    "general": {
-        "price_usd": 1000,
+    "vip": {
+        "price_usd": 5000,
         "total_quantity": 100,
         "available_quantity": 100
     },
-    "vip": {
-        "price_usd": 5000,
-        "total_quantity": 50,
-        "available_quantity": 50
-    },
     "meetgreet": {
-        "price_usd": 10000,
+        "price_usd": 15000,
+        "total_quantity": 25,
+        "available_quantity": 25
+    },
+    "backstage": {
+        "price_usd": 35000,
+        "total_quantity": 10,
+        "available_quantity": 10
+    },
+    "soundcheck": {
+        "price_usd": 8500,
+        "total_quantity": 40,
+        "available_quantity": 40
+    },
+    "photoop": {
+        "price_usd": 20000,
         "total_quantity": 20,
         "available_quantity": 20
     },
-    "backstage": {
-        "price_usd": 15000,
-        "total_quantity": 10,
-        "available_quantity": 10
+    "aftershow": {
+        "price_usd": 50000,
+        "total_quantity": 12,
+        "available_quantity": 12
+    },
+    "hospitality": {
+        "price_usd": 150000,
+        "total_quantity": 8,
+        "available_quantity": 8
+    },
+    "birthday": {
+        "price_usd": 250000,
+        "total_quantity": 6,
+        "available_quantity": 6
+    },
+    "corporate": {
+        "price_usd": 500000,
+        "total_quantity": 4,
+        "available_quantity": 4
+    },
+    "privatemeetup": {
+        "price_usd": 1000000,
+        "total_quantity": 2,
+        "available_quantity": 2
     }
 }
 
@@ -66,10 +96,16 @@ async def add_default_tickets():
     print(f"✅ Total tickets in database: {total_tickets}")
     
     print("\n💰 Default Pricing:")
-    print(f"   General Admission: $1,000 (100 tickets per event)")
-    print(f"   VIP Access: $5,000 (50 tickets per event)")
-    print(f"   Meet & Greet: $10,000 (20 tickets per event)")
-    print(f"   Backstage Pass: $15,000 (10 tickets per event)")
+    print(f"   VIP Access: $5,000 (100 tickets per event)")
+    print(f"   Meet & Greet: $15,000 (25 tickets per event)")
+    print(f"   Backstage Pass: $35,000 (10 tickets per event)")
+    print(f"   Soundcheck Experience: $8,500 (40 tickets per event)")
+    print(f"   Photo Op Experience: $20,000 (20 tickets per event)")
+    print(f"   After Show Lounge: $50,000 (12 tickets per event)")
+    print(f"   Private Table / Hospitality: $150,000 (8 tickets per event)")
+    print(f"   Birthday / Celebration Package: $250,000 (6 tickets per event)")
+    print(f"   Corporate Booking: $500,000 (4 tickets per event)")
+    print(f"   Private Meet-Up Request: $1,000,000 (2 tickets per event)")
     
     client.close()
 
