@@ -167,11 +167,11 @@ const EventManagement = () => {
 
   return (
     <div data-testid="event-management">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">Event Management</h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold">Event Management</h1>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center gap-2"
+          className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 w-full sm:w-auto"
           data-testid="add-event-button"
         >
           <Plus className="w-5 h-5" />
@@ -182,13 +182,13 @@ const EventManagement = () => {
       {/* Event Form */}
       {showForm && (
         <div className="bg-white rounded-lg p-6 mb-8 border border-stone-200" data-testid="event-form">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center gap-3 mb-6">
             <h2 className="text-2xl font-bold">{editingEvent ? 'Edit Event' : 'New Event'}</h2>
             <button onClick={resetForm}><X className="w-6 h-6" /></button>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block mb-2">Event Title *</label>
                 <input
@@ -211,7 +211,7 @@ const EventManagement = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
                 <label className="block mb-2">City *</label>
                 <input

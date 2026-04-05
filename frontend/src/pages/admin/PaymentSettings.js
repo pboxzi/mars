@@ -140,11 +140,11 @@ const PaymentSettings = () => {
 
   return (
     <div data-testid="payment-settings">
-      <h1 className="text-4xl font-bold mb-8">Payment Settings</h1>
+      <h1 className="text-3xl sm:text-4xl font-bold mb-8">Payment Settings</h1>
 
       {/* BTC Price Display */}
       <div className="bg-gradient-to-r from-orange-900/30 to-yellow-900/30 border border-orange-700 rounded-lg p-6 mb-8">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <Bitcoin className="w-12 h-12 text-orange-500" />
           <div>
             <p className="text-stone-500 text-sm">Current Bitcoin Price</p>
@@ -197,7 +197,7 @@ const PaymentSettings = () => {
               <button
                 onClick={() => handleSave(method.key)}
                 disabled={loading}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center gap-2 disabled:opacity-50"
+                className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
                 data-testid={`save-${method.key}`}
               >
                 <Save className="w-5 h-5" />
@@ -274,7 +274,7 @@ const PaymentSettings = () => {
         <button
           onClick={handleSupportSave}
           disabled={loading}
-          className="mt-6 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center gap-2 disabled:opacity-50"
+          className="mt-6 w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
         >
           <Save className="w-5 h-5" />
           Save Customer Support Settings

@@ -43,7 +43,7 @@ const AdminDashboard = () => {
 
   return (
     <div data-testid="admin-dashboard">
-      <h1 className="text-4xl font-bold mb-8">Dashboard</h1>
+      <h1 className="mb-6 text-3xl font-bold sm:mb-8 sm:text-4xl">Dashboard</h1>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
@@ -59,12 +59,12 @@ const AdminDashboard = () => {
       </div>
 
       {/* Recent Bookings */}
-      <div className="bg-white rounded-lg border border-stone-200">
+      <div className="bg-white rounded-lg border border-stone-200 overflow-hidden">
         <div className="p-6 border-b border-stone-200">
           <h2 className="text-2xl font-bold">Recent Booking Requests</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[760px]">
             <thead className="bg-stone-100">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-bold">Confirmation #</th>

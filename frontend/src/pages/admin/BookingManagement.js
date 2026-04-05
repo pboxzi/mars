@@ -175,7 +175,7 @@ const BookingManagement = () => {
 
   return (
     <div data-testid="booking-management">
-      <h1 className="text-4xl font-bold mb-8">Booking Management</h1>
+      <h1 className="mb-6 text-3xl font-bold sm:mb-8 sm:text-4xl">Booking Management</h1>
 
       {/* Status Tabs */}
       <div className="flex gap-2 mb-8 overflow-x-auto">
@@ -198,7 +198,7 @@ const BookingManagement = () => {
       {/* Bookings Table */}
       <div className="bg-white rounded-lg border border-stone-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[980px]">
             <thead className="bg-stone-100">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-bold">Confirmation #</th>
@@ -289,7 +289,7 @@ const BookingManagement = () => {
       {/* Booking Detail Modal */}
       {selectedBooking && (
         <div className="fixed inset-0 bg-black/45 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-testid="booking-detail-modal">
-          <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg p-5 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold mb-6">Booking Details</h2>
 
             <div className="space-y-4 mb-6">
@@ -297,7 +297,7 @@ const BookingManagement = () => {
                 <p className="text-stone-500 text-sm">Confirmation Number</p>
                 <p className="font-bold font-mono">{selectedBooking.confirmation_number}</p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-stone-500 text-sm">Customer Name</p>
                   <p className="font-bold">{selectedBooking.customer_name}</p>
@@ -307,7 +307,7 @@ const BookingManagement = () => {
                   <p className="font-bold capitalize">{selectedBooking.status}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-stone-500 text-sm">Email</p>
                   <p>{selectedBooking.email}</p>
@@ -317,7 +317,7 @@ const BookingManagement = () => {
                   <p>{selectedBooking.phone}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-stone-500 text-sm">Ticket Type</p>
                   <p>{getTicketTierLabel(selectedBooking.ticket_type)}</p>
@@ -336,7 +336,7 @@ const BookingManagement = () => {
               {selectedBooking.customer_payment_submitted_at && (
                 <div className="bg-emerald-900/20 border border-emerald-700 rounded-lg p-4">
                   <p className="font-bold mb-3">Customer Payment Update</p>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-stone-500 text-sm">Submitted</p>
                       <p>{new Date(selectedBooking.customer_payment_submitted_at).toLocaleString()}</p>
@@ -454,7 +454,7 @@ const BookingManagement = () => {
                     />
                   </div>
 
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
                     <button
                       onClick={() => handleApprove(selectedBooking.id)}
                       className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2"
@@ -498,7 +498,7 @@ const BookingManagement = () => {
               </div>
             )}
 
-            <div className="flex gap-4 mt-6">
+            <div className="flex flex-col sm:flex-row gap-4 mt-6">
               <button
                 onClick={closeBookingDetails}
                 className="flex-1 bg-stone-100 hover:bg-stone-200 text-[#151515] font-bold py-3 rounded-lg"

@@ -1,12 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Calendar, FileText, LogOut, CreditCard } from 'lucide-react';
+import { LayoutDashboard, Calendar, FileText, LogOut, CreditCard, Menu, X } from 'lucide-react';
 import AdminInstallPrompt from '../../components/AdminInstallPrompt';
 
 const AdminLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const adminEmail = localStorage.getItem('admin_email');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('admin_token');
@@ -14,6 +15,10 @@ const AdminLayout = ({ children }) => {
       navigate('/admin-secret');
     }
   }, [navigate]);
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('admin_token');
@@ -31,8 +36,39 @@ const AdminLayout = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f7f3ec] text-[#151515] flex">
-      <aside className="w-72 bg-[#fcfaf6] border-r border-stone-200 fixed h-full shadow-[8px_0_30px_rgba(48,32,11,0.04)]" data-testid="admin-sidebar">
+    <div className="min-h-screen bg-[#f7f3ec] text-[#151515]">
+      <div className="lg:hidden sticky top-0 z-40 border-b border-stone-200 bg-[#fcfaf6]/95 backdrop-blur">
+        <div className="flex items-center justify-between px-4 py-4">
+          <div className="min-w-0">
+            <p className="text-[10px] tracking-[0.28em] uppercase text-[#9d172b] mb-1">Bruno Mars</p>
+            <h1 className="text-lg font-black truncate">Admin Panel</h1>
+          </div>
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen((prev) => !prev)}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-stone-200 bg-white text-[#151515] shadow-sm"
+            aria-label={mobileNavOpen ? 'Close navigation' : 'Open navigation'}
+          >
+            {mobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </div>
+
+      {mobileNavOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-40 bg-black/35 lg:hidden"
+          onClick={() => setMobileNavOpen(false)}
+          aria-label="Close navigation overlay"
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-[18rem] max-w-[88vw] bg-[#fcfaf6] border-r border-stone-200 shadow-[8px_0_30px_rgba(48,32,11,0.08)] transition-transform duration-200 lg:z-30 lg:translate-x-0 ${
+          mobileNavOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+        data-testid="admin-sidebar"
+      >
         <div className="p-6 border-b border-stone-200">
           <p className="text-xs tracking-[0.3em] uppercase text-[#9d172b] mb-2">Bruno Mars</p>
           <h1 className="text-2xl font-black text-[#151515]">Admin Panel</h1>
@@ -72,8 +108,8 @@ const AdminLayout = ({ children }) => {
         </nav>
       </aside>
 
-      <main className="flex-1 ml-72">
-        <div className="p-8 min-h-screen">{children}</div>
+      <main className="min-w-0 lg:ml-72">
+        <div className="min-h-screen px-4 py-5 sm:px-6 sm:py-6 lg:p-8">{children}</div>
       </main>
     </div>
   );
