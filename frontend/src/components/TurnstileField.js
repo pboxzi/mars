@@ -45,7 +45,12 @@ const loadTurnstileScript = () => {
 const TurnstileField = ({ token, onTokenChange, resetSignal = 0, error = '' }) => {
   const containerRef = useRef(null);
   const widgetIdRef = useRef(null);
+  const tokenChangeRef = useRef(onTokenChange);
   const [loadError, setLoadError] = useState('');
+
+  useEffect(() => {
+    tokenChangeRef.current = onTokenChange;
+  }, [onTokenChange]);
 
   useEffect(() => {
     if (!isTurnstileEnabled || !containerRef.current) {
@@ -65,11 +70,11 @@ const TurnstileField = ({ token, onTokenChange, resetSignal = 0, error = '' }) =
           theme: 'light',
           callback: (nextToken) => {
             setLoadError('');
-            onTokenChange(nextToken);
+            tokenChangeRef.current(nextToken);
           },
-          'expired-callback': () => onTokenChange(''),
+          'expired-callback': () => tokenChangeRef.current(''),
           'error-callback': () => {
-            onTokenChange('');
+            tokenChangeRef.current('');
             setLoadError('Security check unavailable. Please refresh and try again.');
           },
         });
@@ -85,7 +90,7 @@ const TurnstileField = ({ token, onTokenChange, resetSignal = 0, error = '' }) =
         widgetIdRef.current = null;
       }
     };
-  }, [onTokenChange]);
+  }, []);
 
   useEffect(() => {
     if (!isTurnstileEnabled || widgetIdRef.current === null || !window.turnstile) {
@@ -93,8 +98,8 @@ const TurnstileField = ({ token, onTokenChange, resetSignal = 0, error = '' }) =
     }
 
     window.turnstile.reset(widgetIdRef.current);
-    onTokenChange('');
-  }, [resetSignal, onTokenChange]);
+    tokenChangeRef.current('');
+  }, [resetSignal]);
 
   if (!isTurnstileEnabled) {
     return null;
