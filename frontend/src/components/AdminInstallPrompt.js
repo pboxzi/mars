@@ -33,9 +33,9 @@ const AdminInstallPrompt = ({ compact = false }) => {
 
   if (isStandalone) {
     return (
-      <div className={`${compact ? 'p-4' : 'p-5'} rounded-2xl border border-stone-200 bg-white`}>
-        <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#9d172b] mb-2">App Ready</p>
-        <p className="text-sm text-stone-600">This device already has the admin app installed.</p>
+      <div className={`${compact ? 'p-3' : 'p-5'} rounded-2xl border border-stone-200 bg-white`}>
+        <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.24em] text-[#9d172b] mb-1.5 sm:mb-2">App Ready</p>
+        <p className={`${compact ? 'text-xs leading-5' : 'text-sm'} text-stone-600`}>This device already has the admin app installed.</p>
       </div>
     );
   }
@@ -67,36 +67,36 @@ const AdminInstallPrompt = ({ compact = false }) => {
 
   return (
     <div
-      className={`${compact ? 'p-4' : 'p-5'} rounded-[24px] border border-stone-200 bg-white shadow-[0_12px_35px_rgba(48,32,11,0.05)]`}
+      className={`${compact ? 'p-3' : 'p-5'} rounded-[24px] border border-stone-200 bg-white shadow-[0_12px_35px_rgba(48,32,11,0.05)]`}
       data-testid="admin-install-prompt"
     >
       <div className="flex items-start gap-3">
-        <div className="w-11 h-11 rounded-full bg-[#f4eadf] border border-[#decab0] flex items-center justify-center shrink-0">
+        <div className={`${compact ? 'w-9 h-9' : 'w-11 h-11'} rounded-full bg-[#f4eadf] border border-[#decab0] flex items-center justify-center shrink-0`}>
           {isIos ? (
-            <Smartphone className="w-5 h-5 text-[#9d172b]" />
+            <Smartphone className={`${compact ? 'w-4 h-4' : 'w-5 h-5'} text-[#9d172b]`} />
           ) : (
-            <MonitorSmartphone className="w-5 h-5 text-[#9d172b]" />
+            <MonitorSmartphone className={`${compact ? 'w-4 h-4' : 'w-5 h-5'} text-[#9d172b]`} />
           )}
         </div>
 
         <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#9d172b] mb-2">Admin App</p>
-          <h3 className={`${compact ? 'text-lg' : 'text-xl'} font-black text-[#151515] mb-2`}>
+          <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.24em] text-[#9d172b] mb-1.5 sm:mb-2">Admin App</p>
+          <h3 className={`${compact ? 'text-sm sm:text-base' : 'text-xl'} font-black text-[#151515] mb-1.5 sm:mb-2`}>
             {helperCopy.title}
           </h3>
-          <p className="text-sm leading-6 text-stone-600">
+          <p className={`${compact ? 'text-xs leading-5' : 'text-sm leading-6'} text-stone-600`}>
             {helperCopy.description}
           </p>
         </div>
       </div>
 
-      <div className="mt-4 flex flex-col gap-3">
+      <div className={`${compact ? 'mt-3' : 'mt-4'} flex flex-col gap-3`}>
         {!needsManualInstall && (
           <button
             type="button"
             onClick={handleAction}
             disabled={installing}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#151515] px-4 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-[#2b2b2b] disabled:opacity-50"
+            className={`inline-flex items-center justify-center gap-2 rounded-2xl bg-[#151515] ${compact ? 'px-3 py-2.5 text-[11px] tracking-[0.15em]' : 'px-4 py-3 text-sm tracking-[0.18em]'} font-bold uppercase text-white transition hover:bg-[#2b2b2b] disabled:opacity-50`}
           >
             <Download className="w-4 h-4" />
             {installing ? 'Working...' : helperCopy.buttonLabel}

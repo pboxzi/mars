@@ -29,10 +29,10 @@ const AdminLayout = ({ children }) => {
   const isActive = (path) => location.pathname === path;
 
   const navItems = [
-    { path: '/admin-secret/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/admin-secret/events', icon: Calendar, label: 'Events' },
-    { path: '/admin-secret/bookings', icon: FileText, label: 'Bookings' },
-    { path: '/admin-secret/payment-settings', icon: CreditCard, label: 'Payment Settings' }
+    { path: '/admin-secret/dashboard', icon: LayoutDashboard, label: 'Dashboard', mobileLabel: 'Dashboard' },
+    { path: '/admin-secret/events', icon: Calendar, label: 'Events', mobileLabel: 'Events' },
+    { path: '/admin-secret/bookings', icon: FileText, label: 'Bookings', mobileLabel: 'Bookings' },
+    { path: '/admin-secret/payment-settings', icon: CreditCard, label: 'Payment Settings', mobileLabel: 'Payments' }
   ];
 
   return (
@@ -64,45 +64,47 @@ const AdminLayout = ({ children }) => {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[15.5rem] max-w-[82vw] bg-[#fcfaf6] border-r border-stone-200 shadow-[8px_0_30px_rgba(48,32,11,0.08)] transition-transform duration-200 lg:z-30 lg:w-72 lg:max-w-none lg:translate-x-0 overflow-y-auto ${
+        className={`fixed inset-y-0 left-0 z-50 w-[13.25rem] max-w-[72vw] bg-[#fcfaf6] border-r border-stone-200 shadow-[8px_0_30px_rgba(48,32,11,0.08)] transition-transform duration-200 sm:w-[14.5rem] sm:max-w-[78vw] lg:z-30 lg:w-72 lg:max-w-none lg:translate-x-0 overflow-y-auto ${
           mobileNavOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         data-testid="admin-sidebar"
       >
-        <div className="p-4 sm:p-6 border-b border-stone-200">
-          <p className="text-[10px] sm:text-xs tracking-[0.28em] sm:tracking-[0.3em] uppercase text-[#9d172b] mb-2">Bruno Mars</p>
-          <h1 className="text-xl sm:text-2xl font-black text-[#151515]">Admin Panel</h1>
-          <p className="text-xs sm:text-sm text-stone-500 mt-1">VIP Concierge</p>
-          {adminEmail && <p className="text-xs sm:text-sm text-stone-500 mt-3 break-all">{adminEmail}</p>}
+        <div className="p-3.5 sm:p-6 border-b border-stone-200">
+          <p className="text-[9px] sm:text-xs tracking-[0.24em] sm:tracking-[0.3em] uppercase text-[#9d172b] mb-1.5">Bruno Mars</p>
+          <h1 className="text-lg sm:text-2xl font-black text-[#151515] leading-tight">Admin Panel</h1>
+          <p className="hidden sm:block text-sm text-stone-500 mt-1">VIP Concierge</p>
+          {adminEmail && <p className="text-[11px] sm:text-sm text-stone-500 mt-2 sm:mt-3 truncate">{adminEmail}</p>}
         </div>
 
-        <nav className="p-3 sm:p-4">
+        <nav className="p-2.5 sm:p-4">
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg mb-2 transition-all text-sm sm:text-base ${
+              className={`flex items-center gap-2.5 px-2.5 py-2.5 sm:px-4 sm:py-3 rounded-lg mb-1.5 sm:mb-2 transition-all text-[13px] sm:text-base ${
                 isActive(item.path)
                   ? 'bg-[#151515] text-white shadow-sm'
                   : 'text-stone-600 hover:bg-stone-100 hover:text-[#151515]'
               }`}
               data-testid={`nav-${item.label.toLowerCase().replace(' ', '-')}`}
             >
-              <item.icon className="w-5 h-5" />
-              <span>{item.label}</span>
+              <item.icon className="h-[18px] w-[18px] sm:w-5 sm:h-5 shrink-0" />
+              <span className="sm:hidden">{item.mobileLabel}</span>
+              <span className="hidden sm:inline">{item.label}</span>
             </Link>
           ))}
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg mb-2 text-sm sm:text-base text-stone-600 hover:bg-stone-100 hover:text-[#151515] transition-all w-full mt-6 sm:mt-8"
+            className="flex items-center gap-2.5 px-2.5 py-2.5 sm:px-4 sm:py-3 rounded-lg mb-1.5 sm:mb-2 text-[13px] sm:text-base text-stone-600 hover:bg-stone-100 hover:text-[#151515] transition-all w-full mt-5 sm:mt-8"
             data-testid="logout-button"
           >
-            <LogOut className="w-5 h-5" />
-            <span>Logout</span>
+            <LogOut className="h-[18px] w-[18px] sm:w-5 sm:h-5 shrink-0" />
+            <span className="sm:hidden">Exit</span>
+            <span className="hidden sm:inline">Logout</span>
           </button>
 
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             <AdminInstallPrompt compact />
           </div>
         </nav>
