@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Calendar, FileText, Settings, LogOut, CreditCard } from 'lucide-react';
 
@@ -29,12 +29,13 @@ const AdminLayout = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-[#f7f3ec] text-[#151515] flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-zinc-900 border-r border-zinc-800 fixed h-full" data-testid="admin-sidebar">
-        <div className="p-6 border-b border-zinc-800">
-          <h1 className="text-2xl font-bold text-red-600">ADMIN PANEL</h1>
-          <p className="text-sm text-gray-400 mt-1">VIP Concierge</p>
+      <aside className="w-72 bg-[#fcfaf6] border-r border-stone-200 fixed h-full shadow-[8px_0_30px_rgba(48,32,11,0.04)]" data-testid="admin-sidebar">
+        <div className="p-6 border-b border-stone-200">
+          <p className="text-xs tracking-[0.3em] uppercase text-[#9d172b] mb-2">Bruno Mars</p>
+          <h1 className="text-2xl font-black text-[#151515]">Admin Panel</h1>
+          <p className="text-sm text-stone-500 mt-1">VIP Concierge</p>
         </div>
 
         <nav className="p-4">
@@ -44,8 +45,8 @@ const AdminLayout = ({ children }) => {
               to={item.path}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all ${
                 isActive(item.path)
-                  ? 'bg-red-600 text-white'
-                  : 'text-gray-400 hover:bg-zinc-800 hover:text-white'
+                  ? 'bg-[#151515] text-white shadow-sm'
+                  : 'text-stone-600 hover:bg-stone-100 hover:text-[#151515]'
               }`}
               data-testid={`nav-${item.label.toLowerCase().replace(' ', '-')}`}
             >
@@ -56,7 +57,7 @@ const AdminLayout = ({ children }) => {
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg mb-2 text-gray-400 hover:bg-zinc-800 hover:text-white transition-all w-full mt-8"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg mb-2 text-stone-600 hover:bg-stone-100 hover:text-[#151515] transition-all w-full mt-8"
             data-testid="logout-button"
           >
             <LogOut className="w-5 h-5" />
@@ -66,8 +67,8 @@ const AdminLayout = ({ children }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 ml-64">
-        <div className="p-8">
+      <main className="flex-1 ml-72">
+        <div className="p-8 min-h-screen">
           {children}
         </div>
       </main>

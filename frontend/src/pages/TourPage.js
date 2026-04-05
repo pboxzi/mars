@@ -65,6 +65,22 @@ const TourPage = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [slowLoad, setSlowLoad] = useState(false);
+
+  useEffect(() => {
+    if (!loading) {
+      setSlowLoad(false);
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setSlowLoad(true);
+    }, 6000);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [loading]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -135,6 +151,16 @@ const TourPage = () => {
           font-weight: 600;
           text-transform: uppercase;
           padding: 4vw 0;
+        }
+
+        .tour-status-message span {
+          display: block;
+          margin-top: 0.8vw;
+          font-size: 0.78vw;
+          font-weight: 500;
+          letter-spacing: 0.02em;
+          text-transform: none;
+          color: #4f4f4f;
         }
 
         .tour-events-list {
@@ -284,6 +310,11 @@ const TourPage = () => {
             font-size: 4.2667vw;
             padding: 8vw 0;
           }
+
+          .tour-status-message span {
+            margin-top: 2.5vw;
+            font-size: 3.2vw;
+          }
         }
       `}</style>
 
@@ -297,7 +328,12 @@ const TourPage = () => {
         </header>
 
         <section className="tour-page-content">
-          {loading && <div className="tour-status-message">Loading Tour Dates</div>}
+          {loading && (
+            <div className="tour-status-message">
+              Loading Tour Dates
+              {slowLoad && <span>First visit may take a few seconds while the live server wakes up.</span>}
+            </div>
+          )}
 
           {!loading && error && <div className="tour-status-message">{error}</div>}
 

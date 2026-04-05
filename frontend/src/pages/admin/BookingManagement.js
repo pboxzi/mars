@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { CheckCircle, XCircle, DollarSign, Eye } from 'lucide-react';
 import { getTicketTierLabel } from '../../utils/ticketTiers';
@@ -186,7 +186,7 @@ const BookingManagement = () => {
             className={`px-6 py-3 rounded-lg font-bold whitespace-nowrap ${
               filterStatus === tab.value
                 ? 'bg-red-600 text-white'
-                : 'bg-zinc-900 text-gray-400 hover:bg-zinc-800'
+                : 'bg-white text-stone-500 hover:bg-stone-100'
             }`}
             data-testid={`tab-${tab.value}`}
           >
@@ -196,10 +196,10 @@ const BookingManagement = () => {
       </div>
 
       {/* Bookings Table */}
-      <div className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
+      <div className="bg-white rounded-lg border border-stone-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-zinc-800">
+            <thead className="bg-stone-100">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-bold">Confirmation #</th>
                 <th className="px-6 py-3 text-left text-sm font-bold">Customer</th>
@@ -214,18 +214,18 @@ const BookingManagement = () => {
             <tbody>
               {filteredBookings.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan="8" className="px-6 py-8 text-center text-stone-500">
                     No bookings found
                   </td>
                 </tr>
               ) : (
                 filteredBookings.map((booking) => (
-                  <tr key={booking.id} className="border-t border-zinc-800 hover:bg-zinc-800/50" data-testid={`booking-row-${booking.id}`}>
+                  <tr key={booking.id} className="border-t border-stone-200 hover:bg-stone-100/50" data-testid={`booking-row-${booking.id}`}>
                     <td className="px-6 py-4 font-mono text-sm">{booking.confirmation_number}</td>
                     <td className="px-6 py-4">{booking.customer_name}</td>
                     <td className="px-6 py-4 text-sm">
                       <div>{booking.email}</div>
-                      <div className="text-gray-400">{booking.phone}</div>
+                      <div className="text-stone-500">{booking.phone}</div>
                     </td>
                     <td className="px-6 py-4">{getTicketTierLabel(booking.ticket_type)}</td>
                     <td className="px-6 py-4">{booking.quantity}</td>
@@ -240,7 +240,7 @@ const BookingManagement = () => {
                         {booking.status.toUpperCase()}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-400">
+                    <td className="px-6 py-4 text-sm text-stone-500">
                       {new Date(booking.request_date).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4">
@@ -288,49 +288,49 @@ const BookingManagement = () => {
 
       {/* Booking Detail Modal */}
       {selectedBooking && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" data-testid="booking-detail-modal">
-          <div className="bg-zinc-900 rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/45 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-testid="booking-detail-modal">
+          <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold mb-6">Booking Details</h2>
 
             <div className="space-y-4 mb-6">
               <div>
-                <p className="text-gray-400 text-sm">Confirmation Number</p>
+                <p className="text-stone-500 text-sm">Confirmation Number</p>
                 <p className="font-bold font-mono">{selectedBooking.confirmation_number}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-gray-400 text-sm">Customer Name</p>
+                  <p className="text-stone-500 text-sm">Customer Name</p>
                   <p className="font-bold">{selectedBooking.customer_name}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400 text-sm">Status</p>
+                  <p className="text-stone-500 text-sm">Status</p>
                   <p className="font-bold capitalize">{selectedBooking.status}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-gray-400 text-sm">Email</p>
+                  <p className="text-stone-500 text-sm">Email</p>
                   <p>{selectedBooking.email}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400 text-sm">Phone</p>
+                  <p className="text-stone-500 text-sm">Phone</p>
                   <p>{selectedBooking.phone}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-gray-400 text-sm">Ticket Type</p>
+                  <p className="text-stone-500 text-sm">Ticket Type</p>
                   <p>{getTicketTierLabel(selectedBooking.ticket_type)}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400 text-sm">Quantity</p>
+                  <p className="text-stone-500 text-sm">Quantity</p>
                   <p>{selectedBooking.quantity}</p>
                 </div>
               </div>
               {selectedBooking.message && (
                 <div>
-                  <p className="text-gray-400 text-sm">Message</p>
-                  <p className="bg-zinc-800 p-3 rounded">{selectedBooking.message}</p>
+                  <p className="text-stone-500 text-sm">Message</p>
+                  <p className="bg-stone-100 p-3 rounded">{selectedBooking.message}</p>
                 </div>
               )}
               {selectedBooking.customer_payment_submitted_at && (
@@ -338,27 +338,27 @@ const BookingManagement = () => {
                   <p className="font-bold mb-3">Customer Payment Update</p>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-gray-400 text-sm">Submitted</p>
+                      <p className="text-stone-500 text-sm">Submitted</p>
                       <p>{new Date(selectedBooking.customer_payment_submitted_at).toLocaleString()}</p>
                     </div>
                     <div>
-                      <p className="text-gray-400 text-sm">Method</p>
+                      <p className="text-stone-500 text-sm">Method</p>
                       <p className="uppercase">{selectedBooking.customer_payment_method}</p>
                     </div>
                     <div>
-                      <p className="text-gray-400 text-sm">Reference</p>
+                      <p className="text-stone-500 text-sm">Reference</p>
                       <p>{selectedBooking.customer_payment_reference}</p>
                     </div>
                     {selectedBooking.customer_payment_amount && (
                       <div>
-                        <p className="text-gray-400 text-sm">Amount</p>
+                        <p className="text-stone-500 text-sm">Amount</p>
                         <p>${Number(selectedBooking.customer_payment_amount).toLocaleString()}</p>
                       </div>
                     )}
                   </div>
                   {selectedBooking.customer_payment_proof_url && (
                     <div className="mt-3">
-                      <p className="text-gray-400 text-sm">Proof Link</p>
+                      <p className="text-stone-500 text-sm">Proof Link</p>
                       <a
                         href={selectedBooking.customer_payment_proof_url}
                         target="_blank"
@@ -371,8 +371,8 @@ const BookingManagement = () => {
                   )}
                   {selectedBooking.customer_payment_notes && (
                     <div className="mt-3">
-                      <p className="text-gray-400 text-sm">Notes</p>
-                      <p className="bg-zinc-800 p-3 rounded mt-1">{selectedBooking.customer_payment_notes}</p>
+                      <p className="text-stone-500 text-sm">Notes</p>
+                      <p className="bg-stone-100 p-3 rounded mt-1">{selectedBooking.customer_payment_notes}</p>
                     </div>
                   )}
                 </div>
@@ -381,7 +381,7 @@ const BookingManagement = () => {
 
             {/* Pending - Show Approval Form */}
             {selectedBooking.status === 'pending' && (
-              <div className="border-t border-zinc-700 pt-6">
+              <div className="border-t border-stone-300 pt-6">
                 <h3 className="text-xl font-bold mb-4">Approve Booking</h3>
                 <div className="space-y-4">
                   <div>
@@ -393,7 +393,7 @@ const BookingManagement = () => {
                         paymentSettings,
                         approvalData.admin_notes
                       ))}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3"
+                      className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3"
                     >
                       <option value="zelle">Zelle</option>
                       <option value="cashapp">Cash App</option>
@@ -408,7 +408,7 @@ const BookingManagement = () => {
                     <textarea
                       value={approvalData.payment_instructions}
                       onChange={(e) => setApprovalData({...approvalData, payment_instructions: e.target.value})}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3"
+                      className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3"
                       rows="4"
                       placeholder="Provide payment instructions to the customer..."
                     ></textarea>
@@ -422,7 +422,7 @@ const BookingManagement = () => {
                           type="text"
                           value={approvalData.btc_wallet_address}
                           onChange={(e) => setApprovalData({...approvalData, btc_wallet_address: e.target.value})}
-                          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 font-mono"
+                          className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 font-mono"
                           placeholder="bc1q..."
                         />
                       </div>
@@ -436,10 +436,10 @@ const BookingManagement = () => {
                             ...approvalData,
                             btc_amount: e.target.value ? parseFloat(e.target.value) || 0 : 0
                           })}
-                          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3"
+                          className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3"
                           placeholder="Leave blank to auto-calculate"
                         />
-                        <p className="text-sm text-gray-400 mt-1">Current BTC Price: ${btcPrice.toFixed(2)}</p>
+                        <p className="text-sm text-stone-500 mt-1">Current BTC Price: ${btcPrice.toFixed(2)}</p>
                       </div>
                     </>
                   )}
@@ -450,7 +450,7 @@ const BookingManagement = () => {
                       type="text"
                       value={approvalData.admin_notes}
                       onChange={(e) => setApprovalData({...approvalData, admin_notes: e.target.value})}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3"
+                      className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3"
                     />
                   </div>
 
@@ -481,14 +481,14 @@ const BookingManagement = () => {
 
             {/* Show Payment Instructions if Approved */}
             {(selectedBooking.status === 'approved' || selectedBooking.status === 'paid' || selectedBooking.status === 'confirmed') && selectedBooking.payment_instructions && (
-              <div className="border-t border-zinc-700 pt-6">
+              <div className="border-t border-stone-300 pt-6">
                 <h3 className="text-xl font-bold mb-4">Payment Instructions Sent</h3>
-                <div className="bg-zinc-800 p-4 rounded-lg mb-4">
+                <div className="bg-stone-100 p-4 rounded-lg mb-4">
                   <p className="whitespace-pre-wrap">{selectedBooking.payment_instructions}</p>
                 </div>
                 {selectedBooking.btc_wallet_address && (
-                  <div className="bg-zinc-800 p-4 rounded-lg">
-                    <p className="text-sm text-gray-400 mb-2">BTC Wallet:</p>
+                  <div className="bg-stone-100 p-4 rounded-lg">
+                    <p className="text-sm text-stone-500 mb-2">BTC Wallet:</p>
                     <p className="font-mono text-sm break-all">{selectedBooking.btc_wallet_address}</p>
                     {selectedBooking.btc_amount && (
                       <p className="mt-2">Amount: {selectedBooking.btc_amount} BTC</p>
@@ -501,7 +501,7 @@ const BookingManagement = () => {
             <div className="flex gap-4 mt-6">
               <button
                 onClick={closeBookingDetails}
-                className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 rounded-lg"
+                className="flex-1 bg-stone-100 hover:bg-stone-200 text-[#151515] font-bold py-3 rounded-lg"
               >
                 Close
               </button>
@@ -514,3 +514,4 @@ const BookingManagement = () => {
 };
 
 export default BookingManagement;
+

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Save, Bitcoin, DollarSign } from 'lucide-react';
 import { emptySupportSettings } from '../../hooks/useSupportSettings';
@@ -147,7 +147,7 @@ const PaymentSettings = () => {
         <div className="flex items-center gap-4">
           <Bitcoin className="w-12 h-12 text-orange-500" />
           <div>
-            <p className="text-gray-400 text-sm">Current Bitcoin Price</p>
+            <p className="text-stone-500 text-sm">Current Bitcoin Price</p>
             <p className="text-3xl font-bold">${btcPrice.toFixed(2)} USD</p>
           </div>
         </div>
@@ -156,7 +156,7 @@ const PaymentSettings = () => {
       {/* Payment Methods */}
       <div className="space-y-6">
         {paymentMethods.map((method) => (
-          <div key={method.key} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800" data-testid={`payment-method-${method.key}`}>
+          <div key={method.key} className="bg-white rounded-lg p-6 border border-stone-200" data-testid={`payment-method-${method.key}`}>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <method.icon className={`w-8 h-8 ${method.color}`} />
@@ -170,7 +170,7 @@ const PaymentSettings = () => {
                 <textarea
                   value={settings[method.key]?.instructions || ''}
                   onChange={(e) => handleChange(method.key, 'instructions', e.target.value)}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                  className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
                   rows="5"
                   placeholder={`Enter ${method.name} payment instructions...\n\nExample:\nSend payment to: example@email.com\nReference: Booking confirmation number`}
                   data-testid={`instructions-${method.key}`}
@@ -184,11 +184,11 @@ const PaymentSettings = () => {
                     type="text"
                     value={settings[method.key]?.btc_wallet_address || ''}
                     onChange={(e) => handleChange(method.key, 'btc_wallet_address', e.target.value)}
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600 font-mono"
+                    className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600 font-mono"
                     placeholder="bc1q..."
                     data-testid="btc-wallet-address"
                   />
-                  <p className="text-sm text-gray-400 mt-2">
+                  <p className="text-sm text-stone-500 mt-2">
                     This wallet address will be automatically provided to customers who select Bitcoin payment.
                   </p>
                 </div>
@@ -208,9 +208,9 @@ const PaymentSettings = () => {
         ))}
       </div>
 
-      <div className="bg-zinc-900 rounded-lg p-6 border border-zinc-800 mt-8" data-testid="support-settings">
+      <div className="bg-white rounded-lg p-6 border border-stone-200 mt-8" data-testid="support-settings">
         <h2 className="text-2xl font-bold mb-2">Customer Support Contact</h2>
-        <p className="text-sm text-gray-400 mb-6">
+        <p className="text-sm text-stone-500 mb-6">
           These details appear on the booking confirmation flow, booking status page, and customer email updates.
         </p>
 
@@ -221,7 +221,7 @@ const PaymentSettings = () => {
               type="email"
               value={supportSettings.support_email}
               onChange={(e) => handleSupportChange('support_email', e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+              className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
               placeholder="booking@yourdomain.com"
             />
           </div>
@@ -232,7 +232,7 @@ const PaymentSettings = () => {
               type="text"
               value={supportSettings.support_phone}
               onChange={(e) => handleSupportChange('support_phone', e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+              className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
               placeholder="+1 555 123 4567"
             />
           </div>
@@ -243,7 +243,7 @@ const PaymentSettings = () => {
               type="text"
               value={supportSettings.support_whatsapp}
               onChange={(e) => handleSupportChange('support_whatsapp', e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+              className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
               placeholder="+1 555 123 4567 or https://wa.me/..."
             />
           </div>
@@ -254,7 +254,7 @@ const PaymentSettings = () => {
               type="text"
               value={supportSettings.support_instagram}
               onChange={(e) => handleSupportChange('support_instagram', e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+              className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
               placeholder="@yourhandle"
             />
           </div>
@@ -266,7 +266,7 @@ const PaymentSettings = () => {
             type="text"
             value={supportSettings.support_hours}
             onChange={(e) => handleSupportChange('support_hours', e.target.value)}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+            className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
             placeholder="Mon-Fri, 9am-6pm"
           />
         </div>
@@ -283,7 +283,7 @@ const PaymentSettings = () => {
 
       <div className="mt-8 bg-blue-900/30 border border-blue-700 rounded-lg p-6">
         <h3 className="text-lg font-bold mb-2">Instructions</h3>
-        <ul className="list-disc list-inside space-y-2 text-sm text-gray-400">
+        <ul className="list-disc list-inside space-y-2 text-sm text-stone-500">
           <li>Set up payment instructions for each payment method you want to accept</li>
           <li>These instructions will be shown to customers after their booking is approved</li>
           <li>For Bitcoin payments, provide your wallet address - the BTC amount will be calculated automatically</li>
@@ -296,3 +296,4 @@ const PaymentSettings = () => {
 };
 
 export default PaymentSettings;
+

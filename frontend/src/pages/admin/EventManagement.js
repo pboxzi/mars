@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import {
@@ -181,7 +181,7 @@ const EventManagement = () => {
 
       {/* Event Form */}
       {showForm && (
-        <div className="bg-zinc-900 rounded-lg p-6 mb-8 border border-zinc-800" data-testid="event-form">
+        <div className="bg-white rounded-lg p-6 mb-8 border border-stone-200" data-testid="event-form">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">{editingEvent ? 'Edit Event' : 'New Event'}</h2>
             <button onClick={resetForm}><X className="w-6 h-6" /></button>
@@ -195,7 +195,7 @@ const EventManagement = () => {
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({...formData, title: e.target.value})}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                  className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
                   required
                 />
               </div>
@@ -205,7 +205,7 @@ const EventManagement = () => {
                   type="text"
                   value={formData.venue}
                   onChange={(e) => setFormData({...formData, venue: e.target.value})}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                  className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
                   required
                 />
               </div>
@@ -218,7 +218,7 @@ const EventManagement = () => {
                   type="text"
                   value={formData.city}
                   onChange={(e) => setFormData({...formData, city: e.target.value})}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                  className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
                   required
                 />
               </div>
@@ -228,7 +228,7 @@ const EventManagement = () => {
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({...formData, date: e.target.value})}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                  className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
                   required
                 />
               </div>
@@ -238,7 +238,7 @@ const EventManagement = () => {
                   type="time"
                   value={formData.time}
                   onChange={(e) => setFormData({...formData, time: e.target.value})}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                  className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
                   required
                 />
               </div>
@@ -250,7 +250,7 @@ const EventManagement = () => {
                 type="url"
                 value={formData.image_url}
                 onChange={(e) => setFormData({...formData, image_url: e.target.value})}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
                 placeholder="https://images.unsplash.com/..."
                 required
               />
@@ -261,7 +261,7 @@ const EventManagement = () => {
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
                 rows="3"
                 required
               ></textarea>
@@ -272,7 +272,7 @@ const EventManagement = () => {
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({...formData, status: e.target.value})}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
               >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -280,11 +280,11 @@ const EventManagement = () => {
             </div>
 
             {/* Ticket Pricing */}
-            <div className="border-t border-zinc-700 pt-6 mb-6">
+            <div className="border-t border-stone-300 pt-6 mb-6">
               <h3 className="text-xl font-bold mb-4">Premium Experience Tiers</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {PREMIUM_TICKET_TIERS.map((tier) => (
-                  <div key={tier.type} className="bg-zinc-800 rounded-lg p-4">
+                  <div key={tier.type} className="bg-stone-100 rounded-lg p-4">
                     <h4 className="font-bold mb-3">{tier.label}</h4>
                     <div className="space-y-3">
                       <div>
@@ -294,7 +294,7 @@ const EventManagement = () => {
                           step="0.01"
                           value={ticketData[tier.type].price_usd}
                           onChange={(e) => handleTicketChange(tier.type, 'price_usd', e.target.value)}
-                          className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2"
+                          className="w-full bg-white border border-stone-300 rounded px-3 py-2"
                         />
                       </div>
                       <div>
@@ -307,7 +307,7 @@ const EventManagement = () => {
                             handleTicketChange(tier.type, 'total_quantity', val);
                             handleTicketChange(tier.type, 'available_quantity', val);
                           }}
-                          className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2"
+                          className="w-full bg-white border border-stone-300 rounded px-3 py-2"
                         />
                       </div>
                     </div>
@@ -331,20 +331,20 @@ const EventManagement = () => {
       {/* Events List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {events.map((event) => (
-          <div key={event.id} className="bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800" data-testid={`event-item-${event.id}`}>
+          <div key={event.id} className="bg-white rounded-lg overflow-hidden border border-stone-200" data-testid={`event-item-${event.id}`}>
             <img src={event.image_url} alt={event.title} className="w-full h-48 object-cover" />
             <div className="p-4">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-xl font-bold">{event.title}</h3>
                 <span className={`px-2 py-1 rounded text-xs font-bold ${
-                  event.status === 'active' ? 'bg-green-900/30 text-green-500' : 'bg-gray-900/30 text-gray-500'
+                  event.status === 'active' ? 'bg-green-900/30 text-green-500' : 'bg-gray-900/30 text-stone-500'
                 }`}>
                   {event.status.toUpperCase()}
                 </span>
               </div>
-              <p className="text-gray-400 text-sm mb-1">{event.venue}</p>
-              <p className="text-gray-400 text-sm mb-1">{event.city}</p>
-              <p className="text-gray-400 text-sm mb-4">{event.date} • {event.time}</p>
+              <p className="text-stone-500 text-sm mb-1">{event.venue}</p>
+              <p className="text-stone-500 text-sm mb-1">{event.city}</p>
+              <p className="text-stone-500 text-sm mb-4">{event.date} | {event.time}</p>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleEdit(event)}
@@ -367,7 +367,7 @@ const EventManagement = () => {
       </div>
 
       {events.length === 0 && !showForm && (
-        <div className="text-center py-12 text-gray-400">
+        <div className="text-center py-12 text-stone-500">
           <p>No events yet. Click "Add Event" to create one.</p>
         </div>
       )}
@@ -376,3 +376,4 @@ const EventManagement = () => {
 };
 
 export default EventManagement;
+
