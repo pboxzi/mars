@@ -2,18 +2,16 @@
 import axios from 'axios';
 import { Save, Bitcoin, DollarSign } from 'lucide-react';
 import { emptySupportSettings } from '../../hooks/useSupportSettings';
+import {
+  createDefaultPaymentSettings,
+  getPaymentInstructionsOrTemplate
+} from '../../utils/paymentInstructionTemplates';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const PaymentSettings = () => {
-  const [settings, setSettings] = useState({
-    zelle: { instructions: '', btc_wallet_address: null },
-    cashapp: { instructions: '', btc_wallet_address: null },
-    applepay: { instructions: '', btc_wallet_address: null },
-    bank: { instructions: '', btc_wallet_address: null },
-    btc: { instructions: '', btc_wallet_address: '' }
-  });
+  const [settings, setSettings] = useState(createDefaultPaymentSettings);
   const [loading, setLoading] = useState(false);
   const [btcPrice, setBtcPrice] = useState(0);
   const [supportSettings, setSupportSettings] = useState(emptySupportSettings);
@@ -34,8 +32,8 @@ const PaymentSettings = () => {
       const settingsData = {};
       response.data.forEach(setting => {
         settingsData[setting.payment_method] = {
-          instructions: setting.instructions,
-          btc_wallet_address: setting.btc_wallet_address
+          instructions: getPaymentInstructionsOrTemplate(setting.payment_method, setting.instructions),
+          btc_wallet_address: setting.btc_wallet_address || ''
         };
       });
       
@@ -171,10 +169,13 @@ const PaymentSettings = () => {
                   value={settings[method.key]?.instructions || ''}
                   onChange={(e) => handleChange(method.key, 'instructions', e.target.value)}
                   className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
-                  rows="5"
+                  rows="7"
                   placeholder={`Add ${method.name} steps...`}
                   data-testid={`instructions-${method.key}`}
                 ></textarea>
+                <p className="text-sm text-stone-500 mt-2">
+                  The guidance is already written for you. Just replace the bracketed payment details with your own.
+                </p>
               </div>
 
               {method.key === 'btc' && (
@@ -189,7 +190,7 @@ const PaymentSettings = () => {
                     data-testid="btc-wallet-address"
                   />
                   <p className="text-sm text-stone-500 mt-2">
-                    Shared automatically with BTC bookings.
+                    Shared automatically with approved BTC bookings.
                   </p>
                 </div>
               )}

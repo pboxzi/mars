@@ -2,16 +2,14 @@
 import axios from 'axios';
 import { CheckCircle, XCircle, DollarSign, Eye } from 'lucide-react';
 import { getTicketTierLabel } from '../../utils/ticketTiers';
+import {
+  createDefaultPaymentSettings,
+  getPaymentInstructionsOrTemplate
+} from '../../utils/paymentInstructionTemplates';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
-const defaultPaymentSettings = {
-  zelle: { instructions: '', btc_wallet_address: '' },
-  cashapp: { instructions: '', btc_wallet_address: '' },
-  applepay: { instructions: '', btc_wallet_address: '' },
-  bank: { instructions: '', btc_wallet_address: '' },
-  btc: { instructions: '', btc_wallet_address: '' }
-};
+const defaultPaymentSettings = createDefaultPaymentSettings();
 
 const createApprovalData = (method = 'zelle', paymentSettings = defaultPaymentSettings, adminNotes = '') => ({
   payment_method: method,
@@ -66,7 +64,7 @@ const BookingManagement = () => {
       const nextSettings = response.data.reduce((acc, setting) => ({
         ...acc,
         [setting.payment_method]: {
-          instructions: setting.instructions || '',
+          instructions: getPaymentInstructionsOrTemplate(setting.payment_method, setting.instructions),
           btc_wallet_address: setting.btc_wallet_address || ''
         }
       }), defaultPaymentSettings);
