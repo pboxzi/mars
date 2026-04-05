@@ -1,113 +1,127 @@
 import asyncio
-from motor.motor_asyncio import AsyncIOMotorClient
 import os
+
 from dotenv import load_dotenv
+from motor.motor_asyncio import AsyncIOMotorClient
 
 load_dotenv()
 
 MONGO_URL = os.getenv('MONGO_URL')
 DB_NAME = os.getenv('DB_NAME', 'bruno_mars_vip')
 
-# Default ticket pricing
 DEFAULT_TICKETS = {
-    "vip": {
-        "price_usd": 5000,
-        "total_quantity": 100,
-        "available_quantity": 100
+    'vip': {
+        'price_usd': 4500,
+        'total_quantity': 72,
+        'available_quantity': 72,
     },
-    "meetgreet": {
-        "price_usd": 15000,
-        "total_quantity": 25,
-        "available_quantity": 25
+    'meetgreet': {
+        'price_usd': 12500,
+        'total_quantity': 18,
+        'available_quantity': 18,
     },
-    "backstage": {
-        "price_usd": 35000,
-        "total_quantity": 10,
-        "available_quantity": 10
+    'backstage': {
+        'price_usd': 29000,
+        'total_quantity': 7,
+        'available_quantity': 7,
     },
-    "soundcheck": {
-        "price_usd": 8500,
-        "total_quantity": 40,
-        "available_quantity": 40
+    'soundcheck': {
+        'price_usd': 7500,
+        'total_quantity': 28,
+        'available_quantity': 28,
     },
-    "photoop": {
-        "price_usd": 20000,
-        "total_quantity": 20,
-        "available_quantity": 20
+    'photoop': {
+        'price_usd': 17500,
+        'total_quantity': 12,
+        'available_quantity': 12,
     },
-    "aftershow": {
-        "price_usd": 50000,
-        "total_quantity": 12,
-        "available_quantity": 12
+    'aftershow': {
+        'price_usd': 42000,
+        'total_quantity': 8,
+        'available_quantity': 8,
     },
-    "hospitality": {
-        "price_usd": 150000,
-        "total_quantity": 8,
-        "available_quantity": 8
+    'hospitality': {
+        'price_usd': 125000,
+        'total_quantity': 5,
+        'available_quantity': 5,
     },
-    "birthday": {
-        "price_usd": 250000,
-        "total_quantity": 6,
-        "available_quantity": 6
+    'birthday': {
+        'price_usd': 210000,
+        'total_quantity': 4,
+        'available_quantity': 4,
     },
-    "corporate": {
-        "price_usd": 500000,
-        "total_quantity": 4,
-        "available_quantity": 4
+    'corporate': {
+        'price_usd': 425000,
+        'total_quantity': 3,
+        'available_quantity': 3,
     },
-    "privatemeetup": {
-        "price_usd": 1000000,
-        "total_quantity": 2,
-        "available_quantity": 2
-    }
+    'privatemeetup': {
+        'price_usd': 850000,
+        'total_quantity': 1,
+        'available_quantity': 1,
+    },
 }
+
 
 async def add_default_tickets():
     client = AsyncIOMotorClient(MONGO_URL)
     db = client[DB_NAME]
-    
-    # Clear existing tickets
-    await db.ticket_types.delete_many({})
-    print("✅ Cleared existing tickets")
-    
-    # Get all events
-    events = await db.events.find({}, {"_id": 0}).to_list(1000)
-    print(f"📊 Found {len(events)} events")
-    
-    # Add tickets for each event
-    tickets_added = 0
+
+    events = await db.events.find({}, {'_id': 0}).to_list(1000)
+    print(f'Found {len(events)} events')
+
+    tickets_synced = 0
     for event in events:
         event_id = event['id']
-        
+
         for ticket_type, pricing in DEFAULT_TICKETS.items():
-            ticket = {
-                "id": f"ticket_{event_id}_{ticket_type}",
-                "event_id": event_id,
-                "type": ticket_type,
-                **pricing
+            existing = await db.ticket_types.find_one({'event_id': event_id, 'type': ticket_type}, {'_id': 0})
+            sold_quantity = 0
+            if existing:
+                sold_quantity = max(
+                    0,
+                    int(existing.get('total_quantity', 0)) - int(existing.get('available_quantity', 0)),
+                )
+
+            target_total = int(pricing['total_quantity'])
+            target_available = max(target_total - sold_quantity, 0)
+            ticket_payload = {
+                'event_id': event_id,
+                'type': ticket_type,
+                'price_usd': pricing['price_usd'],
+                'total_quantity': target_total,
+                'available_quantity': target_available,
             }
-            await db.ticket_types.insert_one(ticket)
-            tickets_added += 1
-    
-    print(f"✅ Added {tickets_added} ticket types across all events")
-    
-    # Verify
+
+            if existing:
+                await db.ticket_types.update_one({'id': existing['id']}, {'$set': ticket_payload})
+            else:
+                await db.ticket_types.insert_one(
+                    {
+                        'id': f'ticket_{event_id}_{ticket_type}',
+                        **ticket_payload,
+                    }
+                )
+
+            tickets_synced += 1
+
     total_tickets = await db.ticket_types.count_documents({})
-    print(f"✅ Total tickets in database: {total_tickets}")
-    
-    print("\n💰 Default Pricing:")
-    print(f"   VIP Access: $5,000 (100 tickets per event)")
-    print(f"   Meet & Greet: $15,000 (25 tickets per event)")
-    print(f"   Backstage Pass: $35,000 (10 tickets per event)")
-    print(f"   Soundcheck Experience: $8,500 (40 tickets per event)")
-    print(f"   Photo Op Experience: $20,000 (20 tickets per event)")
-    print(f"   After Show Lounge: $50,000 (12 tickets per event)")
-    print(f"   Private Table / Hospitality: $150,000 (8 tickets per event)")
-    print(f"   Birthday / Celebration Package: $250,000 (6 tickets per event)")
-    print(f"   Corporate Booking: $500,000 (4 tickets per event)")
-    print(f"   Private Meet-Up Request: $1,000,000 (2 tickets per event)")
-    
+    print(f'Synced {tickets_synced} ticket types across all events')
+    print(f'Total tickets in database: {total_tickets}')
+    print('\nUpdated pricing defaults:')
+    print('  VIP Access: $4,500 (72 per event)')
+    print('  Meet & Greet: $12,500 (18 per event)')
+    print('  Backstage Pass: $29,000 (7 per event)')
+    print('  Soundcheck Experience: $7,500 (28 per event)')
+    print('  Photo Op Experience: $17,500 (12 per event)')
+    print('  After Show Lounge: $42,000 (8 per event)')
+    print('  Private Table / Hospitality: $125,000 (5 per event)')
+    print('  Birthday / Celebration Package: $210,000 (4 per event)')
+    print('  Corporate Booking: $425,000 (3 per event)')
+    print('  Private Meet-Up Request: $850,000 (1 per event)')
+
     client.close()
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     asyncio.run(add_default_tickets())

@@ -2,82 +2,82 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'vip',
     label: 'VIP Access',
-    description: 'Premium entry with concierge arrival, preferred access, and elevated guest handling.',
-    priceUsd: 5000,
-    availableQuantity: 100,
-    totalQuantity: 100
+    description: 'Private-entry VIP access with concierge arrival, priority venue handling, and a smoother premium show-night experience.',
+    priceUsd: 4500,
+    availableQuantity: 72,
+    totalQuantity: 72
   },
   {
     type: 'meetgreet',
     label: 'Meet & Greet',
-    description: 'A personal Bruno Mars greeting experience with priority escort and premium coordination.',
-    priceUsd: 15000,
-    availableQuantity: 25,
-    totalQuantity: 25
+    description: 'A rare guest-facing experience with priority escort, premium coordination, and elevated personal attention from arrival onward.',
+    priceUsd: 12500,
+    availableQuantity: 18,
+    totalQuantity: 18
   },
   {
     type: 'backstage',
     label: 'Backstage Pass',
-    description: 'Restricted backstage access before showtime with hosted movement through premium zones.',
-    priceUsd: 35000,
-    availableQuantity: 10,
-    totalQuantity: 10
+    description: 'Limited backstage access before showtime with escorted movement through restricted premium areas and high-touch hosting.',
+    priceUsd: 29000,
+    availableQuantity: 7,
+    totalQuantity: 7
   },
   {
     type: 'soundcheck',
     label: 'Soundcheck Experience',
-    description: 'Early entry for a curated soundcheck session with VIP check-in and preferred arrival flow.',
-    priceUsd: 8500,
-    availableQuantity: 40,
-    totalQuantity: 40
+    description: 'Early-entry soundcheck access with VIP check-in, preferred arrival flow, and a more intimate pre-show atmosphere.',
+    priceUsd: 7500,
+    availableQuantity: 28,
+    totalQuantity: 28
   },
   {
     type: 'photoop',
     label: 'Photo Op Experience',
-    description: 'Professionally managed photo opportunity with premium handling and priority access lane.',
-    priceUsd: 20000,
-    availableQuantity: 20,
-    totalQuantity: 20
-  },
-  {
-    type: 'aftershow',
-    label: 'After Show Lounge',
-    description: 'Invitation to an elevated post-show lounge experience with luxury hospitality service.',
-    priceUsd: 50000,
+    description: 'Professionally coordinated photo opportunity with premium handling, priority routing, and a polished keepsake moment.',
+    priceUsd: 17500,
     availableQuantity: 12,
     totalQuantity: 12
   },
   {
-    type: 'hospitality',
-    label: 'Private Table / Hospitality',
-    description: 'A luxury hosted table package with premium service, private seating, and white-glove care.',
-    priceUsd: 150000,
+    type: 'aftershow',
+    label: 'After Show Lounge',
+    description: 'Invitation to an exclusive post-show lounge setting with refined hospitality, priority hosting, and elevated guest service.',
+    priceUsd: 42000,
     availableQuantity: 8,
     totalQuantity: 8
   },
   {
-    type: 'birthday',
-    label: 'Birthday / Celebration Package',
-    description: 'Special-occasion concierge planning with premium access designed for memorable celebrations.',
-    priceUsd: 250000,
-    availableQuantity: 6,
-    totalQuantity: 6
+    type: 'hospitality',
+    label: 'Private Table / Hospitality',
+    description: 'Luxury table hospitality with premium seating, hosted service, and white-glove attention designed for standout entertaining.',
+    priceUsd: 125000,
+    availableQuantity: 5,
+    totalQuantity: 5
   },
   {
-    type: 'corporate',
-    label: 'Corporate Booking',
-    description: 'Executive-level entertainment package for high-touch business hosting and VIP guest service.',
-    priceUsd: 500000,
+    type: 'birthday',
+    label: 'Birthday / Celebration Package',
+    description: 'Celebration-focused concierge planning with premium access, tailored coordination, and a memorable show-night presentation.',
+    priceUsd: 210000,
     availableQuantity: 4,
     totalQuantity: 4
   },
   {
+    type: 'corporate',
+    label: 'Corporate Booking',
+    description: 'Executive entertainment package built for client hosting, premium access, and seamless VIP coordination from arrival to departure.',
+    priceUsd: 425000,
+    availableQuantity: 3,
+    totalQuantity: 3
+  },
+  {
     type: 'privatemeetup',
     label: 'Private Meet-Up Request',
-    description: 'Ultra-premium bespoke access consideration for private high-touch guest coordination.',
-    priceUsd: 1000000,
-    availableQuantity: 2,
-    totalQuantity: 2
+    description: 'Ultra-limited bespoke access request designed for top-tier guests seeking the highest level of private concierge consideration.',
+    priceUsd: 850000,
+    availableQuantity: 1,
+    totalQuantity: 1
   }
 ];
 
