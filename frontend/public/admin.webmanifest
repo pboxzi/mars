@@ -1,9 +1,10 @@
 {
+  "id": "/admin-secret",
   "name": "Bruno Mars Admin",
   "short_name": "Bruno Admin",
   "description": "Install the Bruno Mars admin panel for faster booking, payment, and event management.",
-  "start_url": "/admin-secret",
-  "scope": "/admin-secret",
+  "start_url": "/admin-secret/dashboard",
+  "scope": "/admin-secret/",
   "display": "standalone",
   "background_color": "#f7f3ec",
   "theme_color": "#f7f3ec",
@@ -20,5 +21,7 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
 }

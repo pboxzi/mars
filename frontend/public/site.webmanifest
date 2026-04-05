@@ -1,12 +1,13 @@
 {
-  "name": "Bruno Mars VIP Concierge",
-  "short_name": "Bruno VIP",
-  "description": "Bruno Mars VIP booking concierge and ticket request portal.",
-  "start_url": "/",
-  "scope": "/",
+  "id": "/admin-secret",
+  "name": "Bruno Mars Admin",
+  "short_name": "Bruno Admin",
+  "description": "Install the Bruno Mars admin panel for faster booking, payment, and event management.",
+  "start_url": "/admin-secret/dashboard",
+  "scope": "/admin-secret/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#f7f3ec",
+  "theme_color": "#f7f3ec",
   "icons": [
     {
       "src": "/icons/admin-icon-192.png",
@@ -20,5 +21,7 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
 }
