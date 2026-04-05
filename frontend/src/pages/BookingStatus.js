@@ -112,17 +112,17 @@ const BookingStatus = () => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'pending':
-        return <Clock className="w-12 h-12 text-yellow-500" />;
+        return <Clock className="h-12 w-12 text-yellow-500" />;
       case 'approved':
-        return <CheckCircle className="w-12 h-12 text-blue-500" />;
+        return <CheckCircle className="h-12 w-12 text-blue-500" />;
       case 'paid':
-        return <DollarSign className="w-12 h-12 text-green-500" />;
+        return <DollarSign className="h-12 w-12 text-green-500" />;
       case 'confirmed':
-        return <CheckCircle className="w-12 h-12 text-green-500" />;
+        return <CheckCircle className="h-12 w-12 text-green-500" />;
       case 'rejected':
-        return <XCircle className="w-12 h-12 text-red-500" />;
+        return <XCircle className="h-12 w-12 text-red-500" />;
       default:
-        return <Clock className="w-12 h-12 text-gray-500" />;
+        return <Clock className="h-12 w-12 text-gray-500" />;
     }
   };
 
@@ -174,39 +174,39 @@ const BookingStatus = () => {
     }
 
     return (
-      <div className="mt-8 bg-emerald-900/20 border border-emerald-700 rounded-lg p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <Receipt className="w-6 h-6 text-emerald-400" />
+      <div className="mt-8 rounded-[24px] border border-[#b9d5c3] bg-[#f1fbf5] p-6">
+        <div className="mb-4 flex items-center gap-3">
+          <Receipt className="h-6 w-6 text-emerald-500" />
           <h3 className="text-xl font-bold">Payment Update Received</h3>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
           <div>
-            <p className="text-gray-400">Method</p>
+            <p className="text-[#6b7d73]">Method</p>
             <p className="font-bold uppercase">{booking.customer_payment_method}</p>
           </div>
           <div>
-            <p className="text-gray-400">Reference</p>
+            <p className="text-[#6b7d73]">Reference</p>
             <p className="font-bold">{booking.customer_payment_reference}</p>
           </div>
           {booking.customer_payment_amount && (
             <div>
-              <p className="text-gray-400">Amount</p>
+              <p className="text-[#6b7d73]">Amount</p>
               <p className="font-bold">${Number(booking.customer_payment_amount).toLocaleString()}</p>
             </div>
           )}
           <div>
-            <p className="text-gray-400">Submitted</p>
+            <p className="text-[#6b7d73]">Submitted</p>
             <p className="font-bold">{new Date(booking.customer_payment_submitted_at).toLocaleString()}</p>
           </div>
         </div>
         {booking.customer_payment_proof_url && (
           <div className="mt-4">
-            <p className="text-gray-400 mb-1">Proof Link</p>
+            <p className="mb-1 text-[#6b7d73]">Proof Link</p>
             <a
               href={booking.customer_payment_proof_url}
               target="_blank"
               rel="noreferrer"
-              className="text-red-400 hover:text-red-300 underline break-all"
+              className="break-all text-[#9d172b] underline transition-colors hover:opacity-80"
             >
               {booking.customer_payment_proof_url}
             </a>
@@ -214,8 +214,8 @@ const BookingStatus = () => {
         )}
         {booking.customer_payment_notes && (
           <div className="mt-4">
-            <p className="text-gray-400 mb-1">Notes</p>
-            <p className="bg-zinc-800 p-3 rounded">{booking.customer_payment_notes}</p>
+            <p className="mb-1 text-[#6b7d73]">Notes</p>
+            <p className="rounded-[16px] border border-[#d7e9dd] bg-white p-3">{booking.customer_payment_notes}</p>
           </div>
         )}
       </div>
@@ -223,114 +223,123 @@ const BookingStatus = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black py-12 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[#f7f2e8] px-4 py-12 text-[#171717]">
+      <div className="mx-auto max-w-4xl">
         <button
           onClick={() => navigate('/')}
-          className="mb-8 text-gray-400 hover:text-white transition-colors"
+          className="mb-8 text-sm font-medium text-[#6d6359] transition-colors hover:text-[#171717]"
         >
           &larr; Back to Home
         </button>
 
-        <h1 className="text-4xl md:text-5xl font-bold text-center mb-12" data-testid="booking-status-title">Check Booking Status</h1>
+        <h1 className="mb-12 text-center text-4xl font-black tracking-[-0.04em] md:text-5xl" data-testid="booking-status-title">
+          Check Booking Status
+        </h1>
 
         <form onSubmit={handleSearch} className="mb-12">
-          <div className="bg-zinc-900 rounded-lg p-8">
-            <label className="block text-lg mb-4">Confirmation Number</label>
-            <div className="flex gap-4">
+          <div className="rounded-[30px] border border-[#dfd2c0] bg-white p-8 shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
+            <label className="mb-4 block text-lg font-bold">Confirmation Number</label>
+            <div className="flex flex-col gap-4 md:flex-row">
               <input
                 type="text"
                 value={confirmationNumber}
                 onChange={(e) => setConfirmationNumber(e.target.value)}
                 placeholder="Enter your confirmation number"
-                className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-600"
+                className="flex-1 rounded-[18px] border border-[#d8cab6] bg-[#fbf6ee] px-4 py-3 text-[#171717] focus:border-[#9d172b] focus:outline-none"
                 data-testid="confirmation-number-input"
                 required
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition-all flex items-center gap-2 disabled:opacity-50"
+                className="flex items-center justify-center gap-2 rounded-[18px] bg-[#171717] px-8 py-3 font-bold text-white transition-all hover:opacity-90 disabled:opacity-50"
                 data-testid="search-button"
               >
-                <Search className="w-5 h-5" />
+                <Search className="h-5 w-5" />
                 {loading ? 'Searching...' : 'Search'}
               </button>
             </div>
             {error && (
-              <p className="text-red-500 mt-4" data-testid="error-message">{error}</p>
+              <p className="mt-4 text-[#b42318]" data-testid="error-message">
+                {error}
+              </p>
             )}
           </div>
         </form>
 
         {booking && event && (
-          <div className="bg-zinc-900 rounded-lg p-8" data-testid="booking-details">
-            <div className="flex items-center justify-center mb-8">
-              {getStatusIcon(booking.status)}
-            </div>
+          <div
+            className="rounded-[32px] border border-[#dfd2c0] bg-white p-8 text-[#171717] shadow-[0_22px_70px_rgba(0,0,0,0.09)]"
+            data-testid="booking-details"
+          >
+            <div className="mb-8 flex items-center justify-center">{getStatusIcon(booking.status)}</div>
 
-            <h2 className="text-3xl font-bold text-center mb-2">{getStatusText(booking.status)}</h2>
-            <p className="text-center text-gray-400 mb-2">Confirmation: {booking.confirmation_number}</p>
-            <p className="text-center text-gray-400 mb-8 max-w-2xl mx-auto">{getStatusMessage(booking)}</p>
+            <h2 className="mb-2 text-center text-3xl font-black tracking-[-0.04em]">{getStatusText(booking.status)}</h2>
+            <p className="mb-2 text-center text-[#6c6258]">Confirmation: {booking.confirmation_number}</p>
+            <p className="mx-auto mb-8 max-w-2xl text-center text-[#6c6258]">{getStatusMessage(booking)}</p>
 
             {paymentActionRequested && booking.status === 'approved' && (
-              <div className="mb-8 bg-red-900/20 border border-red-700 rounded-lg p-5 text-center">
+              <div className="mb-8 rounded-[22px] border border-[#e6c4c8] bg-[#fff3f2] p-5 text-center">
                 <p className="font-semibold">You opened this page from your approval email.</p>
-                <p className="text-gray-300 mt-2">Use the payment update section below once you have sent payment.</p>
+                <p className="mt-2 text-[#6c6258]">Use the payment update section below once you have sent payment.</p>
               </div>
             )}
 
-            <div className="border-t border-zinc-700 pt-6">
-              <h3 className="text-2xl font-bold mb-4">Event Details</h3>
-              <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="border-t border-[#eadfce] pt-6">
+              <h3 className="mb-4 text-2xl font-black tracking-[-0.03em]">Event Details</h3>
+              <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <p className="text-gray-400">Event</p>
+                  <p className="text-[#8b7f72]">Event</p>
                   <p className="font-bold">{event.title}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400">Venue</p>
+                  <p className="text-[#8b7f72]">Venue</p>
                   <p className="font-bold">{event.venue}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400">Location</p>
+                  <p className="text-[#8b7f72]">Location</p>
                   <p className="font-bold">{event.city}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400">Date & Time</p>
-                  <p className="font-bold">{event.date} • {event.time}</p>
+                  <p className="text-[#8b7f72]">Date & Time</p>
+                  <p className="font-bold">{event.date} | {event.time}</p>
                 </div>
               </div>
 
-              <h3 className="text-2xl font-bold mb-4 mt-8">Booking Details</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <h3 className="mb-4 mt-8 text-2xl font-black tracking-[-0.03em]">Booking Details</h3>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <p className="text-gray-400">Name</p>
+                  <p className="text-[#8b7f72]">Name</p>
                   <p className="font-bold">{booking.customer_name}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400">Email</p>
+                  <p className="text-[#8b7f72]">Email</p>
                   <p className="font-bold">{booking.email}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400">Ticket Type</p>
+                  <p className="text-[#8b7f72]">Ticket Type</p>
                   <p className="font-bold">{getTicketTierLabel(booking.ticket_type)}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400">Quantity</p>
+                  <p className="text-[#8b7f72]">Quantity</p>
                   <p className="font-bold">{booking.quantity}</p>
                 </div>
               </div>
 
               {booking.status === 'approved' && booking.payment_instructions && (
-                <div className="mt-8 bg-blue-900/30 border border-blue-700 rounded-lg p-6">
-                  <h3 className="text-xl font-bold mb-4">Payment Instructions</h3>
-                  <p className="whitespace-pre-wrap mb-4">{booking.payment_instructions}</p>
+                <div className="mt-8 rounded-[24px] border border-[#bfd0e3] bg-[#eef5fb] p-6">
+                  <h3 className="mb-4 text-xl font-bold">Payment Instructions</h3>
+                  <p className="mb-4 whitespace-pre-wrap text-[#4f5c68]">{booking.payment_instructions}</p>
                   {booking.btc_wallet_address && (
                     <div className="mt-4">
-                      <p className="text-gray-400">BTC Wallet Address:</p>
-                      <p className="font-mono bg-zinc-800 p-3 rounded mt-2 break-all">{booking.btc_wallet_address}</p>
+                      <p className="text-[#6b7782]">BTC Wallet Address:</p>
+                      <p className="mt-2 break-all rounded-[16px] border border-[#d6dfeb] bg-white p-3 font-mono">
+                        {booking.btc_wallet_address}
+                      </p>
                       {booking.btc_amount && (
-                        <p className="mt-2"><span className="text-gray-400">Amount:</span> {booking.btc_amount} BTC</p>
+                        <p className="mt-2">
+                          <span className="text-[#6b7782]">Amount:</span> {booking.btc_amount} BTC
+                        </p>
                       )}
                     </div>
                   )}
@@ -340,21 +349,21 @@ const BookingStatus = () => {
               {renderPaymentUpdateSummary()}
 
               {booking.status === 'approved' && (
-                <div className="mt-8 bg-zinc-950 border border-zinc-800 rounded-lg p-6">
-                  <h3 className="text-2xl font-bold mb-2">
+                <div className="mt-8 rounded-[24px] border border-[#dfd2c0] bg-[#fcf8f1] p-6">
+                  <h3 className="mb-2 text-2xl font-black tracking-[-0.03em]">
                     {booking.customer_payment_submitted_at ? 'Update Payment Details' : 'Submit Payment Update'}
                   </h3>
-                  <p className="text-gray-400 mb-6">
+                  <p className="mb-6 text-[#6c6258]">
                     After you send payment, fill this in so our team can verify it and move your booking forward.
                   </p>
 
                   <form onSubmit={handleSubmitPaymentUpdate} className="space-y-4">
                     <div>
-                      <label className="block mb-2 font-semibold">Payment Method</label>
+                      <label className="mb-2 block font-semibold">Payment Method</label>
                       <select
                         value={paymentUpdateData.payment_method}
                         onChange={(e) => setPaymentUpdateData({ ...paymentUpdateData, payment_method: e.target.value })}
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3"
+                        className="w-full rounded-[16px] border border-[#d8cab6] bg-white px-4 py-3 text-[#171717] focus:border-[#9d172b] focus:outline-none"
                       >
                         <option value="zelle">Zelle</option>
                         <option value="cashapp">Cash App</option>
@@ -365,60 +374,60 @@ const BookingStatus = () => {
                     </div>
 
                     <div>
-                      <label className="block mb-2 font-semibold">Transaction / Reference ID</label>
+                      <label className="mb-2 block font-semibold">Transaction / Reference ID</label>
                       <input
                         type="text"
                         value={paymentUpdateData.transaction_id}
                         onChange={(e) => setPaymentUpdateData({ ...paymentUpdateData, transaction_id: e.target.value })}
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-600"
+                        className="w-full rounded-[16px] border border-[#d8cab6] bg-white px-4 py-3 text-[#171717] focus:border-[#9d172b] focus:outline-none"
                         placeholder="Enter your transfer, payment, or wallet reference"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block mb-2 font-semibold">Amount Sent (Optional)</label>
+                      <label className="mb-2 block font-semibold">Amount Sent (Optional)</label>
                       <input
                         type="number"
                         min="0"
                         step="0.01"
                         value={paymentUpdateData.payment_amount}
                         onChange={(e) => setPaymentUpdateData({ ...paymentUpdateData, payment_amount: e.target.value })}
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-600"
+                        className="w-full rounded-[16px] border border-[#d8cab6] bg-white px-4 py-3 text-[#171717] focus:border-[#9d172b] focus:outline-none"
                         placeholder="5000"
                       />
                     </div>
 
                     <div>
-                      <label className="block mb-2 font-semibold">Proof Link (Optional)</label>
+                      <label className="mb-2 block font-semibold">Proof Link (Optional)</label>
                       <input
                         type="url"
                         value={paymentUpdateData.proof_url}
                         onChange={(e) => setPaymentUpdateData({ ...paymentUpdateData, proof_url: e.target.value })}
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-600"
+                        className="w-full rounded-[16px] border border-[#d8cab6] bg-white px-4 py-3 text-[#171717] focus:border-[#9d172b] focus:outline-none"
                         placeholder="https://..."
                       />
                     </div>
 
                     <div>
-                      <label className="block mb-2 font-semibold">Notes (Optional)</label>
+                      <label className="mb-2 block font-semibold">Notes (Optional)</label>
                       <textarea
                         value={paymentUpdateData.notes}
                         onChange={(e) => setPaymentUpdateData({ ...paymentUpdateData, notes: e.target.value })}
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-600"
+                        className="w-full rounded-[16px] border border-[#d8cab6] bg-white px-4 py-3 text-[#171717] focus:border-[#9d172b] focus:outline-none"
                         rows="4"
                         placeholder="Anything we should know about the payment?"
                       />
                     </div>
 
                     {paymentUpdateError && (
-                      <div className="bg-red-900/20 border border-red-700 rounded-lg p-4 text-red-300">
+                      <div className="rounded-[18px] border border-[#e6c4c8] bg-[#fff3f2] p-4 text-[#b42318]">
                         {paymentUpdateError}
                       </div>
                     )}
 
                     {paymentUpdateSuccess && (
-                      <div className="bg-green-900/20 border border-green-700 rounded-lg p-4 text-green-300">
+                      <div className="rounded-[18px] border border-[#b9d5c3] bg-[#f1fbf5] p-4 text-[#126b37]">
                         {paymentUpdateSuccess}
                       </div>
                     )}
@@ -426,25 +435,29 @@ const BookingStatus = () => {
                     <button
                       type="submit"
                       disabled={paymentUpdateLoading}
-                      className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-all disabled:opacity-50"
+                      className="w-full rounded-[18px] bg-[#171717] py-3 font-bold text-white transition-all hover:opacity-90 disabled:opacity-50"
                     >
-                      {paymentUpdateLoading ? 'Sending Update...' : booking.customer_payment_submitted_at ? 'Resend Payment Update' : 'Submit Payment Update'}
+                      {paymentUpdateLoading
+                        ? 'Sending Update...'
+                        : booking.customer_payment_submitted_at
+                          ? 'Resend Payment Update'
+                          : 'Submit Payment Update'}
                     </button>
                   </form>
                 </div>
               )}
 
               {booking.status === 'confirmed' && (
-                <div className="mt-8 bg-green-900/30 border border-green-700 rounded-lg p-6 text-center">
-                  <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500" />
-                  <h3 className="text-2xl font-bold mb-2">Your Booking is Confirmed!</h3>
-                  <p className="text-gray-400">See you at the show!</p>
+                <div className="mt-8 rounded-[24px] border border-[#b9d5c3] bg-[#f1fbf5] p-6 text-center">
+                  <CheckCircle className="mx-auto mb-4 h-16 w-16 text-green-500" />
+                  <h3 className="mb-2 text-2xl font-bold">Your Booking is Confirmed!</h3>
+                  <p className="text-[#5a6b60]">See you at the show!</p>
                 </div>
               )}
 
               {booking.status === 'rejected' && booking.admin_notes && (
-                <div className="mt-8 bg-red-900/30 border border-red-700 rounded-lg p-6">
-                  <h3 className="text-xl font-bold mb-4">Admin Notes</h3>
+                <div className="mt-8 rounded-[24px] border border-[#e6c4c8] bg-[#fff3f2] p-6">
+                  <h3 className="mb-4 text-xl font-bold">Admin Notes</h3>
                   <p>{booking.admin_notes}</p>
                 </div>
               )}

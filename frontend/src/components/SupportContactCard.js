@@ -57,14 +57,16 @@ const SupportContactCard = ({
   ].filter(Boolean);
 
   return (
-    <div className={`rounded-lg border border-zinc-700 bg-zinc-950/60 p-6 ${className}`.trim()}>
-      <h3 className="text-xl font-bold mb-2">{title}</h3>
-      <p className="text-sm text-gray-400 mb-4">{description}</p>
+    <div
+      className={`rounded-[28px] border border-[#dfd2c0] bg-[#fffdfa] p-6 text-[#171717] shadow-[0_18px_50px_rgba(0,0,0,0.08)] ${className}`.trim()}
+    >
+      <h3 className="mb-2 text-xl font-bold">{title}</h3>
+      <p className="mb-4 text-sm text-[#6c6258]">{description}</p>
 
       {confirmationNumber && (
-        <div className="mb-4 rounded-lg bg-zinc-900 p-4">
-          <p className="text-xs uppercase tracking-[0.25em] text-gray-500 mb-2">Confirmation Number</p>
-          <p className="font-mono text-lg text-red-500">{confirmationNumber}</p>
+        <div className="mb-4 rounded-[22px] border border-[#eadfce] bg-[#f8f1e5] p-4">
+          <p className="mb-2 text-xs uppercase tracking-[0.25em] text-[#8b7f72]">Confirmation Number</p>
+          <p className="font-mono text-lg font-bold text-[#9d172b]">{confirmationNumber}</p>
         </div>
       )}
 
@@ -72,30 +74,30 @@ const SupportContactCard = ({
         <div className="space-y-3">
           {items.map((item) => (
             <div key={item.label} className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
-              <span className="text-sm uppercase tracking-[0.2em] text-gray-500">{item.label}</span>
+              <span className="text-sm uppercase tracking-[0.2em] text-[#8b7f72]">{item.label}</span>
               {item.href ? (
                 <a
                   href={item.href}
                   target={item.href.startsWith('http') ? '_blank' : undefined}
                   rel={item.href.startsWith('http') ? 'noreferrer' : undefined}
-                  className="text-white hover:text-red-400 transition-colors break-all"
+                  className="break-all text-[#171717] transition-colors hover:text-[#9d172b]"
                 >
                   {item.value}
                 </a>
               ) : (
-                <span className="text-white break-all">{item.value}</span>
+                <span className="break-all text-[#171717]">{item.value}</span>
               )}
             </div>
           ))}
           {supportSettings.support_hours && (
-            <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between pt-2 border-t border-zinc-800">
-              <span className="text-sm uppercase tracking-[0.2em] text-gray-500">Response Hours</span>
-              <span className="text-white">{supportSettings.support_hours}</span>
+            <div className="flex flex-col gap-1 border-t border-[#eadfce] pt-2 md:flex-row md:items-center md:justify-between">
+              <span className="text-sm uppercase tracking-[0.2em] text-[#8b7f72]">Response Hours</span>
+              <span className="text-[#171717]">{supportSettings.support_hours}</span>
             </div>
           )}
         </div>
       ) : (
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-[#6c6258]">
           Our team will reply using the details attached to your booking. Configure direct support channels in the admin
           panel when you are ready.
         </p>
