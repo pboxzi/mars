@@ -33,12 +33,12 @@ const AdminDashboard = () => {
   }
 
   const statCards = [
-    { label: 'Pending Requests', value: stats.pending_count, icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-900/20' },
+    { label: 'Pending', value: stats.pending_count, icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-900/20' },
     { label: 'Approved', value: stats.approved_count, icon: CheckCircle, color: 'text-blue-500', bg: 'bg-blue-900/20' },
     { label: 'Paid', value: stats.paid_count, icon: DollarSign, color: 'text-green-500', bg: 'bg-green-900/20' },
     { label: 'Confirmed', value: stats.confirmed_count, icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-900/20' },
     { label: 'Rejected', value: stats.rejected_count, icon: XCircle, color: 'text-red-500', bg: 'bg-red-900/20' },
-    { label: 'Total Revenue', value: `$${stats.total_revenue.toFixed(2)}`, icon: TrendingUp, color: 'text-purple-500', bg: 'bg-purple-900/20' },
+    { label: 'Revenue', value: `$${stats.total_revenue.toFixed(2)}`, icon: TrendingUp, color: 'text-purple-500', bg: 'bg-purple-900/20' },
   ];
 
   return (
@@ -61,7 +61,7 @@ const AdminDashboard = () => {
       {/* Recent Bookings */}
       <div className="bg-white rounded-lg border border-stone-200 overflow-hidden">
         <div className="p-6 border-b border-stone-200">
-          <h2 className="text-2xl font-bold">Recent Booking Requests</h2>
+          <h2 className="text-2xl font-bold">Recent Bookings</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px]">
@@ -79,7 +79,7 @@ const AdminDashboard = () => {
               {stats.recent_bookings.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-8 text-center text-stone-500">
-                    No booking requests yet
+                    No bookings yet
                   </td>
                 </tr>
               ) : (

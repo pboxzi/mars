@@ -10,32 +10,32 @@ const AdminInstallPrompt = ({ compact = false }) => {
   const helperCopy = useMemo(() => {
     if (needsManualInstall) {
       return {
-        title: 'Add Admin to Home Screen',
-        description: 'On iPhone or iPad, open this page in Safari, tap Share, then choose Add to Home Screen.',
-        buttonLabel: 'Open Safari Guide'
+        title: 'Install on iPhone',
+        description: 'Safari > Share > Add to Home Screen.',
+        buttonLabel: 'Use Safari'
       };
     }
 
     if (canInstall) {
       return {
-        title: 'Install Admin App',
-        description: 'Add the admin panel to this device so it opens like a real app and stays one tap away.',
+        title: 'Install Admin',
+        description: 'Save this admin panel as an app.',
         buttonLabel: 'Install App'
       };
     }
 
     return {
-      title: 'Install on This Device',
-      description: 'Use Chrome or Edge and look for the install icon in the address bar if the button is not showing yet.',
-      buttonLabel: 'Refresh to Check'
+      title: 'Install Admin',
+      description: 'Open in Chrome or Edge, then refresh once.',
+      buttonLabel: 'Refresh'
     };
   }, [canInstall, needsManualInstall]);
 
   if (isStandalone) {
     return (
       <div className={`${compact ? 'p-3' : 'p-5'} rounded-2xl border border-stone-200 bg-white`}>
-        <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.24em] text-[#9d172b] mb-1.5 sm:mb-2">App Ready</p>
-        <p className={`${compact ? 'text-xs leading-5' : 'text-sm'} text-stone-600`}>This device already has the admin app installed.</p>
+        <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.24em] text-[#9d172b] mb-1.5 sm:mb-2">Installed</p>
+        <p className={`${compact ? 'text-xs leading-5' : 'text-sm'} text-stone-600`}>Admin app is ready on this device.</p>
       </div>
     );
   }
@@ -48,11 +48,11 @@ const AdminInstallPrompt = ({ compact = false }) => {
       try {
         const result = await promptInstall();
         if (result.outcome === 'accepted') {
-          setFeedback('Install accepted. The admin app should appear on this device in a moment.');
+          setFeedback('Install started.');
         } else if (result.outcome === 'dismissed') {
-          setFeedback('Install was dismissed. You can try again any time from this screen.');
+          setFeedback('Install canceled.');
         } else {
-          setFeedback('Install is not available yet. Refresh once if this is your first visit.');
+          setFeedback('Refresh and try again.');
         }
       } finally {
         setInstalling(false);
@@ -104,9 +104,7 @@ const AdminInstallPrompt = ({ compact = false }) => {
         )}
 
         {!canInstall && !needsManualInstall && (
-          <p className="text-xs text-stone-500">
-            If this is the first visit on this device, refresh once after a few seconds so the install option can appear.
-          </p>
+          <p className="text-xs text-stone-500">If install does not show yet, refresh once.</p>
         )}
 
         {feedback && <p className="text-xs text-stone-500">{feedback}</p>}

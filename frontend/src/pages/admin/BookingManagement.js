@@ -99,16 +99,16 @@ const BookingManagement = () => {
       );
       await fetchBookings();
       closeBookingDetails();
-      alert('Booking approved successfully!');
+      alert('Approved');
     } catch (error) {
       console.error('Error approving booking:', error);
-      alert(error.response?.data?.detail || 'Failed to approve booking');
+      alert(error.response?.data?.detail || 'Approve failed');
     }
   };
 
   const handleReject = async (bookingId, notes) => {
     if (!notes) {
-      alert('Please provide a reason for rejection');
+      alert('Add a reject reason');
       return;
     }
 
@@ -121,10 +121,10 @@ const BookingManagement = () => {
       );
       await fetchBookings();
       closeBookingDetails();
-      alert('Booking rejected');
+      alert('Rejected');
     } catch (error) {
       console.error('Error rejecting booking:', error);
-      alert(error.response?.data?.detail || 'Failed to reject booking');
+      alert(error.response?.data?.detail || 'Reject failed');
     }
   };
 
@@ -137,10 +137,10 @@ const BookingManagement = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchBookings();
-      alert('Booking marked as paid!');
+      alert('Marked paid');
     } catch (error) {
       console.error('Error marking booking as paid:', error);
-      alert('Failed to mark booking as paid');
+      alert('Mark paid failed');
     }
   };
 
@@ -153,10 +153,10 @@ const BookingManagement = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchBookings();
-      alert('Booking confirmed!');
+      alert('Confirmed');
     } catch (error) {
       console.error('Error confirming booking:', error);
-      alert('Failed to confirm booking');
+      alert('Confirm failed');
     }
   };
 
@@ -175,7 +175,7 @@ const BookingManagement = () => {
 
   return (
     <div data-testid="booking-management">
-      <h1 className="mb-6 text-3xl font-bold sm:mb-8 sm:text-4xl">Booking Management</h1>
+      <h1 className="mb-6 text-3xl font-bold sm:mb-8 sm:text-4xl">Bookings</h1>
 
       {/* Status Tabs */}
       <div className="flex gap-2 mb-8 overflow-x-auto">
@@ -215,7 +215,7 @@ const BookingManagement = () => {
               {filteredBookings.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="px-6 py-8 text-center text-stone-500">
-                    No bookings found
+                    No bookings
                   </td>
                 </tr>
               ) : (
@@ -256,7 +256,7 @@ const BookingManagement = () => {
                           <button
                             onClick={() => {
                               const txid = prompt(
-                                'Enter transaction ID (optional):',
+                                'Transaction ID (optional):',
                                 booking.customer_payment_reference || ''
                               );
                               if (txid !== null) handleMarkPaid(booking.id, txid);
@@ -290,16 +290,16 @@ const BookingManagement = () => {
       {selectedBooking && (
         <div className="fixed inset-0 bg-black/45 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-testid="booking-detail-modal">
           <div className="bg-white rounded-lg p-5 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-6">Booking Details</h2>
+            <h2 className="text-2xl font-bold mb-6">Booking</h2>
 
             <div className="space-y-4 mb-6">
               <div>
-                <p className="text-stone-500 text-sm">Confirmation Number</p>
+                <p className="text-stone-500 text-sm">Confirmation</p>
                 <p className="font-bold font-mono">{selectedBooking.confirmation_number}</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-stone-500 text-sm">Customer Name</p>
+                  <p className="text-stone-500 text-sm">Name</p>
                   <p className="font-bold">{selectedBooking.customer_name}</p>
                 </div>
                 <div>
@@ -319,7 +319,7 @@ const BookingManagement = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-stone-500 text-sm">Ticket Type</p>
+                  <p className="text-stone-500 text-sm">Access</p>
                   <p>{getTicketTierLabel(selectedBooking.ticket_type)}</p>
                 </div>
                 <div>
@@ -335,7 +335,7 @@ const BookingManagement = () => {
               )}
               {selectedBooking.customer_payment_submitted_at && (
                 <div className="bg-emerald-900/20 border border-emerald-700 rounded-lg p-4">
-                  <p className="font-bold mb-3">Customer Payment Update</p>
+                  <p className="font-bold mb-3">Payment update</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-stone-500 text-sm">Submitted</p>
@@ -382,7 +382,7 @@ const BookingManagement = () => {
             {/* Pending - Show Approval Form */}
             {selectedBooking.status === 'pending' && (
               <div className="border-t border-stone-300 pt-6">
-                <h3 className="text-xl font-bold mb-4">Approve Booking</h3>
+                <h3 className="text-xl font-bold mb-4">Approve</h3>
                 <div className="space-y-4">
                   <div>
                     <label className="block mb-2">Payment Method</label>
@@ -404,13 +404,13 @@ const BookingManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block mb-2">Payment Instructions</label>
+                    <label className="block mb-2">Instructions</label>
                     <textarea
                       value={approvalData.payment_instructions}
                       onChange={(e) => setApprovalData({...approvalData, payment_instructions: e.target.value})}
                       className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3"
                       rows="4"
-                      placeholder="Provide payment instructions to the customer..."
+                      placeholder="Add payment steps..."
                     ></textarea>
                   </div>
 
@@ -439,13 +439,13 @@ const BookingManagement = () => {
                           className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3"
                           placeholder="Leave blank to auto-calculate"
                         />
-                        <p className="text-sm text-stone-500 mt-1">Current BTC Price: ${btcPrice.toFixed(2)}</p>
+                        <p className="text-sm text-stone-500 mt-1">BTC: ${btcPrice.toFixed(2)}</p>
                       </div>
                     </>
                   )}
 
                   <div>
-                    <label className="block mb-2">Admin Notes (Optional)</label>
+                    <label className="block mb-2">Internal note</label>
                     <input
                       type="text"
                       value={approvalData.admin_notes}
@@ -465,7 +465,7 @@ const BookingManagement = () => {
                     </button>
                     <button
                       onClick={() => {
-                        const notes = prompt('Reason for rejection:');
+                        const notes = prompt('Reject reason:');
                         if (notes) handleReject(selectedBooking.id, notes);
                       }}
                       className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2"
@@ -482,7 +482,7 @@ const BookingManagement = () => {
             {/* Show Payment Instructions if Approved */}
             {(selectedBooking.status === 'approved' || selectedBooking.status === 'paid' || selectedBooking.status === 'confirmed') && selectedBooking.payment_instructions && (
               <div className="border-t border-stone-300 pt-6">
-                <h3 className="text-xl font-bold mb-4">Payment Instructions Sent</h3>
+                <h3 className="text-xl font-bold mb-4">Instructions sent</h3>
                 <div className="bg-stone-100 p-4 rounded-lg mb-4">
                   <p className="whitespace-pre-wrap">{selectedBooking.payment_instructions}</p>
                 </div>

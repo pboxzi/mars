@@ -1,8 +1,13 @@
-const SHELL_CACHE = 'bruno-mars-shell-v1';
-const RUNTIME_CACHE = 'bruno-mars-runtime-v1';
+const SHELL_CACHE = 'bruno-mars-shell-v2';
+const RUNTIME_CACHE = 'bruno-mars-runtime-v2';
 const APP_SHELL = [
   '/',
   '/index.html',
+  '/admin-secret',
+  '/admin-secret/dashboard',
+  '/admin-secret/events',
+  '/admin-secret/bookings',
+  '/admin-secret/payment-settings',
   '/site.webmanifest',
   '/admin.webmanifest',
   '/icons/admin-icon-192.png',

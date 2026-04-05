@@ -82,10 +82,10 @@ const PaymentSettings = () => {
         settings[method],
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert('Payment settings updated successfully!');
+      alert('Saved');
     } catch (error) {
       console.error('Error saving payment settings:', error);
-      alert('Failed to save payment settings');
+      alert('Save failed');
     } finally {
       setLoading(false);
     }
@@ -121,10 +121,10 @@ const PaymentSettings = () => {
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert('Customer support settings updated successfully!');
+      alert('Support saved');
     } catch (error) {
       console.error('Error saving support settings:', error);
-      alert('Failed to save customer support settings');
+      alert('Support save failed');
     } finally {
       setLoading(false);
     }
@@ -140,14 +140,14 @@ const PaymentSettings = () => {
 
   return (
     <div data-testid="payment-settings">
-      <h1 className="text-3xl sm:text-4xl font-bold mb-8">Payment Settings</h1>
+      <h1 className="text-3xl sm:text-4xl font-bold mb-8">Payments</h1>
 
       {/* BTC Price Display */}
       <div className="bg-gradient-to-r from-orange-900/30 to-yellow-900/30 border border-orange-700 rounded-lg p-6 mb-8">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <Bitcoin className="w-12 h-12 text-orange-500" />
           <div>
-            <p className="text-stone-500 text-sm">Current Bitcoin Price</p>
+            <p className="text-stone-500 text-sm">BTC price</p>
             <p className="text-3xl font-bold">${btcPrice.toFixed(2)} USD</p>
           </div>
         </div>
@@ -166,13 +166,13 @@ const PaymentSettings = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block mb-2 font-bold">Payment Instructions</label>
+                <label className="block mb-2 font-bold">Instructions</label>
                 <textarea
                   value={settings[method.key]?.instructions || ''}
                   onChange={(e) => handleChange(method.key, 'instructions', e.target.value)}
                   className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
                   rows="5"
-                  placeholder={`Enter ${method.name} payment instructions...\n\nExample:\nSend payment to: example@email.com\nReference: Booking confirmation number`}
+                  placeholder={`Add ${method.name} steps...`}
                   data-testid={`instructions-${method.key}`}
                 ></textarea>
               </div>
@@ -189,7 +189,7 @@ const PaymentSettings = () => {
                     data-testid="btc-wallet-address"
                   />
                   <p className="text-sm text-stone-500 mt-2">
-                    This wallet address will be automatically provided to customers who select Bitcoin payment.
+                    Shared automatically with BTC bookings.
                   </p>
                 </div>
               )}
@@ -201,7 +201,7 @@ const PaymentSettings = () => {
                 data-testid={`save-${method.key}`}
               >
                 <Save className="w-5 h-5" />
-                Save {method.name} Settings
+                Save {method.name}
               </button>
             </div>
           </div>
@@ -209,9 +209,9 @@ const PaymentSettings = () => {
       </div>
 
       <div className="bg-white rounded-lg p-6 border border-stone-200 mt-8" data-testid="support-settings">
-        <h2 className="text-2xl font-bold mb-2">Customer Support Contact</h2>
+        <h2 className="text-2xl font-bold mb-2">Support</h2>
         <p className="text-sm text-stone-500 mb-6">
-          These details appear on the booking confirmation flow, booking status page, and customer email updates.
+          Used on status pages and customer emails.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -277,18 +277,17 @@ const PaymentSettings = () => {
           className="mt-6 w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
         >
           <Save className="w-5 h-5" />
-          Save Customer Support Settings
+          Save Support
         </button>
       </div>
 
       <div className="mt-8 bg-blue-900/30 border border-blue-700 rounded-lg p-6">
-        <h3 className="text-lg font-bold mb-2">Instructions</h3>
+        <h3 className="text-lg font-bold mb-2">Quick Notes</h3>
         <ul className="list-disc list-inside space-y-2 text-sm text-stone-500">
-          <li>Set up payment instructions for each payment method you want to accept</li>
-          <li>These instructions will be shown to customers after their booking is approved</li>
-          <li>For Bitcoin payments, provide your wallet address - the BTC amount will be calculated automatically</li>
-          <li>Support contact details help customers know how to reach you and what number to include</li>
-          <li>You can update these settings anytime</li>
+          <li>Add clear steps for each payment method.</li>
+          <li>Customers see these after approval.</li>
+          <li>BTC totals are calculated automatically.</li>
+          <li>Support details appear in emails and status pages.</li>
         </ul>
       </div>
     </div>
