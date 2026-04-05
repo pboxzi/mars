@@ -144,7 +144,11 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
   const formattedEventTime = event?.time || '';
   const selectionUnitLabel = PACKAGE_TICKET_TYPES.has(formData.ticket_type) ? 'Per Package' : 'Per Guest';
   const quantityUnitLabel = PACKAGE_TICKET_TYPES.has(formData.ticket_type) ? 'Packages' : 'Guests';
-  const contactLine = [supportSettings.support_email, supportSettings.support_phone]
+  const contactLine = [
+    supportSettings.support_whatsapp ? `WhatsApp: ${supportSettings.support_whatsapp}` : null,
+    supportSettings.support_phone ? `Phone: ${supportSettings.support_phone}` : null,
+    supportSettings.support_instagram ? `Instagram: ${supportSettings.support_instagram}` : null
+  ]
     .filter(Boolean)
     .join(' | ');
 

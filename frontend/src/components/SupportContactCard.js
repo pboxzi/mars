@@ -33,13 +33,6 @@ const SupportContactCard = ({
   className = ''
 }) => {
   const items = [
-    supportSettings.support_email
-      ? {
-          label: 'Email',
-          value: supportSettings.support_email,
-          href: `mailto:${supportSettings.support_email}`
-        }
-      : null,
     supportSettings.support_phone
       ? {
           label: 'Phone',
@@ -103,8 +96,8 @@ const SupportContactCard = ({
         </div>
       ) : (
         <p className="text-sm text-gray-400">
-          Our team will reply using the email address and phone number attached to your booking. Configure direct support
-          channels in the admin panel when you are ready.
+          Our team will reply using the details attached to your booking. Configure direct support channels in the admin
+          panel when you are ready.
         </p>
       )}
     </div>

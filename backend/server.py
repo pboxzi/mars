@@ -595,11 +595,6 @@ def get_booking_status_label(status: str) -> str:
 
 def build_support_contact_html(site_settings: SiteSettings) -> str:
     support_items = []
-    if site_settings.support_email:
-        support_items.append(
-            f'<div class="detail-row"><span class="label">Email:</span> '
-            f'<a href="mailto:{site_settings.support_email}">{site_settings.support_email}</a></div>'
-        )
     if site_settings.support_phone:
         support_items.append(
             f'<div class="detail-row"><span class="label">Phone:</span> '

@@ -212,12 +212,13 @@ const PaymentSettings = () => {
       <div className="bg-white rounded-lg p-6 border border-stone-200 mt-8" data-testid="support-settings">
         <h2 className="text-2xl font-bold mb-2">Support</h2>
         <p className="text-sm text-stone-500 mb-6">
-          Used on status pages and customer emails.
+          Phone, WhatsApp, Instagram, and response hours appear on customer-facing pages and emails. Support email stays
+          internal for outbound or admin use.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block mb-2 font-bold">Support Email</label>
+            <label className="block mb-2 font-bold">Support Email (Internal)</label>
             <input
               type="email"
               value={supportSettings.support_email}
@@ -225,6 +226,9 @@ const PaymentSettings = () => {
               className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
               placeholder="booking@yourdomain.com"
             />
+            <p className="text-sm text-stone-500 mt-2">
+              Kept for branded outbound mail and admin use. It is not shown to fans on the public side.
+            </p>
           </div>
 
           <div>
@@ -288,7 +292,7 @@ const PaymentSettings = () => {
           <li>Add clear steps for each payment method.</li>
           <li>Customers see these after approval.</li>
           <li>BTC totals are calculated automatically.</li>
-          <li>Support details appear in emails and status pages.</li>
+          <li>Only phone, WhatsApp, Instagram, and response hours appear on customer-facing pages and emails.</li>
         </ul>
       </div>
     </div>
