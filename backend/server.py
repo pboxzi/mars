@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import ReturnDocument
+import ipaddress
 import os
 import logging
 import asyncio
@@ -512,17 +513,23 @@ async def verify_turnstile_token(token: Optional[str], request: Request) -> None
     payload = {
         "secret": TURNSTILE_SECRET_KEY,
         "response": cleaned_token,
-        "remoteip": get_client_ip(request),
     }
+
+    candidate_ip = clean_text(get_client_ip(request))
+    if candidate_ip:
+        try:
+            ipaddress.ip_address(candidate_ip)
+            payload["remoteip"] = candidate_ip
+        except ValueError:
+            logger.warning("Skipping invalid Turnstile remote IP value: %s", candidate_ip)
 
     try:
         response = await asyncio.to_thread(
             requests.post,
             "https://challenges.cloudflare.com/turnstile/v0/siteverify",
             data=payload,
-            timeout=5,
+            timeout=10,
         )
-        response.raise_for_status()
         result = response.json()
     except Exception as exc:
         logger.error("Turnstile verification failed: %s", exc)
@@ -531,7 +538,23 @@ async def verify_turnstile_token(token: Optional[str], request: Request) -> None
             detail="Security verification is temporarily unavailable. Please try again."
         ) from exc
 
+    if response.status_code >= 500:
+        logger.error(
+            "Turnstile verification service error: status=%s body=%s",
+            response.status_code,
+            result,
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Security verification is temporarily unavailable. Please try again."
+        )
+
     if not result.get("success"):
+        logger.warning(
+            "Turnstile verification rejected token: status=%s errors=%s",
+            response.status_code,
+            result.get("error-codes", []),
+        )
         raise HTTPException(status_code=400, detail="Please complete the security check and try again.")
 
 
