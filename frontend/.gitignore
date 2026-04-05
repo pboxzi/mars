@@ -10,6 +10,7 @@
 
 # production
 /build
+/build-pwa*
 
 # misc
 .DS_Store

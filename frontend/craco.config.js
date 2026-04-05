@@ -17,6 +17,7 @@ if (config.enableHealthCheck) {
 
 const webpackConfig = {
   eslint: {
+    enable: process.env.DISABLE_ESLINT_PLUGIN !== "true",
     configure: {
       extends: ["plugin:react-hooks/recommended"],
       rules: {
@@ -30,6 +31,14 @@ const webpackConfig = {
       "@": path.resolve(__dirname, "src"),
     },
     configure: (currentWebpackConfig) => {
+      const eslintPlugin = currentWebpackConfig.plugins.find(
+        (plugin) => plugin && plugin.constructor && plugin.constructor.name === "ESLintWebpackPlugin",
+      );
+
+      if (eslintPlugin && eslintPlugin.options) {
+        eslintPlugin.options.cache = false;
+      }
+
       currentWebpackConfig.watchOptions = {
         ...currentWebpackConfig.watchOptions,
         ignored: [

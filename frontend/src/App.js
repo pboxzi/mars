@@ -11,23 +11,28 @@ import AdminLayout from './pages/admin/AdminLayout';
 import EventManagement from './pages/admin/EventManagement';
 import BookingManagement from './pages/admin/BookingManagement';
 import PaymentSettings from './pages/admin/PaymentSettings';
+import ManifestManager from './components/ManifestManager';
+import { PwaInstallProvider } from './context/PwaInstallContext';
 import './App.css';
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/tour" element={<TourPage />} />
-        <Route path="/music" element={<MusicPage />} />
-        <Route path="/subscribe" element={<SubscribePage />} />
-        <Route path="/booking-status" element={<BookingStatus />} />
-        <Route path="/admin-secret" element={<AdminLogin />} />
-        <Route path="/admin-secret/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-        <Route path="/admin-secret/events" element={<AdminLayout><EventManagement /></AdminLayout>} />
-        <Route path="/admin-secret/bookings" element={<AdminLayout><BookingManagement /></AdminLayout>} />
-        <Route path="/admin-secret/payment-settings" element={<AdminLayout><PaymentSettings /></AdminLayout>} />
-      </Routes>
+      <PwaInstallProvider>
+        <ManifestManager />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/tour" element={<TourPage />} />
+          <Route path="/music" element={<MusicPage />} />
+          <Route path="/subscribe" element={<SubscribePage />} />
+          <Route path="/booking-status" element={<BookingStatus />} />
+          <Route path="/admin-secret" element={<AdminLogin />} />
+          <Route path="/admin-secret/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+          <Route path="/admin-secret/events" element={<AdminLayout><EventManagement /></AdminLayout>} />
+          <Route path="/admin-secret/bookings" element={<AdminLayout><BookingManagement /></AdminLayout>} />
+          <Route path="/admin-secret/payment-settings" element={<AdminLayout><PaymentSettings /></AdminLayout>} />
+        </Routes>
+      </PwaInstallProvider>
     </BrowserRouter>
   );
 }

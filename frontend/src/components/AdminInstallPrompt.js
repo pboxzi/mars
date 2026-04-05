@@ -1,0 +1,118 @@
+import React, { useMemo, useState } from 'react';
+import { Download, Smartphone, MonitorSmartphone } from 'lucide-react';
+import { usePwaInstall } from '../context/PwaInstallContext';
+
+const AdminInstallPrompt = ({ compact = false }) => {
+  const { canInstall, isStandalone, isIos, needsManualInstall, promptInstall } = usePwaInstall();
+  const [installing, setInstalling] = useState(false);
+  const [feedback, setFeedback] = useState('');
+
+  const helperCopy = useMemo(() => {
+    if (needsManualInstall) {
+      return {
+        title: 'Add Admin to Home Screen',
+        description: 'On iPhone or iPad, open this page in Safari, tap Share, then choose Add to Home Screen.',
+        buttonLabel: 'Open Safari Guide'
+      };
+    }
+
+    if (canInstall) {
+      return {
+        title: 'Install Admin App',
+        description: 'Add the admin panel to this device so it opens like a real app and stays one tap away.',
+        buttonLabel: 'Install App'
+      };
+    }
+
+    return {
+      title: 'Install on This Device',
+      description: 'Use Chrome or Edge and look for the install icon in the address bar if the button is not showing yet.',
+      buttonLabel: 'Refresh to Check'
+    };
+  }, [canInstall, needsManualInstall]);
+
+  if (isStandalone) {
+    return (
+      <div className={`${compact ? 'p-4' : 'p-5'} rounded-2xl border border-stone-200 bg-white`}>
+        <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#9d172b] mb-2">App Ready</p>
+        <p className="text-sm text-stone-600">This device already has the admin app installed.</p>
+      </div>
+    );
+  }
+
+  const handleAction = async () => {
+    if (canInstall) {
+      setInstalling(true);
+      setFeedback('');
+
+      try {
+        const result = await promptInstall();
+        if (result.outcome === 'accepted') {
+          setFeedback('Install accepted. The admin app should appear on this device in a moment.');
+        } else if (result.outcome === 'dismissed') {
+          setFeedback('Install was dismissed. You can try again any time from this screen.');
+        } else {
+          setFeedback('Install is not available yet. Refresh once if this is your first visit.');
+        }
+      } finally {
+        setInstalling(false);
+      }
+      return;
+    }
+
+    if (!needsManualInstall) {
+      window.location.reload();
+    }
+  };
+
+  return (
+    <div
+      className={`${compact ? 'p-4' : 'p-5'} rounded-[24px] border border-stone-200 bg-white shadow-[0_12px_35px_rgba(48,32,11,0.05)]`}
+      data-testid="admin-install-prompt"
+    >
+      <div className="flex items-start gap-3">
+        <div className="w-11 h-11 rounded-full bg-[#f4eadf] border border-[#decab0] flex items-center justify-center shrink-0">
+          {isIos ? (
+            <Smartphone className="w-5 h-5 text-[#9d172b]" />
+          ) : (
+            <MonitorSmartphone className="w-5 h-5 text-[#9d172b]" />
+          )}
+        </div>
+
+        <div className="min-w-0">
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#9d172b] mb-2">Admin App</p>
+          <h3 className={`${compact ? 'text-lg' : 'text-xl'} font-black text-[#151515] mb-2`}>
+            {helperCopy.title}
+          </h3>
+          <p className="text-sm leading-6 text-stone-600">
+            {helperCopy.description}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-col gap-3">
+        {!needsManualInstall && (
+          <button
+            type="button"
+            onClick={handleAction}
+            disabled={installing}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#151515] px-4 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-[#2b2b2b] disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" />
+            {installing ? 'Working...' : helperCopy.buttonLabel}
+          </button>
+        )}
+
+        {!canInstall && !needsManualInstall && (
+          <p className="text-xs text-stone-500">
+            If this is the first visit on this device, refresh once after a few seconds so the install option can appear.
+          </p>
+        )}
+
+        {feedback && <p className="text-xs text-stone-500">{feedback}</p>}
+      </div>
+    </div>
+  );
+};
+
+export default AdminInstallPrompt;

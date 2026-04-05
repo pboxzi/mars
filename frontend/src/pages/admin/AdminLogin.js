@@ -1,7 +1,8 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
+import AdminInstallPrompt from '../../components/AdminInstallPrompt';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -15,8 +16,8 @@ const AdminLogin = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError('');
     setLoading(true);
 
@@ -51,7 +52,7 @@ const AdminLogin = () => {
               <input
                 type="email"
                 value={credentials.email}
-                onChange={(e) => setCredentials({...credentials, email: e.target.value})}
+                onChange={(event) => setCredentials({ ...credentials, email: event.target.value })}
                 className="w-full bg-[#fbf8f2] border border-stone-300 rounded-2xl px-4 py-3 focus:outline-none focus:border-[#9d172b]"
                 data-testid="admin-email-input"
                 required
@@ -63,7 +64,7 @@ const AdminLogin = () => {
               <input
                 type="password"
                 value={credentials.password}
-                onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+                onChange={(event) => setCredentials({ ...credentials, password: event.target.value })}
                 className="w-full bg-[#fbf8f2] border border-stone-300 rounded-2xl px-4 py-3 focus:outline-none focus:border-[#9d172b]"
                 data-testid="admin-password-input"
                 required
@@ -92,10 +93,13 @@ const AdminLogin = () => {
             </p>
           </div>
         </div>
+
+        <div className="mt-5">
+          <AdminInstallPrompt />
+        </div>
       </div>
     </div>
   );
 };
 
 export default AdminLogin;
-
