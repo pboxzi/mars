@@ -64,24 +64,24 @@ const AdminLayout = ({ children }) => {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[18rem] max-w-[88vw] bg-[#fcfaf6] border-r border-stone-200 shadow-[8px_0_30px_rgba(48,32,11,0.08)] transition-transform duration-200 lg:z-30 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-[15.5rem] max-w-[82vw] bg-[#fcfaf6] border-r border-stone-200 shadow-[8px_0_30px_rgba(48,32,11,0.08)] transition-transform duration-200 lg:z-30 lg:w-72 lg:max-w-none lg:translate-x-0 overflow-y-auto ${
           mobileNavOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         data-testid="admin-sidebar"
       >
-        <div className="p-6 border-b border-stone-200">
-          <p className="text-xs tracking-[0.3em] uppercase text-[#9d172b] mb-2">Bruno Mars</p>
-          <h1 className="text-2xl font-black text-[#151515]">Admin Panel</h1>
-          <p className="text-sm text-stone-500 mt-1">VIP Concierge</p>
-          {adminEmail && <p className="text-sm text-stone-500 mt-3">{adminEmail}</p>}
+        <div className="p-4 sm:p-6 border-b border-stone-200">
+          <p className="text-[10px] sm:text-xs tracking-[0.28em] sm:tracking-[0.3em] uppercase text-[#9d172b] mb-2">Bruno Mars</p>
+          <h1 className="text-xl sm:text-2xl font-black text-[#151515]">Admin Panel</h1>
+          <p className="text-xs sm:text-sm text-stone-500 mt-1">VIP Concierge</p>
+          {adminEmail && <p className="text-xs sm:text-sm text-stone-500 mt-3 break-all">{adminEmail}</p>}
         </div>
 
-        <nav className="p-4">
+        <nav className="p-3 sm:p-4">
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all ${
+              className={`flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg mb-2 transition-all text-sm sm:text-base ${
                 isActive(item.path)
                   ? 'bg-[#151515] text-white shadow-sm'
                   : 'text-stone-600 hover:bg-stone-100 hover:text-[#151515]'
@@ -95,7 +95,7 @@ const AdminLayout = ({ children }) => {
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg mb-2 text-stone-600 hover:bg-stone-100 hover:text-[#151515] transition-all w-full mt-8"
+            className="flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg mb-2 text-sm sm:text-base text-stone-600 hover:bg-stone-100 hover:text-[#151515] transition-all w-full mt-6 sm:mt-8"
             data-testid="logout-button"
           >
             <LogOut className="w-5 h-5" />
