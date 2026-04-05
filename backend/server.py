@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Header, status
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Header, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -10,7 +10,7 @@ import asyncio
 import resend
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
-from typing import List, Optional
+from typing import Dict, List, Optional
 import uuid
 import bcrypt
 import jwt
@@ -79,6 +79,13 @@ SUPPORT_PHONE = os.environ.get('SUPPORT_PHONE', '')
 SUPPORT_WHATSAPP = os.environ.get('SUPPORT_WHATSAPP', '')
 SUPPORT_INSTAGRAM = os.environ.get('SUPPORT_INSTAGRAM', '')
 SUPPORT_HOURS = os.environ.get('SUPPORT_HOURS', '')
+TURNSTILE_SECRET_KEY = os.environ.get('TURNSTILE_SECRET_KEY', '').strip()
+BOOKING_RATE_LIMIT = int(os.environ.get('BOOKING_RATE_LIMIT', '5'))
+BOOKING_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get('BOOKING_RATE_LIMIT_WINDOW_SECONDS', '900'))
+SUBSCRIPTION_RATE_LIMIT = int(os.environ.get('SUBSCRIPTION_RATE_LIMIT', '6'))
+SUBSCRIPTION_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get('SUBSCRIPTION_RATE_LIMIT_WINDOW_SECONDS', '900'))
+PAYMENT_UPDATE_RATE_LIMIT = int(os.environ.get('PAYMENT_UPDATE_RATE_LIMIT', '6'))
+PAYMENT_UPDATE_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get('PAYMENT_UPDATE_RATE_LIMIT_WINDOW_SECONDS', '900'))
 resend.api_key = RESEND_API_KEY
 
 # Security
@@ -89,6 +96,8 @@ app = FastAPI()
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
+PUBLIC_RATE_LIMITS: Dict[str, List[float]] = {}
+PUBLIC_RATE_LIMIT_LOCK = asyncio.Lock()
 
 
 # ==================== ENUMS ====================
@@ -256,6 +265,8 @@ class BookingRequestCreate(BaseModel):
     phone: str
     quantity: int
     message: Optional[str] = None
+    captcha_token: Optional[str] = None
+    website: Optional[str] = None
 
 
 class BookingApproval(BaseModel):
@@ -277,6 +288,8 @@ class BookingPaymentUpdate(BaseModel):
     payment_amount: Optional[float] = None
     proof_url: Optional[str] = None
     notes: Optional[str] = None
+    captcha_token: Optional[str] = None
+    website: Optional[str] = None
 
 
 class BookingConfirm(BaseModel):
@@ -336,6 +349,8 @@ class Subscription(BaseModel):
 class SubscriptionCreate(BaseModel):
     email: EmailStr
     source: Optional[str] = None
+    captcha_token: Optional[str] = None
+    website: Optional[str] = None
 
 
 # Dashboard Stats Model
@@ -444,6 +459,80 @@ def contact_value(value: Optional[str]) -> Optional[str]:
     """Normalize optional contact fields before storing them."""
     cleaned = clean_text(value)
     return cleaned or None
+
+
+def get_client_ip(request: Request) -> str:
+    """Best-effort client IP resolution behind Render/proxy layers."""
+    forwarded_for = clean_text(request.headers.get('x-forwarded-for'))
+    if forwarded_for:
+        return forwarded_for.split(',')[0].strip()
+
+    real_ip = clean_text(request.headers.get('x-real-ip'))
+    if real_ip:
+        return real_ip
+
+    return request.client.host if request.client else 'unknown'
+
+
+def ensure_honeypot_clear(value: Optional[str]) -> None:
+    """Reject obvious bot traffic when the hidden field is filled."""
+    if clean_text(value):
+        raise HTTPException(status_code=400, detail="Security check failed. Please refresh and try again.")
+
+
+async def enforce_public_rate_limit(request: Request, bucket: str, limit: int, window_seconds: int) -> None:
+    """Apply a small per-IP rate limit to public write endpoints."""
+    now = datetime.now(timezone.utc).timestamp()
+    rate_key = f"{bucket}:{get_client_ip(request)}"
+
+    async with PUBLIC_RATE_LIMIT_LOCK:
+        recent_hits = PUBLIC_RATE_LIMITS.get(rate_key, [])
+        recent_hits = [ts for ts in recent_hits if now - ts < window_seconds]
+
+        if len(recent_hits) >= limit:
+            retry_after = max(1, int(window_seconds - (now - recent_hits[0])))
+            raise HTTPException(
+                status_code=429,
+                detail=f"Too many requests. Please wait about {retry_after} seconds and try again."
+            )
+
+        recent_hits.append(now)
+        PUBLIC_RATE_LIMITS[rate_key] = recent_hits
+
+
+async def verify_turnstile_token(token: Optional[str], request: Request) -> None:
+    """Validate Turnstile when a secret key is configured."""
+    if not TURNSTILE_SECRET_KEY:
+        return
+
+    cleaned_token = clean_text(token)
+    if not cleaned_token:
+        raise HTTPException(status_code=400, detail="Please complete the security check.")
+
+    payload = {
+        "secret": TURNSTILE_SECRET_KEY,
+        "response": cleaned_token,
+        "remoteip": get_client_ip(request),
+    }
+
+    try:
+        response = await asyncio.to_thread(
+            requests.post,
+            "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+            data=payload,
+            timeout=5,
+        )
+        response.raise_for_status()
+        result = response.json()
+    except Exception as exc:
+        logger.error("Turnstile verification failed: %s", exc)
+        raise HTTPException(
+            status_code=503,
+            detail="Security verification is temporarily unavailable. Please try again."
+        ) from exc
+
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail="Please complete the security check and try again.")
 
 
 def normalize_event_key(date_value: str, venue: str, city: str) -> str:
@@ -1168,8 +1257,16 @@ async def get_public_site_settings():
 
 # Newsletter subscribe (public)
 @api_router.post("/subscriptions")
-async def create_subscription(subscription: SubscriptionCreate):
+async def create_subscription(subscription: SubscriptionCreate, request: Request):
     """Subscribe an email address to updates."""
+    await enforce_public_rate_limit(
+        request,
+        "subscriptions",
+        SUBSCRIPTION_RATE_LIMIT,
+        SUBSCRIPTION_RATE_LIMIT_WINDOW_SECONDS,
+    )
+    ensure_honeypot_clear(subscription.website)
+    await verify_turnstile_token(subscription.captcha_token, request)
     return await save_subscription(subscription)
 
 
@@ -1181,14 +1278,23 @@ async def health_check():
         "db_backend": "mongodb" if mongo_url else "in-memory",
         "db_name": db_name,
         "email_ready": bool(RESEND_API_KEY and SENDER_EMAIL and ADMIN_EMAIL),
+        "captcha_ready": bool(TURNSTILE_SECRET_KEY),
     }
 
 
 # Submit booking request (public)
 @api_router.post("/bookings", response_model=BookingRequest)
-async def create_booking_request(booking: BookingRequestCreate):
+async def create_booking_request(booking: BookingRequestCreate, request: Request):
     """Submit a booking request"""
     await ensure_official_tour_schedule()
+    await enforce_public_rate_limit(
+        request,
+        "bookings",
+        BOOKING_RATE_LIMIT,
+        BOOKING_RATE_LIMIT_WINDOW_SECONDS,
+    )
+    ensure_honeypot_clear(booking.website)
+    await verify_turnstile_token(booking.captcha_token, request)
     # Verify event exists
     event = await db.events.find_one({"id": booking.event_id, "status": "active"}, {"_id": 0})
     if not event:
@@ -1206,7 +1312,7 @@ async def create_booking_request(booking: BookingRequestCreate):
         raise HTTPException(status_code=400, detail="Not enough tickets available")
     
     # Create booking request
-    booking_obj = BookingRequest(**booking.model_dump())
+    booking_obj = BookingRequest(**booking.model_dump(exclude={"captcha_token", "website"}))
     doc = booking_obj.model_dump()
     doc['request_date'] = doc['request_date'].isoformat()
     
@@ -1222,8 +1328,16 @@ async def create_booking_request(booking: BookingRequestCreate):
 
 
 @api_router.post("/bookings/{confirmation_number}/payment-update", response_model=BookingRequest)
-async def submit_payment_update(confirmation_number: str, payment_update: BookingPaymentUpdate):
+async def submit_payment_update(confirmation_number: str, payment_update: BookingPaymentUpdate, request: Request):
     """Allow customers to submit payment details after approval."""
+    await enforce_public_rate_limit(
+        request,
+        "payment-update",
+        PAYMENT_UPDATE_RATE_LIMIT,
+        PAYMENT_UPDATE_RATE_LIMIT_WINDOW_SECONDS,
+    )
+    ensure_honeypot_clear(payment_update.website)
+    await verify_turnstile_token(payment_update.captcha_token, request)
     booking = await db.booking_requests.find_one(
         {"confirmation_number": confirmation_number.upper()},
         {"_id": 0}

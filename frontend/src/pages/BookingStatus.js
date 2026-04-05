@@ -3,7 +3,9 @@ import axios from 'axios';
 import { Search, CheckCircle, Clock, XCircle, DollarSign, Receipt } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import SupportContactCard from '../components/SupportContactCard';
+import TurnstileField, { isTurnstileEnabled } from '../components/TurnstileField';
 import useSupportSettings from '../hooks/useSupportSettings';
+import { trackPaymentUpdateSubmitted } from '../utils/adTracking';
 import { getTicketTierLabel } from '../utils/ticketTiers';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -14,7 +16,8 @@ const createPaymentUpdateData = (booking = null) => ({
   transaction_id: booking?.customer_payment_reference || '',
   payment_amount: booking?.customer_payment_amount || '',
   proof_url: booking?.customer_payment_proof_url || '',
-  notes: booking?.customer_payment_notes || ''
+  notes: booking?.customer_payment_notes || '',
+  website: ''
 });
 
 const BookingStatus = () => {
@@ -29,6 +32,9 @@ const BookingStatus = () => {
   const [paymentUpdateLoading, setPaymentUpdateLoading] = useState(false);
   const [paymentUpdateError, setPaymentUpdateError] = useState('');
   const [paymentUpdateSuccess, setPaymentUpdateSuccess] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
+  const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
   const { supportSettings } = useSupportSettings();
 
   const paymentActionRequested = searchParams.get('action') === 'payment';
@@ -84,6 +90,13 @@ const BookingStatus = () => {
 
     setPaymentUpdateError('');
     setPaymentUpdateSuccess('');
+    setCaptchaError('');
+
+    if (isTurnstileEnabled && !captchaToken) {
+      setCaptchaError('Please complete the security check.');
+      return;
+    }
+
     setPaymentUpdateLoading(true);
 
     try {
@@ -94,12 +107,22 @@ const BookingStatus = () => {
           transaction_id: paymentUpdateData.transaction_id,
           payment_amount: paymentUpdateData.payment_amount ? Number(paymentUpdateData.payment_amount) : null,
           proof_url: paymentUpdateData.proof_url || null,
-          notes: paymentUpdateData.notes || null
+          notes: paymentUpdateData.notes || null,
+          captcha_token: captchaToken || undefined,
+          website: paymentUpdateData.website || undefined
         }
       );
 
+      trackPaymentUpdateSubmitted({
+        paymentMethod: paymentUpdateData.payment_method,
+        value: paymentUpdateData.payment_amount ? Number(paymentUpdateData.payment_amount) : undefined,
+        currency: 'USD',
+        confirmationNumber: booking.confirmation_number,
+      });
       await searchBooking(booking.confirmation_number);
       setPaymentUpdateSuccess('Your payment update was received. Our team will review it and email you again after verification.');
+      setCaptchaToken('');
+      setCaptchaResetSignal((current) => current + 1);
     } catch (submitError) {
       setPaymentUpdateError(
         submitError.response?.data?.detail || 'We could not save your payment update. Please try again.'
@@ -419,6 +442,28 @@ const BookingStatus = () => {
                         placeholder="Anything we should know about the payment?"
                       />
                     </div>
+
+                    <input
+                      type="text"
+                      value={paymentUpdateData.website}
+                      onChange={(e) => setPaymentUpdateData({ ...paymentUpdateData, website: e.target.value })}
+                      tabIndex="-1"
+                      autoComplete="off"
+                      className="hidden"
+                      aria-hidden="true"
+                    />
+
+                    <TurnstileField
+                      token={captchaToken}
+                      onTokenChange={(nextToken) => {
+                        setCaptchaToken(nextToken);
+                        if (nextToken) {
+                          setCaptchaError('');
+                        }
+                      }}
+                      resetSignal={captchaResetSignal}
+                      error={captchaError}
+                    />
 
                     {paymentUpdateError && (
                       <div className="rounded-[18px] border border-[#e6c4c8] bg-[#fff3f2] p-4 text-[#b42318]">

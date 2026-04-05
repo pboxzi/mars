@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
+import TurnstileField, { isTurnstileEnabled } from '../components/TurnstileField';
+import { trackSubscribeSubmitted } from '../utils/adTracking';
 import { subscribeEmail } from '../utils/subscribe';
 
 const SubscribePage = () => {
@@ -8,16 +10,34 @@ const SubscribePage = () => {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
+  const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setCaptchaError('');
+
+    if (isTurnstileEnabled && !captchaToken) {
+      setCaptchaError('Please complete the security check.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await subscribeEmail(email, 'subscribe-page');
+      await subscribeEmail(email, 'subscribe-page', {
+        captchaToken,
+        website: honeypot
+      });
+      trackSubscribeSubmitted({ source: 'subscribe-page' });
       setSubmitted(true);
       setEmail('');
+      setHoneypot('');
+      setCaptchaToken('');
+      setCaptchaResetSignal((current) => current + 1);
       setTimeout(() => setSubmitted(false), 3000);
     } catch (submitError) {
       setError(submitError.message);
@@ -140,12 +160,32 @@ const SubscribePage = () => {
         
         <form className="subscribe-form" onSubmit={handleSubmit}>
           <input
+            type="text"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            tabIndex="-1"
+            autoComplete="off"
+            className="hidden"
+            aria-hidden="true"
+          />
+          <input
             type="email"
             className="subscribe-input"
             placeholder="Enter Your Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+          />
+          <TurnstileField
+            token={captchaToken}
+            onTokenChange={(nextToken) => {
+              setCaptchaToken(nextToken);
+              if (nextToken) {
+                setCaptchaError('');
+              }
+            }}
+            resetSignal={captchaResetSignal}
+            error={captchaError}
           />
           <button type="submit" className="subscribe-button" disabled={loading}>
             {loading ? 'Submitting...' : 'Subscribe'}

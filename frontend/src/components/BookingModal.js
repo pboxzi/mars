@@ -2,7 +2,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Minus, Plus, X } from 'lucide-react';
+import TurnstileField, { isTurnstileEnabled } from './TurnstileField';
 import useSupportSettings from '../hooks/useSupportSettings';
+import { trackBookingSubmitted } from '../utils/adTracking';
 import {
   PREMIUM_TICKET_DETAILS,
   PREMIUM_TICKET_ORDER,
@@ -69,12 +71,16 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
     email: '',
     phone: '',
     quantity: 1,
-    message: ''
+    message: '',
+    website: ''
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [confirmationNumber, setConfirmationNumber] = useState('');
   const [error, setError] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
+  const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
   const { supportSettings } = useSupportSettings();
 
   const fetchTickets = useCallback(async () => {
@@ -171,16 +177,33 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
 
   const handleSubmit = async (submitEvent) => {
     submitEvent.preventDefault();
+    setCaptchaError('');
+
+    if (isTurnstileEnabled && !captchaToken) {
+      setCaptchaError('Please complete the security check.');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
       const response = await axios.post(`${API}/bookings`, {
         ...formData,
-        event_id: event.id
+        event_id: event.id,
+        captcha_token: captchaToken,
       });
       setConfirmationNumber(response.data.confirmation_number);
+      trackBookingSubmitted({
+        value: subtotal || undefined,
+        currency: 'USD',
+        ticketType: formData.ticket_type,
+        quantity: Number(formData.quantity || 0),
+        eventId: event.id,
+      });
       setSuccess(true);
+      setCaptchaToken('');
+      setCaptchaResetSignal((current) => current + 1);
     } catch (requestError) {
       setError(requestError.response?.data?.detail || 'Failed to submit booking request');
     } finally {
@@ -542,6 +565,29 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                       placeholder="Guest names, celebration details, seating preference, or special request."
                     />
                   </div>
+
+                  <input
+                    type="text"
+                    name="website"
+                    value={formData.website || ''}
+                    onChange={handleChange}
+                    tabIndex="-1"
+                    autoComplete="off"
+                    className="hidden"
+                    aria-hidden="true"
+                  />
+
+                  <TurnstileField
+                    token={captchaToken}
+                    onTokenChange={(nextToken) => {
+                      setCaptchaToken(nextToken);
+                      if (nextToken) {
+                        setCaptchaError('');
+                      }
+                    }}
+                    resetSignal={captchaResetSignal}
+                    error={captchaError}
+                  />
 
                   {error && (
                     <div className="mt-3.5 rounded-[16px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import TurnstileField, { isTurnstileEnabled } from './TurnstileField';
+import { trackSubscribeSubmitted } from '../utils/adTracking';
 import { subscribeEmail } from '../utils/subscribe';
 
 const Footer = () => {
@@ -7,16 +9,34 @@ const Footer = () => {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
+  const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setCaptchaError('');
+
+    if (isTurnstileEnabled && !captchaToken) {
+      setCaptchaError('Please complete the security check.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await subscribeEmail(email, 'footer');
+      await subscribeEmail(email, 'footer', {
+        captchaToken,
+        website: honeypot
+      });
+      trackSubscribeSubmitted({ source: 'footer' });
       setSubmitted(true);
       setEmail('');
+      setHoneypot('');
+      setCaptchaToken('');
+      setCaptchaResetSignal((current) => current + 1);
       setTimeout(() => setSubmitted(false), 3000);
     } catch (submitError) {
       setError(submitError.message);
@@ -286,6 +306,15 @@ const Footer = () => {
             </p>
             
             <form className="footer-subscribe-form" onSubmit={handleSubmit}>
+              <input
+                type="text"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                tabIndex="-1"
+                autoComplete="off"
+                className="hidden"
+                aria-hidden="true"
+              />
               <div className="footer-form-group">
                 <label htmlFor="email">EMAIL</label>
                 <input
@@ -298,6 +327,17 @@ const Footer = () => {
                   required
                 />
               </div>
+              <TurnstileField
+                token={captchaToken}
+                onTokenChange={(nextToken) => {
+                  setCaptchaToken(nextToken);
+                  if (nextToken) {
+                    setCaptchaError('');
+                  }
+                }}
+                resetSignal={captchaResetSignal}
+                error={captchaError}
+              />
               <button type="submit" className="footer-subscribe-button" disabled={loading}>
                 {loading ? 'SUBMITTING...' : 'SUBMIT'}
               </button>

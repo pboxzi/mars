@@ -1,7 +1,7 @@
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-export async function subscribeEmail(email, source) {
+export async function subscribeEmail(email, source, protection = {}) {
   if (!BACKEND_URL) {
     throw new Error('Backend URL is not configured.');
   }
@@ -13,7 +13,9 @@ export async function subscribeEmail(email, source) {
     },
     body: JSON.stringify({
       email,
-      source
+      source,
+      captcha_token: protection.captchaToken || undefined,
+      website: protection.website || undefined
     })
   });
 

@@ -12,6 +12,7 @@ import EventManagement from './pages/admin/EventManagement';
 import BookingManagement from './pages/admin/BookingManagement';
 import PaymentSettings from './pages/admin/PaymentSettings';
 import ManifestManager from './components/ManifestManager';
+import TrackingScripts from './components/TrackingScripts';
 import { PwaInstallProvider } from './context/PwaInstallContext';
 import './App.css';
 
@@ -20,6 +21,7 @@ function App() {
     <BrowserRouter>
       <PwaInstallProvider>
         <ManifestManager />
+        <TrackingScripts />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/tour" element={<TourPage />} />
