@@ -461,6 +461,13 @@ class PublicVisitNotificationFeed(BaseModel):
     notifications: List[PublicVisitNotification]
 
 
+class AdminLaunchCleanupSummary(BaseModel):
+    deleted_bookings: int
+    deleted_subscriptions: int
+    deleted_public_visits: int
+    reset_ticket_types: int
+
+
 # ==================== HELPER FUNCTIONS ====================
 
 def hash_password(password: str) -> str:
@@ -1045,6 +1052,40 @@ async def save_subscription(payload: SubscriptionCreate) -> dict:
         "email": normalized_email,
         "source": subscription.source
     }
+
+
+async def reset_launch_data() -> AdminLaunchCleanupSummary:
+    """Clear test-facing activity while preserving admin/config records."""
+    deleted_bookings = await db.booking_requests.count_documents({})
+    deleted_subscriptions = await db.subscriptions.count_documents({})
+    deleted_public_visits = await db.public_visit_notifications.count_documents({})
+
+    ticket_types = await db.ticket_types.find({}, {"_id": 0, "id": 1, "total_quantity": 1}).to_list(500)
+    reset_ticket_types = 0
+    for ticket in ticket_types:
+        total_quantity = ticket.get("total_quantity")
+        if total_quantity is None:
+            continue
+
+        await db.ticket_types.update_one(
+            {"id": ticket["id"]},
+            {"$set": {"available_quantity": total_quantity}},
+        )
+        reset_ticket_types += 1
+
+    await db.booking_requests.delete_many({})
+    await db.subscriptions.delete_many({})
+    await db.public_visit_notifications.delete_many({})
+
+    async with PUBLIC_RATE_LIMIT_LOCK:
+        PUBLIC_RATE_LIMITS.clear()
+
+    return AdminLaunchCleanupSummary(
+        deleted_bookings=deleted_bookings,
+        deleted_subscriptions=deleted_subscriptions,
+        deleted_public_visits=deleted_public_visits,
+        reset_ticket_types=reset_ticket_types,
+    )
 
 
 def get_ticket_type_label(ticket_type: str) -> str:
@@ -2415,6 +2456,12 @@ async def mark_admin_public_visit_notifications_read(admin: dict = Depends(get_c
         {"$set": {"read_at": read_at}},
     )
     return {"status": "ok", "read_at": read_at}
+
+
+@api_router.post("/admin/cleanup-launch-data", response_model=AdminLaunchCleanupSummary)
+async def cleanup_launch_data(admin: dict = Depends(get_current_admin)):
+    """Clear test activity before launch while preserving core setup."""
+    return await reset_launch_data()
 
 
 # ==================== EVENT MANAGEMENT (ADMIN) ====================
