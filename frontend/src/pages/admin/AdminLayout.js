@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Calendar, CreditCard, FileText, LayoutDashboard, LogOut } from 'lucide-react';
+import AdminNotificationCenter from '../../components/AdminNotificationCenter';
 
 const navItems = [
   { path: '/admin-secret/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -57,6 +58,9 @@ const AdminLayout = ({ children }) => {
         </nav>
 
         <div className="border-t border-stone-200 p-4">
+          <div className="mb-3">
+            <AdminNotificationCenter />
+          </div>
           <button
             type="button"
             onClick={handleLogout}
@@ -75,13 +79,16 @@ const AdminLayout = ({ children }) => {
               <p className="text-[11px] uppercase tracking-[0.22em] text-[#9d172b]">Admin</p>
               <p className="mt-1 text-lg font-black text-[#151515]">The Romantic Tour</p>
             </div>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="inline-flex items-center justify-center rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700"
-            >
-              Logout
-            </button>
+            <div className="flex items-center gap-2">
+              <AdminNotificationCenter />
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center justify-center rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700"
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </header>
 
