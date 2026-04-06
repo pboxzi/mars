@@ -731,11 +731,9 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
               </div>
             </div>
 
-            {contactLine && (
-              <div className="mt-5 text-sm font-medium text-[#5f564d]">
-                Questions? {contactLine}
-              </div>
-            )}
+            <div className="mt-5 text-sm font-medium text-[#5f564d]">
+              Guest Services: {guestServicesLine}
+            </div>
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
               <Link
