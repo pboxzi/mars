@@ -171,13 +171,19 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
   const formattedEventTime = event?.time || '';
   const selectionUnitLabel = PACKAGE_TICKET_TYPES.has(formData.ticket_type) ? 'Per Package' : 'Per Guest';
   const quantityUnitLabel = PACKAGE_TICKET_TYPES.has(formData.ticket_type) ? 'Packages' : 'Guests';
-  const contactLine = [
-    supportSettings.support_whatsapp ? `WhatsApp: ${supportSettings.support_whatsapp}` : null,
-    supportSettings.support_phone ? `Phone: ${supportSettings.support_phone}` : null,
-    supportSettings.support_instagram ? `Instagram: ${supportSettings.support_instagram}` : null
-  ]
-    .filter(Boolean)
-    .join(' | ');
+  const guestServicesPrimaryItems = [
+    supportSettings.support_email ? { label: 'Email', value: supportSettings.support_email } : null,
+    supportSettings.support_instagram ? { label: 'Instagram', value: supportSettings.support_instagram } : null,
+    supportSettings.support_hours ? { label: 'Hours', value: supportSettings.support_hours } : null
+  ].filter(Boolean);
+  const guestServicesDirectItems = [
+    supportSettings.support_whatsapp ? { label: 'WhatsApp', value: supportSettings.support_whatsapp } : null,
+    supportSettings.support_phone ? { label: 'Phone', value: supportSettings.support_phone } : null
+  ].filter(Boolean);
+  const guestServicesLine =
+    [...guestServicesPrimaryItems, ...guestServicesDirectItems]
+      .map(({ label, value }) => `${label}: ${value}`)
+      .join(' • ') || 'Guest Services follow-up is shared after review.';
 
   const updateQuantity = (nextValue) => {
     const safeMaximum = maxQuantity > 0 ? maxQuantity : 1;
@@ -681,7 +687,25 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
           </div>
         )}
 
-        {contactLine && <div className="mt-4 text-sm leading-6 text-[#6a6055]">Questions? {contactLine}</div>}
+        <div className="mt-4 rounded-[18px] border border-[#e6d9c9] bg-[#fffaf1] px-4 py-3">
+          <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8b7c6d]">Guest Services</div>
+          <div className="mt-2 text-sm leading-6 text-[#5f564d]">
+            Follow-up and payment details are shared after review.
+          </div>
+          {guestServicesPrimaryItems.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#171717]">
+              {guestServicesPrimaryItems.map(({ label, value }) => (
+                <div key={label}>
+                  <span className="font-bold">{label}:</span> {value}
+                </div>
+              ))}
+            </div>
+          ) : guestServicesDirectItems.length > 0 ? (
+            <div className="mt-3 text-sm leading-6 text-[#5f564d]">
+              {guestServicesDirectItems.map(({ label, value }) => `${label}: ${value}`).join(' • ')}
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
@@ -729,8 +753,12 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
               </div>
             </div>
 
-            <div className="mt-5 text-sm font-medium text-[#5f564d]">
-              Guest Services: {guestServicesLine}
+            <div className="mt-5 rounded-[18px] border border-[#e6d9c9] bg-[#fffaf1] px-4 py-3 text-left text-sm text-[#5f564d]">
+              <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8b7c6d]">Guest Services</div>
+              <div className="mt-2 leading-6">
+                Confirmation details and next-step updates are shared after review.
+              </div>
+              <div className="mt-2 font-medium text-[#171717]">{guestServicesLine}</div>
             </div>
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -755,9 +783,9 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-[120] overflow-y-auto bg-black/80 px-3 py-4 backdrop-blur-[2px]" onClick={onClose}>
+    <div className="fixed inset-0 z-[120] overflow-y-auto bg-black/80 px-3 py-4 backdrop-blur-[2px] lg:overflow-hidden" onClick={onClose}>
       <div
-        className="relative mx-auto max-w-[1280px] overflow-hidden rounded-[30px] border border-[#d9ccb9] bg-[#f7efe2] text-[#171717] shadow-[0_32px_96px_rgba(0,0,0,0.36)]"
+        className="relative mx-auto max-w-[1280px] overflow-hidden rounded-[30px] border border-[#d9ccb9] bg-[#f7efe2] text-[#171717] shadow-[0_32px_96px_rgba(0,0,0,0.36)] lg:h-[calc(100vh-2rem)]"
         onClick={(clickEvent) => clickEvent.stopPropagation()}
         data-testid="booking-modal"
       >
@@ -771,9 +799,9 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
         </button>
 
         <form onSubmit={handleSubmit}>
-          <div className="grid lg:grid-cols-[0.78fr_1.22fr]">
-            <div className="flex min-h-[380px] flex-col overflow-hidden bg-[#17110e] lg:min-h-[820px]">
-              <div className="relative h-[290px] border-b border-white/10 bg-[radial-gradient(circle_at_top,#532018_0%,#241613_55%,#17110e_100%)] sm:h-[340px] lg:h-[370px]">
+          <div className="grid lg:h-full lg:grid-cols-[0.72fr_1.28fr]">
+            <div className="flex min-h-[380px] flex-col overflow-hidden bg-[#17110e] lg:h-full">
+              <div className="relative h-[290px] border-b border-white/10 bg-[radial-gradient(circle_at_top,#532018_0%,#241613_55%,#17110e_100%)] sm:h-[340px] lg:h-[310px] xl:h-[340px]">
                 <img
                   src={event?.image_url}
                   alt="Bruno Mars"
@@ -782,7 +810,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                 <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#17110e] via-[#17110e]/45 to-transparent" />
               </div>
 
-              <div className="flex flex-1 flex-col justify-between p-6 text-white sm:p-8 lg:p-10">
+              <div className="flex flex-1 flex-col justify-between p-6 text-white sm:p-8 lg:px-8 lg:py-7 xl:px-10 xl:py-8">
                 <div>
                   <div className="inline-flex rounded-full border border-white/18 bg-white/8 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#f0c98d] backdrop-blur-sm">
                     Official Bruno Mars Premium Access
@@ -792,10 +820,10 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                     <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#f0c98d]">
                       Selected Event
                     </div>
-                    <h2 className="mt-3 text-[40px] font-black uppercase leading-none tracking-[-0.06em] text-white sm:text-[52px]">
+                    <h2 className="mt-3 text-[40px] font-black uppercase leading-none tracking-[-0.06em] text-white sm:text-[52px] lg:text-[44px] xl:text-[52px]">
                       Bruno Mars
                     </h2>
-                    <p className="mt-4 max-w-[440px] text-sm leading-7 text-white/78">
+                    <p className="mt-4 max-w-[420px] text-sm leading-6 text-white/78 xl:leading-7">
                       {formattedEventDate} {formattedEventTime ? `| ${formattedEventTime}` : ''}
                       <br />
                       {event?.venue}, {event?.city}
@@ -813,7 +841,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                         <div className="text-[28px] font-black uppercase leading-[0.96] text-white">
                           {selectedTicketLabel}
                         </div>
-                        <p className="mt-3 text-sm leading-7 text-white/78">
+                        <p className="mt-3 text-sm leading-6 text-white/78 xl:leading-7">
                           {selectedTicketDescription}
                         </p>
                       </div>
@@ -858,7 +886,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
               </div>
             </div>
 
-            <div className="bg-[#fcfaf6] px-5 pb-6 pt-16 lg:max-h-[820px] lg:overflow-y-auto lg:px-7 lg:pb-8 lg:pt-12">
+            <div className="bg-[#fcfaf6] px-5 pb-6 pt-16 lg:h-full lg:overflow-y-auto lg:px-7 lg:pb-8 lg:pt-12">
               {renderStepIndicators()}
               {bookingStep === 1 && renderStepOne()}
               {bookingStep === 2 && renderStepTwo()}
