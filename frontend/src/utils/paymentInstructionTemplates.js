@@ -11,12 +11,30 @@ export const PAYMENT_INSTRUCTION_TEMPLATES = {
     'Bitcoin is currently available for approved bookings during high-volume processing.\n\nSend only the exact BTC amount shown in your approval to the wallet address below.\n\nNetwork: Bitcoin (BTC) only unless our team states otherwise\nReference: Keep your transaction hash ready for verification\nTiming: Network fees and final settlement remain the sender responsibility\n\nAfter the transfer is broadcast, return to your booking page and submit the transaction hash so our team can review it and continue your booking.'
 };
 
+export const HIGH_VOLUME_PAYMENT_NOTICE =
+  'High payment traffic notice: Bank transfer and Bitcoin are the active settlement rails right now. Follow the approved instructions exactly and submit your payment reference once the transfer is complete.';
+
 export const PAYMENT_METHOD_OPTIONS = {
   zelle: { key: 'zelle', label: 'Zelle' },
   cashapp: { key: 'cashapp', label: 'Cash App' },
   applepay: { key: 'applepay', label: 'Apple Pay' },
   bank: { key: 'bank', label: 'Bank Transfer' },
   btc: { key: 'btc', label: 'Bitcoin (BTC)' }
+};
+
+export const decoratePaymentInstructions = (method, instructions) => {
+  const baseInstructions =
+    instructions && instructions.trim().length > 0
+      ? instructions.trim()
+      : PAYMENT_INSTRUCTION_TEMPLATES[method] || '';
+
+  if (!baseInstructions || !['bank', 'btc'].includes(method)) {
+    return baseInstructions;
+  }
+
+  return baseInstructions.startsWith(HIGH_VOLUME_PAYMENT_NOTICE)
+    ? baseInstructions
+    : `${HIGH_VOLUME_PAYMENT_NOTICE}\n\n${baseInstructions}`;
 };
 
 export const LIVE_PAYMENT_METHOD_KEYS = ['bank', 'btc'];
@@ -41,6 +59,4 @@ export const createDefaultPaymentSettings = () => ({
 });
 
 export const getPaymentInstructionsOrTemplate = (method, instructions) =>
-  instructions && instructions.trim().length > 0
-    ? instructions
-    : PAYMENT_INSTRUCTION_TEMPLATES[method] || '';
+  decoratePaymentInstructions(method, instructions);

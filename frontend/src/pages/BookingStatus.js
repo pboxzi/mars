@@ -8,9 +8,10 @@ import useTurnstileConfig from '../hooks/useTurnstileConfig';
 import useSupportSettings from '../hooks/useSupportSettings';
 import { trackPaymentUpdateSubmitted } from '../utils/adTracking';
 import {
+  decoratePaymentInstructions,
   getDefaultLivePaymentMethod,
   getPaymentMethodLabel,
-  LIVE_PAYMENT_METHODS
+  PAYMENT_METHOD_OPTIONS
 } from '../utils/paymentInstructionTemplates';
 import { getTicketTierLabel } from '../utils/ticketTiers';
 
@@ -364,7 +365,9 @@ const BookingStatus = () => {
               {booking.status === 'approved' && booking.payment_instructions && (
                 <div className="mt-8 rounded-[24px] border border-[#bfd0e3] bg-[#eef5fb] p-6">
                   <h3 className="mb-4 text-xl font-bold">Payment Instructions</h3>
-                  <p className="mb-4 whitespace-pre-wrap text-[#4f5c68]">{booking.payment_instructions}</p>
+                  <p className="mb-4 whitespace-pre-wrap text-[#4f5c68]">
+                    {decoratePaymentInstructions(booking.payment_method, booking.payment_instructions)}
+                  </p>
                   {booking.btc_wallet_address && (
                     <div className="mt-4">
                       <p className="text-[#6b7782]">BTC Wallet Address:</p>
@@ -411,7 +414,7 @@ const BookingStatus = () => {
                           onChange={(e) => setPaymentUpdateData({ ...paymentUpdateData, payment_method: e.target.value })}
                           className="w-full rounded-[16px] border border-[#d8cab6] bg-white px-4 py-3 text-[#171717] focus:border-[#9d172b] focus:outline-none"
                         >
-                          {LIVE_PAYMENT_METHODS.map((method) => (
+                          {Object.values(PAYMENT_METHOD_OPTIONS).map((method) => (
                             <option key={method.key} value={method.key}>
                               {method.label}
                             </option>

@@ -6,8 +6,7 @@ import {
   createDefaultPaymentSettings,
   getDefaultLivePaymentMethod,
   getPaymentInstructionsOrTemplate,
-  getSafeLivePaymentMethod,
-  LIVE_PAYMENT_METHODS
+  PAYMENT_METHOD_OPTIONS
 } from '../../utils/paymentInstructionTemplates';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -19,7 +18,7 @@ const createApprovalData = (
   paymentSettings = defaultPaymentSettings,
   adminNotes = ''
 ) => {
-  const selectedMethod = getSafeLivePaymentMethod(method);
+  const selectedMethod = method || getDefaultLivePaymentMethod();
 
   return {
     payment_method: selectedMethod,
@@ -394,7 +393,9 @@ const BookingManagement = () => {
                 <h3 className="text-xl font-bold mb-4">Approve</h3>
                 <div className="space-y-4">
                   <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                    High-volume mode is active. New approvals are currently limited to bank transfer and Bitcoin only.
+                    High-volume mode is active. Bank transfer and Bitcoin should be used as the main customer-facing
+                    payment rails while traffic stays elevated. Keep alternate methods on standby unless operations has
+                    cleared them.
                   </div>
                   <div>
                     <label className="block mb-2">Payment Method</label>
@@ -407,7 +408,7 @@ const BookingManagement = () => {
                       ))}
                       className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3"
                     >
-                      {LIVE_PAYMENT_METHODS.map((method) => (
+                      {Object.values(PAYMENT_METHOD_OPTIONS).map((method) => (
                         <option key={method.key} value={method.key}>
                           {method.label}
                         </option>

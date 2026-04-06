@@ -1,11 +1,11 @@
 ﻿import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Save, Bitcoin, Landmark } from 'lucide-react';
+import { Save, Bitcoin, Landmark, DollarSign } from 'lucide-react';
 import { emptySupportSettings } from '../../hooks/useSupportSettings';
 import {
   createDefaultPaymentSettings,
   getPaymentInstructionsOrTemplate,
-  LIVE_PAYMENT_METHODS
+  PAYMENT_METHOD_OPTIONS
 } from '../../utils/paymentInstructionTemplates';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -130,11 +130,14 @@ const PaymentSettings = () => {
   };
 
   const paymentMethodMeta = {
+    zelle: { icon: DollarSign, color: 'text-purple-500' },
+    cashapp: { icon: DollarSign, color: 'text-green-500' },
+    applepay: { icon: DollarSign, color: 'text-blue-500' },
     bank: { icon: Landmark, color: 'text-yellow-500' },
     btc: { icon: Bitcoin, color: 'text-orange-500' }
   };
 
-  const paymentMethods = LIVE_PAYMENT_METHODS.map((method) => ({
+  const paymentMethods = Object.values(PAYMENT_METHOD_OPTIONS).map((method) => ({
     ...method,
     ...paymentMethodMeta[method.key]
   }));
@@ -157,8 +160,8 @@ const PaymentSettings = () => {
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-5 mb-8">
         <h2 className="text-lg font-bold text-stone-900 mb-2">High-Volume Mode</h2>
         <p className="text-sm text-stone-600">
-          Customer-facing approvals are currently limited to Bank Transfer and Bitcoin. Alternative payment rails stay
-          offline until processing capacity expands.
+          Bank Transfer and Bitcoin are the preferred customer-facing settlement rails while payment traffic is high.
+          Keep alternate methods updated here only if your team plans to reopen them for approvals.
         </p>
       </div>
 
@@ -186,7 +189,8 @@ const PaymentSettings = () => {
                 ></textarea>
                 <p className="text-sm text-stone-500 mt-2">
                   These instructions are sent directly to approved guests. Replace the bracketed placeholders with your
-                  real settlement details.
+                  real settlement details. A high-traffic notice is automatically added to Bank Transfer and Bitcoin
+                  approvals.
                 </p>
               </div>
 
@@ -301,7 +305,8 @@ const PaymentSettings = () => {
       <div className="mt-8 bg-blue-900/30 border border-blue-700 rounded-lg p-6">
         <h3 className="text-lg font-bold mb-2">Quick Notes</h3>
         <ul className="list-disc list-inside space-y-2 text-sm text-stone-500">
-          <li>Only Bank Transfer and Bitcoin are currently live for customer approvals.</li>
+          <li>Bank Transfer and Bitcoin should be the main customer-facing options while payment traffic is high.</li>
+          <li>Keep alternate methods updated only if operations plans to reactivate them.</li>
           <li>Add clear, exact settlement details for each active method.</li>
           <li>Customers see these after approval.</li>
           <li>BTC totals are calculated automatically.</li>

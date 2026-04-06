@@ -150,10 +150,6 @@ class PaymentMethodEnum(str, Enum):
     BTC = "btc"
 
 
-LIVE_PAYMENT_METHODS = {PaymentMethodEnum.BANK, PaymentMethodEnum.BTC}
-LIVE_PAYMENT_METHOD_VALUES = {method.value for method in LIVE_PAYMENT_METHODS}
-
-
 def payment_method_label(method) -> str:
     labels = {
         PaymentMethodEnum.ZELLE.value: "Zelle",
@@ -1477,12 +1473,6 @@ async def submit_payment_update(confirmation_number: str, payment_update: Bookin
                     f"{payment_method_label(approved_method_value)}."
                 )
             )
-    elif submitted_payment_method not in LIVE_PAYMENT_METHOD_VALUES:
-        raise HTTPException(
-            status_code=400,
-            detail="Only bank transfer and Bitcoin payment updates are available right now."
-        )
-
     update_data = {
         "customer_payment_method": payment_update.payment_method,
         "customer_payment_reference": clean_text(payment_update.transaction_id),
@@ -1807,11 +1797,6 @@ async def approve_booking(
     
     if booking['status'] != 'pending':
         raise HTTPException(status_code=400, detail="Only pending bookings can be approved")
-    if approval_data.payment_method not in LIVE_PAYMENT_METHODS:
-        raise HTTPException(
-            status_code=400,
-            detail="Only bank transfer and Bitcoin approvals are available right now."
-        )
     ticket = await db.ticket_types.find_one({
         "event_id": booking['event_id'],
         "type": booking['ticket_type']
@@ -2046,12 +2031,6 @@ async def update_payment_settings(
     admin: dict = Depends(get_current_admin)
 ):
     """Update payment settings for a specific payment method"""
-    if payment_method not in LIVE_PAYMENT_METHODS:
-        raise HTTPException(
-            status_code=400,
-            detail="Only bank transfer and Bitcoin settings are editable while high-volume mode is active."
-        )
-
     existing = await db.payment_settings.find_one({"payment_method": payment_method})
     
     if existing:
