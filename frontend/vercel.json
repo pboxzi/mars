@@ -5,6 +5,15 @@
   "outputDirectory": "build",
   "headers": [
     {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/admin-secret",
       "headers": [
         {
@@ -25,7 +34,31 @@
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/tour",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/music",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/subscribe",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/booking-status",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/admin-secret",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/admin-secret/(.*)",
       "destination": "/index.html"
     }
   ]
