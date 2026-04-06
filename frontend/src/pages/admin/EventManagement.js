@@ -166,139 +166,157 @@ const EventManagement = () => {
   };
 
   return (
-    <div data-testid="event-management">
-      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold">Event Management</h1>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 w-full sm:w-auto"
-          data-testid="add-event-button"
-        >
-          <Plus className="w-5 h-5" />
-          Add Event
-        </button>
-      </div>
+    <div className="space-y-6" data-testid="event-management">
+      <section className="rounded-[28px] border border-stone-200 bg-white p-5 shadow-[0_12px_30px_rgba(48,32,11,0.05)] sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.22em] text-[#9d172b]">Events</p>
+            <h1 className="mt-2 text-2xl font-black text-[#151515] sm:text-3xl">Keep the schedule clean.</h1>
+            <p className="mt-2 text-sm leading-6 text-stone-600">
+              Add new stops, edit existing dates, and manage ticket quantities without the form taking over the whole page.
+            </p>
+          </div>
 
-      {/* Event Form */}
+          <div className="flex flex-col gap-3 sm:items-end">
+            <div className="rounded-2xl border border-stone-200 bg-[#fcfaf6] px-4 py-3 text-sm text-stone-600">
+              <span className="text-xs uppercase tracking-[0.18em] text-stone-400">Events on file</span>
+              <p className="mt-1 text-2xl font-black text-[#151515]">{events.length}</p>
+            </div>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#151515] px-5 py-3 text-sm font-semibold text-white"
+              data-testid="add-event-button"
+            >
+              <Plus className="h-4 w-4" />
+              {showForm ? 'Close Form' : editingEvent ? 'Editing Event' : 'New Event'}
+            </button>
+          </div>
+        </div>
+      </section>
+
       {showForm && (
-        <div className="bg-white rounded-lg p-6 mb-8 border border-stone-200" data-testid="event-form">
-          <div className="flex justify-between items-center gap-3 mb-6">
-            <h2 className="text-2xl font-bold">{editingEvent ? 'Edit Event' : 'New Event'}</h2>
-            <button onClick={resetForm}><X className="w-6 h-6" /></button>
+        <section className="rounded-[28px] border border-stone-200 bg-white p-5 shadow-[0_12px_30px_rgba(48,32,11,0.05)] sm:p-6" data-testid="event-form">
+          <div className="flex items-start justify-between gap-3 mb-6">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-stone-400">Event Form</p>
+              <h2 className="mt-2 text-2xl font-black text-[#151515]">{editingEvent ? 'Edit Event' : 'New Event'}</h2>
+            </div>
+            <button type="button" onClick={resetForm} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 bg-white">
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-4">
               <div>
-                <label className="block mb-2">Event Title *</label>
+                <label className="block mb-2 text-sm font-semibold text-[#151515]">Event Title *</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({...formData, title: e.target.value})}
-                  className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
                   required
                 />
               </div>
               <div>
-                <label className="block mb-2">Venue *</label>
+                <label className="block mb-2 text-sm font-semibold text-[#151515]">Venue *</label>
                 <input
                   type="text"
                   value={formData.venue}
                   onChange={(e) => setFormData({...formData, venue: e.target.value})}
-                  className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
                   required
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 mb-4">
               <div>
-                <label className="block mb-2">City *</label>
+                <label className="block mb-2 text-sm font-semibold text-[#151515]">City *</label>
                 <input
                   type="text"
                   value={formData.city}
                   onChange={(e) => setFormData({...formData, city: e.target.value})}
-                  className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
                   required
                 />
               </div>
               <div>
-                <label className="block mb-2">Date *</label>
+                <label className="block mb-2 text-sm font-semibold text-[#151515]">Date *</label>
                 <input
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({...formData, date: e.target.value})}
-                  className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
                   required
                 />
               </div>
               <div>
-                <label className="block mb-2">Time *</label>
+                <label className="block mb-2 text-sm font-semibold text-[#151515]">Time *</label>
                 <input
                   type="time"
                   value={formData.time}
                   onChange={(e) => setFormData({...formData, time: e.target.value})}
-                  className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
                   required
                 />
               </div>
             </div>
 
             <div className="mb-4">
-              <label className="block mb-2">Image URL *</label>
+              <label className="block mb-2 text-sm font-semibold text-[#151515]">Image URL *</label>
               <input
                 type="url"
                 value={formData.image_url}
                 onChange={(e) => setFormData({...formData, image_url: e.target.value})}
-                className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
                 placeholder="https://images.unsplash.com/..."
                 required
               />
             </div>
 
             <div className="mb-4">
-              <label className="block mb-2">Description *</label>
+              <label className="block mb-2 text-sm font-semibold text-[#151515]">Description *</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
-                rows="3"
+                className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+                rows="4"
                 required
               ></textarea>
             </div>
 
             <div className="mb-6">
-              <label className="block mb-2">Status *</label>
+              <label className="block mb-2 text-sm font-semibold text-[#151515]">Status *</label>
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({...formData, status: e.target.value})}
-                className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
               >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
             </div>
 
-            {/* Ticket Pricing */}
-            <div className="border-t border-stone-300 pt-6 mb-6">
-              <h3 className="text-xl font-bold mb-4">Premium Experience Tiers</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mb-6 border-t border-stone-200 pt-6">
+              <h3 className="text-xl font-black text-[#151515] mb-4">Premium Experience Tiers</h3>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {PREMIUM_TICKET_TIERS.map((tier) => (
-                  <div key={tier.type} className="bg-stone-100 rounded-lg p-4">
-                    <h4 className="font-bold mb-3">{tier.label}</h4>
+                  <div key={tier.type} className="rounded-[24px] border border-stone-200 bg-[#fcfaf6] p-4">
+                    <h4 className="font-bold mb-3 text-[#151515]">{tier.label}</h4>
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-sm mb-1">Price ($)</label>
+                        <label className="block text-sm mb-1 text-stone-500">Price ($)</label>
                         <input
                           type="number"
                           step="0.01"
                           value={ticketData[tier.type].price_usd}
                           onChange={(e) => handleTicketChange(tier.type, 'price_usd', e.target.value)}
-                          className="w-full bg-white border border-stone-300 rounded px-3 py-2"
+                          className="w-full rounded-2xl border border-stone-200 bg-white px-3 py-2.5"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm mb-1">Total Quantity</label>
+                        <label className="block text-sm mb-1 text-stone-500">Total Quantity</label>
                         <input
                           type="number"
                           value={ticketData[tier.type].total_quantity}
@@ -307,7 +325,7 @@ const EventManagement = () => {
                             handleTicketChange(tier.type, 'total_quantity', val);
                             handleTicketChange(tier.type, 'available_quantity', val);
                           }}
-                          className="w-full bg-white border border-stone-300 rounded px-3 py-2"
+                          className="w-full rounded-2xl border border-stone-200 bg-white px-3 py-2.5"
                         />
                       </div>
                     </div>
@@ -318,44 +336,43 @@ const EventManagement = () => {
 
             <button
               type="submit"
-              className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center gap-2"
+              className="inline-flex items-center gap-2 rounded-full bg-[#151515] px-5 py-3 text-sm font-semibold text-white"
               data-testid="save-event-button"
             >
-              <Save className="w-5 h-5" />
+              <Save className="w-4 h-4" />
               {editingEvent ? 'Update Event' : 'Create Event'}
             </button>
           </form>
-        </div>
+        </section>
       )}
 
-      {/* Events List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {events.map((event) => (
-          <div key={event.id} className="bg-white rounded-lg overflow-hidden border border-stone-200" data-testid={`event-item-${event.id}`}>
+          <div key={event.id} className="overflow-hidden rounded-[28px] border border-stone-200 bg-white shadow-[0_10px_24px_rgba(48,32,11,0.04)]" data-testid={`event-item-${event.id}`}>
             <img src={event.image_url} alt={event.title} className="w-full h-48 object-cover" />
-            <div className="p-4">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-xl font-bold">{event.title}</h3>
-                <span className={`px-2 py-1 rounded text-xs font-bold ${
-                  event.status === 'active' ? 'bg-green-900/30 text-green-500' : 'bg-gray-900/30 text-stone-500'
+            <div className="p-5">
+              <div className="flex justify-between items-start gap-3 mb-2">
+                <h3 className="text-xl font-black text-[#151515]">{event.title}</h3>
+                <span className={`rounded-full px-3 py-1 text-xs font-bold ${
+                  event.status === 'active' ? 'bg-green-50 text-green-700' : 'bg-stone-100 text-stone-600'
                 }`}>
                   {event.status.toUpperCase()}
                 </span>
               </div>
-              <p className="text-stone-500 text-sm mb-1">{event.venue}</p>
-              <p className="text-stone-500 text-sm mb-1">{event.city}</p>
-              <p className="text-stone-500 text-sm mb-4">{event.date} | {event.time}</p>
+              <p className="text-sm text-stone-500 mb-1">{event.venue}</p>
+              <p className="text-sm text-stone-500 mb-1">{event.city}</p>
+              <p className="text-sm text-stone-500 mb-4">{event.date} | {event.time}</p>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleEdit(event)}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded flex items-center justify-center gap-2"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2.5 text-sm font-semibold text-stone-700"
                 >
                   <Edit2 className="w-4 h-4" />
                   Edit
                 </button>
                 <button
                   onClick={() => handleDelete(event.id)}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded flex items-center justify-center gap-2"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white"
                 >
                   <Trash2 className="w-4 h-4" />
                   Delete
@@ -367,8 +384,8 @@ const EventManagement = () => {
       </div>
 
       {events.length === 0 && !showForm && (
-        <div className="text-center py-12 text-stone-500">
-          <p>No events yet. Click "Add Event" to create one.</p>
+        <div className="rounded-[28px] border border-dashed border-stone-300 bg-white px-5 py-12 text-center text-stone-500">
+          <p>No events yet. Use the new event button to add the first date.</p>
         </div>
       )}
     </div>
