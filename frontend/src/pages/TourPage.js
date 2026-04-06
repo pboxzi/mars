@@ -126,8 +126,8 @@ const TourPage = () => {
         }
 
         .tour-page-title-image {
-          width: 60.1vw;
-          margin: 1.5vw auto 0;
+          width: min(46vw, 920px);
+          margin: 2.5vw auto 0;
         }
 
         .tour-page-title-image img {
@@ -310,8 +310,8 @@ const TourPage = () => {
           }
 
           .tour-page-title-image {
-            width: 88.27vw;
-            margin-top: 6.5vw;
+            width: 78vw;
+            margin-top: 8vw;
           }
 
           .tour-page-content {
