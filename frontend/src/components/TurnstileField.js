@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 export const TURNSTILE_SITE_KEY = (process.env.REACT_APP_TURNSTILE_SITE_KEY || '').trim();
 export const isTurnstileEnabled = Boolean(TURNSTILE_SITE_KEY);
@@ -21,9 +21,17 @@ const loadTurnstileScript = () => {
     return turnstileLoader;
   }
 
-  turnstileLoader = new Promise((resolve, reject) => {
+  const pending = new Promise((resolve, reject) => {
     const existing = document.getElementById(TURNSTILE_SCRIPT_ID);
     if (existing) {
+      if (window.turnstile) {
+        resolve(window.turnstile);
+        return;
+      }
+      if (existing.complete) {
+        reject(new Error('Turnstile script missing API after load'));
+        return;
+      }
       existing.addEventListener('load', () => resolve(window.turnstile));
       existing.addEventListener('error', reject);
       return;
@@ -39,6 +47,15 @@ const loadTurnstileScript = () => {
     document.head.appendChild(script);
   });
 
+  turnstileLoader = pending.catch((err) => {
+    const node = document.getElementById(TURNSTILE_SCRIPT_ID);
+    if (node) {
+      node.remove();
+    }
+    turnstileLoader = null;
+    throw err;
+  });
+
   return turnstileLoader;
 };
 
@@ -52,7 +69,7 @@ const TurnstileField = ({ token, onTokenChange, resetSignal = 0, error = '' }) =
     tokenChangeRef.current = onTokenChange;
   }, [onTokenChange]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isTurnstileEnabled || !containerRef.current) {
       return undefined;
     }

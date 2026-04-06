@@ -459,6 +459,7 @@ const BookingStatus = () => {
                         setCaptchaToken(nextToken);
                         if (nextToken) {
                           setCaptchaError('');
+                          setPaymentUpdateError('');
                         }
                       }}
                       resetSignal={captchaResetSignal}

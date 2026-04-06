@@ -583,6 +583,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                       setCaptchaToken(nextToken);
                       if (nextToken) {
                         setCaptchaError('');
+                        setError('');
                       }
                     }}
                     resetSignal={captchaResetSignal}

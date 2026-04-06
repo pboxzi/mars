@@ -333,6 +333,7 @@ const Footer = () => {
                   setCaptchaToken(nextToken);
                   if (nextToken) {
                     setCaptchaError('');
+                    setError('');
                   }
                 }}
                 resetSignal={captchaResetSignal}

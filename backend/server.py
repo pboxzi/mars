@@ -81,6 +81,11 @@ SUPPORT_WHATSAPP = os.environ.get('SUPPORT_WHATSAPP', '')
 SUPPORT_INSTAGRAM = os.environ.get('SUPPORT_INSTAGRAM', '')
 SUPPORT_HOURS = os.environ.get('SUPPORT_HOURS', '')
 TURNSTILE_SECRET_KEY = os.environ.get('TURNSTILE_SECRET_KEY', '').strip()
+TURNSTILE_INCLUDE_REMOTEIP = os.environ.get('TURNSTILE_INCLUDE_REMOTEIP', '').strip().lower() in (
+    '1',
+    'true',
+    'yes',
+)
 BOOKING_RATE_LIMIT = int(os.environ.get('BOOKING_RATE_LIMIT', '5'))
 BOOKING_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get('BOOKING_RATE_LIMIT_WINDOW_SECONDS', '900'))
 SUBSCRIPTION_RATE_LIMIT = int(os.environ.get('SUBSCRIPTION_RATE_LIMIT', '6'))
@@ -472,7 +477,38 @@ def get_client_ip(request: Request) -> str:
     if real_ip:
         return real_ip
 
+    true_client = clean_text(request.headers.get('true-client-ip'))
+    if true_client:
+        return true_client
+
+    cf = clean_text(request.headers.get('cf-connecting-ip'))
+    if cf:
+        return cf
+
     return request.client.host if request.client else 'unknown'
+
+
+def get_turnstile_remote_ip(request: Request) -> Optional[str]:
+    """Visitor IP for Turnstile siteverify; omit when unknown (wrong IP breaks verification)."""
+    forwarded_for = clean_text(request.headers.get('x-forwarded-for'))
+    if forwarded_for:
+        candidate = forwarded_for.split(',')[0].strip()
+        if candidate:
+            return candidate
+
+    real_ip = clean_text(request.headers.get('x-real-ip'))
+    if real_ip:
+        return real_ip
+
+    true_client = clean_text(request.headers.get('true-client-ip'))
+    if true_client:
+        return true_client
+
+    cf = clean_text(request.headers.get('cf-connecting-ip'))
+    if cf:
+        return cf
+
+    return None
 
 
 def ensure_honeypot_clear(value: Optional[str]) -> None:
@@ -515,13 +551,14 @@ async def verify_turnstile_token(token: Optional[str], request: Request) -> None
         "response": cleaned_token,
     }
 
-    candidate_ip = clean_text(get_client_ip(request))
-    if candidate_ip:
-        try:
-            ipaddress.ip_address(candidate_ip)
-            payload["remoteip"] = candidate_ip
-        except ValueError:
-            logger.warning("Skipping invalid Turnstile remote IP value: %s", candidate_ip)
+    if TURNSTILE_INCLUDE_REMOTEIP:
+        candidate_ip = clean_text(get_turnstile_remote_ip(request) or "")
+        if candidate_ip:
+            try:
+                ipaddress.ip_address(candidate_ip)
+                payload["remoteip"] = candidate_ip
+            except ValueError:
+                logger.warning("Skipping invalid Turnstile remote IP value: %s", candidate_ip)
 
     try:
         response = await asyncio.to_thread(

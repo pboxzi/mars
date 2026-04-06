@@ -182,6 +182,7 @@ const SubscribePage = () => {
               setCaptchaToken(nextToken);
               if (nextToken) {
                 setCaptchaError('');
+                setError('');
               }
             }}
             resetSignal={captchaResetSignal}
