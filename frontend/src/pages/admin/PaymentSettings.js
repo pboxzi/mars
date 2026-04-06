@@ -1,28 +1,22 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Save, Bitcoin, Landmark, DollarSign } from 'lucide-react';
+import { Save, Bitcoin, DollarSign } from 'lucide-react';
 import { emptySupportSettings } from '../../hooks/useSupportSettings';
-import {
-  createDefaultPaymentSettings,
-  getPaymentInstructionsOrTemplate,
-  PAYMENT_METHOD_OPTIONS
-} from '../../utils/paymentInstructionTemplates';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
-const emptyBtcQuote = {
-  price: 0,
-  source: '',
-  timestamp: '',
-  isLive: false
-};
 
 const PaymentSettings = () => {
-  const [settings, setSettings] = useState(createDefaultPaymentSettings);
+  const [settings, setSettings] = useState({
+    zelle: { instructions: '', btc_wallet_address: null },
+    cashapp: { instructions: '', btc_wallet_address: null },
+    applepay: { instructions: '', btc_wallet_address: null },
+    bank: { instructions: '', btc_wallet_address: null },
+    btc: { instructions: '', btc_wallet_address: '' }
+  });
   const [loading, setLoading] = useState(false);
-  const [btcQuote, setBtcQuote] = useState(emptyBtcQuote);
+  const [btcPrice, setBtcPrice] = useState(0);
   const [supportSettings, setSupportSettings] = useState(emptySupportSettings);
-  const [selectedMethod, setSelectedMethod] = useState('bank');
 
   useEffect(() => {
     fetchSettings();
@@ -40,8 +34,8 @@ const PaymentSettings = () => {
       const settingsData = {};
       response.data.forEach(setting => {
         settingsData[setting.payment_method] = {
-          instructions: getPaymentInstructionsOrTemplate(setting.payment_method, setting.instructions),
-          btc_wallet_address: setting.btc_wallet_address || ''
+          instructions: setting.instructions,
+          btc_wallet_address: setting.btc_wallet_address
         };
       });
       
@@ -54,15 +48,9 @@ const PaymentSettings = () => {
   const fetchBtcPrice = async () => {
     try {
       const response = await axios.get(`${API}/btc-price`);
-      setBtcQuote({
-        price: response.data.btc_to_usd || 0,
-        source: response.data.source || '',
-        timestamp: response.data.timestamp || '',
-        isLive: Boolean(response.data.is_live)
-      });
+      setBtcPrice(response.data.btc_to_usd);
     } catch (error) {
       console.error('Error fetching BTC price:', error);
-      setBtcQuote(emptyBtcQuote);
     }
   };
 
@@ -94,10 +82,10 @@ const PaymentSettings = () => {
         settings[method],
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert('Saved');
+      alert('Payment settings updated successfully!');
     } catch (error) {
       console.error('Error saving payment settings:', error);
-      alert('Save failed');
+      alert('Failed to save payment settings');
     } finally {
       setLoading(false);
     }
@@ -133,190 +121,150 @@ const PaymentSettings = () => {
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert('Support saved');
+      alert('Customer support settings updated successfully!');
     } catch (error) {
       console.error('Error saving support settings:', error);
-      alert('Support save failed');
+      alert('Failed to save customer support settings');
     } finally {
       setLoading(false);
     }
   };
 
-  const paymentMethodMeta = {
-    zelle: { icon: DollarSign, color: 'text-purple-500' },
-    cashapp: { icon: DollarSign, color: 'text-green-500' },
-    applepay: { icon: DollarSign, color: 'text-blue-500' },
-    bank: { icon: Landmark, color: 'text-yellow-500' },
-    btc: { icon: Bitcoin, color: 'text-orange-500' }
-  };
-
-  const paymentMethods = Object.values(PAYMENT_METHOD_OPTIONS).map((method) => ({
-    ...method,
-    ...paymentMethodMeta[method.key]
-  }));
-  const activeMethod = paymentMethods.find((method) => method.key === selectedMethod) || paymentMethods[0];
-  const btcQuoteUpdatedLabel = btcQuote.timestamp ? new Date(btcQuote.timestamp).toLocaleString() : '';
+  const paymentMethods = [
+    { key: 'zelle', name: 'Zelle', icon: DollarSign, color: 'text-purple-500' },
+    { key: 'cashapp', name: 'Cash App', icon: DollarSign, color: 'text-green-500' },
+    { key: 'applepay', name: 'Apple Pay', icon: DollarSign, color: 'text-blue-500' },
+    { key: 'bank', name: 'Bank Transfer', icon: DollarSign, color: 'text-yellow-500' },
+    { key: 'btc', name: 'Bitcoin (BTC)', icon: Bitcoin, color: 'text-orange-500' },
+  ];
 
   return (
-    <div className="space-y-6" data-testid="payment-settings">
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(20rem,0.9fr)]">
-        <div className="rounded-[28px] border border-stone-200 bg-white p-5 shadow-[0_12px_30px_rgba(48,32,11,0.05)] sm:p-6">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-[#9d172b]">Payments</p>
-          <h1 className="mt-2 text-2xl font-black text-[#151515] sm:text-3xl">Keep live settlement details clean.</h1>
-          <p className="mt-2 text-sm leading-6 text-stone-600">
-            Edit one payment method at a time so mobile stays simple and the team can update the active rail quickly.
-          </p>
+    <div data-testid="payment-settings">
+      <h1 className="text-4xl font-bold mb-8">Payment Settings</h1>
 
-          <div className="-mx-5 mt-5 overflow-x-auto px-5 sm:-mx-6 sm:px-6">
-            <div className="flex gap-2 pb-1">
-              {paymentMethods.map((method) => (
-                <button
-                  key={method.key}
-                  type="button"
-                  onClick={() => setSelectedMethod(method.key)}
-                  className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold transition ${
-                    selectedMethod === method.key
-                      ? 'bg-[#151515] text-white'
-                      : 'border border-stone-200 bg-white text-stone-600'
-                  }`}
-                >
-                  {method.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <aside className="rounded-[28px] border border-stone-200 bg-[#151515] p-5 text-white shadow-[0_12px_30px_rgba(21,21,21,0.12)] sm:p-6">
-          <div className="flex items-start gap-3">
-            <Bitcoin className="h-10 w-10 text-orange-400" />
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.22em] text-white/60">BTC Reference</p>
-              <p className="mt-2 text-3xl font-black">{btcQuote.price ? `$${btcQuote.price.toFixed(2)}` : 'Loading...'}</p>
-              <p className="mt-2 text-sm text-white/65">
-                {btcQuote.source ? `${btcQuote.source}${btcQuote.isLive ? '' : ' (last known quote)'}` : 'Waiting for quote'}
-              </p>
-              {btcQuoteUpdatedLabel ? <p className="mt-1 text-xs text-white/50">Updated {btcQuoteUpdatedLabel}</p> : null}
-            </div>
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-white/75">
-            Bank Transfer and Bitcoin should stay first while payment traffic is high. Keep other rails updated only if your team plans to use them.
-          </div>
-        </aside>
-      </section>
-
-      <section className="rounded-[28px] border border-stone-200 bg-white p-5 shadow-[0_12px_30px_rgba(48,32,11,0.05)] sm:p-6" data-testid={`payment-method-${activeMethod.key}`}>
-        <div className="flex items-center gap-3">
-          <activeMethod.icon className={`h-8 w-8 ${activeMethod.color}`} />
+      <div className="bg-gradient-to-r from-orange-900/30 to-yellow-900/30 border border-orange-700 rounded-lg p-6 mb-8">
+        <div className="flex items-center gap-4">
+          <Bitcoin className="w-12 h-12 text-orange-500" />
           <div>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-stone-400">Active Editor</p>
-            <h2 className="mt-1 text-2xl font-black text-[#151515]">{activeMethod.name}</h2>
+            <p className="text-stone-500 text-sm">Current Bitcoin Price</p>
+            <p className="text-3xl font-bold">${btcPrice.toFixed(2)} USD</p>
           </div>
         </div>
+      </div>
 
-        <div className="mt-5 space-y-4">
-          <div>
-            <label className="block mb-2 text-sm font-semibold text-[#151515]">Instructions</label>
-            <textarea
-              value={settings[activeMethod.key]?.instructions || ''}
-              onChange={(e) => handleChange(activeMethod.key, 'instructions', e.target.value)}
-              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
-              rows="8"
-              placeholder={`Add ${activeMethod.name} steps...`}
-              data-testid={`instructions-${activeMethod.key}`}
-            ></textarea>
-            <p className="mt-2 text-sm leading-6 text-stone-500">
-              These instructions are sent directly to approved guests. Replace placeholders with your real settlement details.
-            </p>
-          </div>
-
-          {activeMethod.key === 'btc' && (
-            <div>
-              <label className="block mb-2 text-sm font-semibold text-[#151515]">BTC Wallet Address</label>
-              <input
-                type="text"
-                value={settings[activeMethod.key]?.btc_wallet_address || ''}
-                onChange={(e) => handleChange(activeMethod.key, 'btc_wallet_address', e.target.value)}
-                className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 font-mono text-sm"
-                placeholder="bc1q..."
-                data-testid="btc-wallet-address"
-              />
-              <p className="mt-2 text-sm text-stone-500">Shared automatically with approved BTC bookings.</p>
+      <div className="space-y-6">
+        {paymentMethods.map((method) => (
+          <div key={method.key} className="bg-white rounded-lg p-6 border border-stone-200" data-testid={`payment-method-${method.key}`}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <method.icon className={`w-8 h-8 ${method.color}`} />
+                <h2 className="text-2xl font-bold">{method.name}</h2>
+              </div>
             </div>
-          )}
 
-          <button
-            onClick={() => handleSave(activeMethod.key)}
-            disabled={loading}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#151515] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50 sm:w-auto"
-            data-testid={`save-${activeMethod.key}`}
-          >
-            <Save className="h-4 w-4" />
-            Save {activeMethod.name}
-          </button>
-        </div>
-      </section>
+            <div className="space-y-4">
+              <div>
+                <label className="block mb-2 font-bold">Payment Instructions</label>
+                <textarea
+                  value={settings[method.key]?.instructions || ''}
+                  onChange={(e) => handleChange(method.key, 'instructions', e.target.value)}
+                  className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
+                  rows="5"
+                  placeholder={`Enter ${method.name} payment instructions...\n\nExample:\nSend payment to: example@email.com\nReference: Booking confirmation number`}
+                  data-testid={`instructions-${method.key}`}
+                ></textarea>
+              </div>
 
-      <section className="rounded-[28px] border border-stone-200 bg-white p-5 shadow-[0_12px_30px_rgba(48,32,11,0.05)] sm:p-6" data-testid="support-settings">
-        <h2 className="text-2xl font-black text-[#151515]">Support Details</h2>
-        <p className="mt-2 text-sm leading-6 text-stone-500">
-          Phone, WhatsApp, Instagram, and response hours appear on customer-facing pages and emails. Support email stays internal.
+              {method.key === 'btc' && (
+                <div>
+                  <label className="block mb-2 font-bold">BTC Wallet Address</label>
+                  <input
+                    type="text"
+                    value={settings[method.key]?.btc_wallet_address || ''}
+                    onChange={(e) => handleChange(method.key, 'btc_wallet_address', e.target.value)}
+                    className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600 font-mono"
+                    placeholder="bc1q..."
+                    data-testid="btc-wallet-address"
+                  />
+                  <p className="text-sm text-stone-500 mt-2">
+                    This wallet address will be automatically provided to customers who select Bitcoin payment.
+                  </p>
+                </div>
+              )}
+
+              <button
+                onClick={() => handleSave(method.key)}
+                disabled={loading}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center gap-2 disabled:opacity-50"
+                data-testid={`save-${method.key}`}
+              >
+                <Save className="w-5 h-5" />
+                Save {method.name} Settings
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-white rounded-lg p-6 border border-stone-200 mt-8" data-testid="support-settings">
+        <h2 className="text-2xl font-bold mb-2">Customer Support Contact</h2>
+        <p className="text-sm text-stone-500 mb-6">
+          These details appear on the booking confirmation flow, booking status page, and customer email updates.
         </p>
 
-        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="block mb-2 text-sm font-semibold text-[#151515]">Support Email (Internal)</label>
+            <label className="block mb-2 font-bold">Support Email</label>
             <input
               type="email"
               value={supportSettings.support_email}
               onChange={(e) => handleSupportChange('support_email', e.target.value)}
-              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+              className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
               placeholder="booking@yourdomain.com"
             />
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-semibold text-[#151515]">Support Phone</label>
+            <label className="block mb-2 font-bold">Support Phone</label>
             <input
               type="text"
               value={supportSettings.support_phone}
               onChange={(e) => handleSupportChange('support_phone', e.target.value)}
-              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+              className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
               placeholder="+1 555 123 4567"
             />
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-semibold text-[#151515]">WhatsApp</label>
+            <label className="block mb-2 font-bold">WhatsApp</label>
             <input
               type="text"
               value={supportSettings.support_whatsapp}
               onChange={(e) => handleSupportChange('support_whatsapp', e.target.value)}
-              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+              className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
               placeholder="+1 555 123 4567 or https://wa.me/..."
             />
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-semibold text-[#151515]">Instagram</label>
+            <label className="block mb-2 font-bold">Instagram</label>
             <input
               type="text"
               value={supportSettings.support_instagram}
               onChange={(e) => handleSupportChange('support_instagram', e.target.value)}
-              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+              className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
               placeholder="@yourhandle"
             />
           </div>
         </div>
 
         <div className="mt-4">
-          <label className="block mb-2 text-sm font-semibold text-[#151515]">Response Hours</label>
+          <label className="block mb-2 font-bold">Response Hours</label>
           <input
             type="text"
             value={supportSettings.support_hours}
             onChange={(e) => handleSupportChange('support_hours', e.target.value)}
-            className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+            className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"
             placeholder="Mon-Fri, 9am-6pm"
           />
         </div>
@@ -324,15 +272,25 @@ const PaymentSettings = () => {
         <button
           onClick={handleSupportSave}
           disabled={loading}
-          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#151515] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50 sm:w-auto"
+          className="mt-6 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center gap-2 disabled:opacity-50"
         >
-          <Save className="h-4 w-4" />
-          Save Support
+          <Save className="w-5 h-5" />
+          Save Customer Support Settings
         </button>
-      </section>
+      </div>
+
+      <div className="mt-8 bg-blue-900/30 border border-blue-700 rounded-lg p-6">
+        <h3 className="text-lg font-bold mb-2">Instructions</h3>
+        <ul className="list-disc list-inside space-y-2 text-sm text-stone-500">
+          <li>Set up payment instructions for each payment method you want to accept</li>
+          <li>These instructions will be shown to customers after their booking is approved</li>
+          <li>For Bitcoin payments, provide your wallet address - the BTC amount will be calculated automatically</li>
+          <li>Support contact details help customers know how to reach you and what number to include</li>
+          <li>You can update these settings anytime</li>
+        </ul>
+      </div>
     </div>
   );
 };
 
 export default PaymentSettings;
-
