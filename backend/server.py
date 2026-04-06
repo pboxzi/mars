@@ -86,6 +86,11 @@ TURNSTILE_INCLUDE_REMOTEIP = os.environ.get('TURNSTILE_INCLUDE_REMOTEIP', '').st
     'true',
     'yes',
 )
+DISABLE_TURNSTILE_VERIFICATION = os.environ.get('DISABLE_TURNSTILE_VERIFICATION', '').strip().lower() in (
+    '1',
+    'true',
+    'yes',
+)
 BOOKING_RATE_LIMIT = int(os.environ.get('BOOKING_RATE_LIMIT', '5'))
 BOOKING_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get('BOOKING_RATE_LIMIT_WINDOW_SECONDS', '900'))
 SUBSCRIPTION_RATE_LIMIT = int(os.environ.get('SUBSCRIPTION_RATE_LIMIT', '6'))
@@ -539,6 +544,10 @@ async def enforce_public_rate_limit(request: Request, bucket: str, limit: int, w
 
 async def verify_turnstile_token(token: Optional[str], request: Request) -> None:
     """Validate Turnstile when a secret key is configured."""
+    if DISABLE_TURNSTILE_VERIFICATION:
+        logger.warning("Turnstile checks are disabled (DISABLE_TURNSTILE_VERIFICATION). Remove in production.")
+        return
+
     if not TURNSTILE_SECRET_KEY:
         return
 
