@@ -11,6 +11,7 @@ import AdminLayout from './pages/admin/AdminLayout';
 import EventManagement from './pages/admin/EventManagement';
 import BookingManagement from './pages/admin/BookingManagement';
 import PaymentSettings from './pages/admin/PaymentSettings';
+import AdminSettings from './pages/admin/AdminSettings';
 import ManifestManager from './components/ManifestManager';
 import TrackingScripts from './components/TrackingScripts';
 import { PwaInstallProvider } from './context/PwaInstallContext';
@@ -33,6 +34,7 @@ function App() {
           <Route path="/admin-secret/events" element={<AdminLayout><EventManagement /></AdminLayout>} />
           <Route path="/admin-secret/bookings" element={<AdminLayout><BookingManagement /></AdminLayout>} />
           <Route path="/admin-secret/payment-settings" element={<AdminLayout><PaymentSettings /></AdminLayout>} />
+          <Route path="/admin-secret/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
         </Routes>
       </PwaInstallProvider>
     </BrowserRouter>
