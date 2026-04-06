@@ -1,10 +1,23 @@
-import { useEffect } from 'react';
-import { loadAdTracking } from '../utils/adTracking';
+import { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { trackPageView } from '../utils/adTracking';
 
 const TrackingScripts = () => {
+  const location = useLocation();
+  const lastTrackedPathRef = useRef('');
+
   useEffect(() => {
-    loadAdTracking();
-  }, []);
+    const currentPath = `${location.pathname}${location.search}${location.hash}`;
+    if (lastTrackedPathRef.current === currentPath) {
+      return;
+    }
+
+    lastTrackedPathRef.current = currentPath;
+    trackPageView({
+      path: currentPath,
+      title: document.title,
+    });
+  }, [location.hash, location.pathname, location.search]);
 
   return null;
 };

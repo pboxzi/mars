@@ -77,6 +77,7 @@ This creates the initial admin account using:
 3. Add the frontend env var:
    - `REACT_APP_BACKEND_URL=https://your-backend.onrender.com`
    - `REACT_APP_SITE_URL=https://your-site.vercel.app`
+   - `REACT_APP_META_PIXEL_ID=<your Meta Pixel ID>` if you want Facebook/Instagram ad tracking
 4. Deploy.
 
 The Vercel config in [frontend/vercel.json](frontend/vercel.json) already handles React route rewrites.
@@ -135,12 +136,15 @@ Required:
 - `REACT_APP_BACKEND_URL`
 - `REACT_APP_SITE_URL`
 
+Optional Meta ads:
+- `REACT_APP_META_PIXEL_ID`
+
 Optional fallback:
 - `REACT_APP_TURNSTILE_SITE_KEY`
 
 ## Social-share launch notes
 - The repo now includes a built-in share image at `frontend/public/social-preview.png`.
-- Set `REACT_APP_SITE_URL` to your final public Vercel URL so shared links resolve to the correct canonical site URL in browsers.
+- Set `REACT_APP_SITE_URL` to your final public Vercel URL so shared links and social previews resolve to the correct canonical and image URLs.
 - After each redeploy, re-share the homepage link on Instagram, Facebook, WhatsApp, or X to confirm the preview card updates.
 
 ## Free-tier warnings

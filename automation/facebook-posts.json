@@ -1,0 +1,32 @@
+{
+  "posts": [
+    {
+      "message": "Bruno Mars: The Romantic Tour is now live. Explore dates and request premium access here: {tour_url}",
+      "link": "{tour_url}"
+    },
+    {
+      "message": "Planning your tour experience? Browse current Bruno Mars premium access options and start your request today: {tour_url}",
+      "link": "{tour_url}"
+    },
+    {
+      "message": "Guest booking requests for Bruno Mars: The Romantic Tour are open. Start here: {tour_url}",
+      "link": "{tour_url}"
+    },
+    {
+      "message": "Need a fast way to check Bruno Mars tour access and request booking support? Visit: {tour_url}",
+      "link": "{tour_url}"
+    },
+    {
+      "message": "Premium tour access requests for Bruno Mars can be submitted online in minutes. See the live tour page: {tour_url}",
+      "link": "{tour_url}"
+    },
+    {
+      "message": "Bruno Mars tour updates and booking support are available on the official tour page. Open it here: {tour_url}",
+      "link": "{tour_url}"
+    },
+    {
+      "message": "Looking for Bruno Mars: The Romantic Tour booking support? Start with the live tour page here: {tour_url}",
+      "link": "{tour_url}"
+    }
+  ]
+}

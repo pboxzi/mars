@@ -1,5 +1,6 @@
 const path = require("path");
 require("dotenv").config();
+process.env.REACT_APP_SITE_URL = (process.env.REACT_APP_SITE_URL || "").trim().replace(/\/+$/, "");
 
 const config = {
   enableHealthCheck: process.env.ENABLE_HEALTH_CHECK === "true",

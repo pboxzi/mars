@@ -4,20 +4,31 @@ import { CheckCircle, XCircle, DollarSign, Eye } from 'lucide-react';
 import { getTicketTierLabel } from '../../utils/ticketTiers';
 import {
   createDefaultPaymentSettings,
-  getPaymentInstructionsOrTemplate
+  getDefaultLivePaymentMethod,
+  getPaymentInstructionsOrTemplate,
+  getSafeLivePaymentMethod,
+  LIVE_PAYMENT_METHODS
 } from '../../utils/paymentInstructionTemplates';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 const defaultPaymentSettings = createDefaultPaymentSettings();
 
-const createApprovalData = (method = 'zelle', paymentSettings = defaultPaymentSettings, adminNotes = '') => ({
-  payment_method: method,
-  payment_instructions: paymentSettings[method]?.instructions || '',
-  btc_wallet_address: method === 'btc' ? paymentSettings.btc?.btc_wallet_address || '' : '',
-  btc_amount: 0,
-  admin_notes: adminNotes
-});
+const createApprovalData = (
+  method = getDefaultLivePaymentMethod(),
+  paymentSettings = defaultPaymentSettings,
+  adminNotes = ''
+) => {
+  const selectedMethod = getSafeLivePaymentMethod(method);
+
+  return {
+    payment_method: selectedMethod,
+    payment_instructions: paymentSettings[selectedMethod]?.instructions || '',
+    btc_wallet_address: selectedMethod === 'btc' ? paymentSettings.btc?.btc_wallet_address || '' : '',
+    btc_amount: 0,
+    admin_notes: adminNotes
+  };
+};
 
 const BookingManagement = () => {
   const [bookings, setBookings] = useState([]);
@@ -78,13 +89,13 @@ const BookingManagement = () => {
   const openBookingDetails = (booking) => {
     setSelectedBooking(booking);
     if (booking.status === 'pending') {
-      setApprovalData(createApprovalData('zelle', paymentSettings));
+      setApprovalData(createApprovalData(getDefaultLivePaymentMethod(), paymentSettings));
     }
   };
 
   const closeBookingDetails = () => {
     setSelectedBooking(null);
-    setApprovalData(createApprovalData('zelle', paymentSettings));
+    setApprovalData(createApprovalData(getDefaultLivePaymentMethod(), paymentSettings));
   };
 
   const handleApprove = async (bookingId) => {
@@ -382,6 +393,9 @@ const BookingManagement = () => {
               <div className="border-t border-stone-300 pt-6">
                 <h3 className="text-xl font-bold mb-4">Approve</h3>
                 <div className="space-y-4">
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    High-volume mode is active. New approvals are currently limited to bank transfer and Bitcoin only.
+                  </div>
                   <div>
                     <label className="block mb-2">Payment Method</label>
                     <select
@@ -393,11 +407,11 @@ const BookingManagement = () => {
                       ))}
                       className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3"
                     >
-                      <option value="zelle">Zelle</option>
-                      <option value="cashapp">Cash App</option>
-                      <option value="applepay">Apple Pay</option>
-                      <option value="bank">Bank Transfer</option>
-                      <option value="btc">Bitcoin (BTC)</option>
+                      {LIVE_PAYMENT_METHODS.map((method) => (
+                        <option key={method.key} value={method.key}>
+                          {method.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
 

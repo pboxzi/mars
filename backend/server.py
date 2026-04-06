@@ -150,6 +150,22 @@ class PaymentMethodEnum(str, Enum):
     BTC = "btc"
 
 
+LIVE_PAYMENT_METHODS = {PaymentMethodEnum.BANK, PaymentMethodEnum.BTC}
+LIVE_PAYMENT_METHOD_VALUES = {method.value for method in LIVE_PAYMENT_METHODS}
+
+
+def payment_method_label(method) -> str:
+    labels = {
+        PaymentMethodEnum.ZELLE.value: "Zelle",
+        PaymentMethodEnum.CASHAPP.value: "Cash App",
+        PaymentMethodEnum.APPLEPAY.value: "Apple Pay",
+        PaymentMethodEnum.BANK.value: "bank transfer",
+        PaymentMethodEnum.BTC.value: "Bitcoin",
+    }
+    key = method.value if isinstance(method, PaymentMethodEnum) else str(method or "")
+    return labels.get(key, key.replace("_", " ").title() if key else "selected payment method")
+
+
 class EventStatusEnum(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
@@ -1447,6 +1463,26 @@ async def submit_payment_update(confirmation_number: str, payment_update: Bookin
             detail="Payment updates can only be submitted after approval and before final payment verification."
         )
 
+    submitted_payment_method = payment_update.payment_method.value
+    approved_method = booking.get("payment_method")
+    if approved_method:
+        approved_method_value = (
+            approved_method.value if isinstance(approved_method, PaymentMethodEnum) else str(approved_method)
+        )
+        if submitted_payment_method != approved_method_value:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Please submit your update using the approved payment method: "
+                    f"{payment_method_label(approved_method_value)}."
+                )
+            )
+    elif submitted_payment_method not in LIVE_PAYMENT_METHOD_VALUES:
+        raise HTTPException(
+            status_code=400,
+            detail="Only bank transfer and Bitcoin payment updates are available right now."
+        )
+
     update_data = {
         "customer_payment_method": payment_update.payment_method,
         "customer_payment_reference": clean_text(payment_update.transaction_id),
@@ -1771,6 +1807,11 @@ async def approve_booking(
     
     if booking['status'] != 'pending':
         raise HTTPException(status_code=400, detail="Only pending bookings can be approved")
+    if approval_data.payment_method not in LIVE_PAYMENT_METHODS:
+        raise HTTPException(
+            status_code=400,
+            detail="Only bank transfer and Bitcoin approvals are available right now."
+        )
     ticket = await db.ticket_types.find_one({
         "event_id": booking['event_id'],
         "type": booking['ticket_type']
@@ -2005,6 +2046,12 @@ async def update_payment_settings(
     admin: dict = Depends(get_current_admin)
 ):
     """Update payment settings for a specific payment method"""
+    if payment_method not in LIVE_PAYMENT_METHODS:
+        raise HTTPException(
+            status_code=400,
+            detail="Only bank transfer and Bitcoin settings are editable while high-volume mode is active."
+        )
+
     existing = await db.payment_settings.find_one({"payment_method": payment_method})
     
     if existing:

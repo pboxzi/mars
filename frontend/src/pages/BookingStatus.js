@@ -7,13 +7,18 @@ import TurnstileField from '../components/TurnstileField';
 import useTurnstileConfig from '../hooks/useTurnstileConfig';
 import useSupportSettings from '../hooks/useSupportSettings';
 import { trackPaymentUpdateSubmitted } from '../utils/adTracking';
+import {
+  getDefaultLivePaymentMethod,
+  getPaymentMethodLabel,
+  LIVE_PAYMENT_METHODS
+} from '../utils/paymentInstructionTemplates';
 import { getTicketTierLabel } from '../utils/ticketTiers';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const createPaymentUpdateData = (booking = null) => ({
-  payment_method: booking?.customer_payment_method || booking?.payment_method || 'cashapp',
+  payment_method: booking?.customer_payment_method || booking?.payment_method || getDefaultLivePaymentMethod(),
   transaction_id: booking?.customer_payment_reference || '',
   payment_amount: booking?.customer_payment_amount || '',
   proof_url: booking?.customer_payment_proof_url || '',
@@ -384,24 +389,36 @@ const BookingStatus = () => {
                     {booking.customer_payment_submitted_at ? 'Update Payment Details' : 'Submit Payment Update'}
                   </h3>
                   <p className="mb-6 text-[#6c6258]">
-                    After you send payment, fill this in so our team can verify it and move your booking forward.
+                    After you send payment using the approved method below, fill this in so our team can verify it and move your booking forward.
                   </p>
 
                   <form onSubmit={handleSubmitPaymentUpdate} className="space-y-4">
-                    <div>
-                      <label className="mb-2 block font-semibold">Payment Method</label>
-                      <select
-                        value={paymentUpdateData.payment_method}
-                        onChange={(e) => setPaymentUpdateData({ ...paymentUpdateData, payment_method: e.target.value })}
-                        className="w-full rounded-[16px] border border-[#d8cab6] bg-white px-4 py-3 text-[#171717] focus:border-[#9d172b] focus:outline-none"
-                      >
-                        <option value="zelle">Zelle</option>
-                        <option value="cashapp">Cash App</option>
-                        <option value="applepay">Apple Pay</option>
-                        <option value="bank">Bank Transfer</option>
-                        <option value="btc">Bitcoin (BTC)</option>
-                      </select>
-                    </div>
+                    {booking.payment_method ? (
+                      <div>
+                        <label className="mb-2 block font-semibold">Approved Payment Method</label>
+                        <div className="rounded-[16px] border border-[#d8cab6] bg-white px-4 py-3 font-bold text-[#171717]">
+                          {getPaymentMethodLabel(booking.payment_method)}
+                        </div>
+                        <p className="mt-2 text-sm text-[#6c6258]">
+                          Use the same payment rail shown in your approval instructions for this booking.
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="mb-2 block font-semibold">Payment Method</label>
+                        <select
+                          value={paymentUpdateData.payment_method}
+                          onChange={(e) => setPaymentUpdateData({ ...paymentUpdateData, payment_method: e.target.value })}
+                          className="w-full rounded-[16px] border border-[#d8cab6] bg-white px-4 py-3 text-[#171717] focus:border-[#9d172b] focus:outline-none"
+                        >
+                          {LIVE_PAYMENT_METHODS.map((method) => (
+                            <option key={method.key} value={method.key}>
+                              {method.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
 
                     <div>
                       <label className="mb-2 block font-semibold">Transaction / Reference ID</label>
@@ -410,7 +427,7 @@ const BookingStatus = () => {
                         value={paymentUpdateData.transaction_id}
                         onChange={(e) => setPaymentUpdateData({ ...paymentUpdateData, transaction_id: e.target.value })}
                         className="w-full rounded-[16px] border border-[#d8cab6] bg-white px-4 py-3 text-[#171717] focus:border-[#9d172b] focus:outline-none"
-                        placeholder="Enter your transfer, payment, or wallet reference"
+                        placeholder={paymentUpdateData.payment_method === 'btc' ? 'Enter your BTC transaction hash' : 'Enter your bank transfer reference'}
                         required
                       />
                     </div>
@@ -420,11 +437,11 @@ const BookingStatus = () => {
                       <input
                         type="number"
                         min="0"
-                        step="0.01"
+                        step={paymentUpdateData.payment_method === 'btc' ? '0.00000001' : '0.01'}
                         value={paymentUpdateData.payment_amount}
                         onChange={(e) => setPaymentUpdateData({ ...paymentUpdateData, payment_amount: e.target.value })}
                         className="w-full rounded-[16px] border border-[#d8cab6] bg-white px-4 py-3 text-[#171717] focus:border-[#9d172b] focus:outline-none"
-                        placeholder="5000"
+                        placeholder={paymentUpdateData.payment_method === 'btc' ? '0.025' : '5000'}
                       />
                     </div>
 

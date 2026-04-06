@@ -118,15 +118,15 @@ try {
 
     $currentStep = 'approve_booking'
     $approved = Invoke-JsonRequest -Method Put -Uri ("$baseUrl/admin/bookings/{0}/approve" -f $booking.id) -Headers $authHeaders -Body @{
-        payment_method = 'cashapp'
-        payment_instructions = 'Send payment to $bruno-test'
+        payment_method = 'bank'
+        payment_instructions = 'Send your balance using the approved beneficiary details and keep the transfer reference ready for verification.'
         admin_notes = 'Approved during end-to-end verification'
     }
 
     $currentStep = 'submit_payment_update'
     $paymentUpdate = Invoke-JsonRequest -Method Post -Uri ("$baseUrl/bookings/{0}/payment-update" -f $booking.confirmation_number) -Body @{
-        payment_method = 'cashapp'
-        transaction_id = 'PAYMENT-UPDATE-20260404'
+        payment_method = 'bank'
+        transaction_id = 'BANK-REF-20260404'
         payment_amount = 5000
         proof_url = 'https://example.com/proof'
         notes = 'Customer payment update verification'

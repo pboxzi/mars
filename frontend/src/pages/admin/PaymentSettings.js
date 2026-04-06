@@ -1,10 +1,11 @@
 ﻿import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Save, Bitcoin, DollarSign } from 'lucide-react';
+import { Save, Bitcoin, Landmark } from 'lucide-react';
 import { emptySupportSettings } from '../../hooks/useSupportSettings';
 import {
   createDefaultPaymentSettings,
-  getPaymentInstructionsOrTemplate
+  getPaymentInstructionsOrTemplate,
+  LIVE_PAYMENT_METHODS
 } from '../../utils/paymentInstructionTemplates';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -128,13 +129,15 @@ const PaymentSettings = () => {
     }
   };
 
-  const paymentMethods = [
-    { key: 'zelle', name: 'Zelle', icon: DollarSign, color: 'text-purple-500' },
-    { key: 'cashapp', name: 'Cash App', icon: DollarSign, color: 'text-green-500' },
-    { key: 'applepay', name: 'Apple Pay', icon: DollarSign, color: 'text-blue-500' },
-    { key: 'bank', name: 'Bank Transfer', icon: DollarSign, color: 'text-yellow-500' },
-    { key: 'btc', name: 'Bitcoin (BTC)', icon: Bitcoin, color: 'text-orange-500' },
-  ];
+  const paymentMethodMeta = {
+    bank: { icon: Landmark, color: 'text-yellow-500' },
+    btc: { icon: Bitcoin, color: 'text-orange-500' }
+  };
+
+  const paymentMethods = LIVE_PAYMENT_METHODS.map((method) => ({
+    ...method,
+    ...paymentMethodMeta[method.key]
+  }));
 
   return (
     <div data-testid="payment-settings">
@@ -149,6 +152,14 @@ const PaymentSettings = () => {
             <p className="text-3xl font-bold">${btcPrice.toFixed(2)} USD</p>
           </div>
         </div>
+      </div>
+
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-5 mb-8">
+        <h2 className="text-lg font-bold text-stone-900 mb-2">High-Volume Mode</h2>
+        <p className="text-sm text-stone-600">
+          Customer-facing approvals are currently limited to Bank Transfer and Bitcoin. Alternative payment rails stay
+          offline until processing capacity expands.
+        </p>
       </div>
 
       {/* Payment Methods */}
@@ -174,7 +185,8 @@ const PaymentSettings = () => {
                   data-testid={`instructions-${method.key}`}
                 ></textarea>
                 <p className="text-sm text-stone-500 mt-2">
-                  The guidance is already written for you. Just replace the bracketed payment details with your own.
+                  These instructions are sent directly to approved guests. Replace the bracketed placeholders with your
+                  real settlement details.
                 </p>
               </div>
 
@@ -289,7 +301,8 @@ const PaymentSettings = () => {
       <div className="mt-8 bg-blue-900/30 border border-blue-700 rounded-lg p-6">
         <h3 className="text-lg font-bold mb-2">Quick Notes</h3>
         <ul className="list-disc list-inside space-y-2 text-sm text-stone-500">
-          <li>Add clear steps for each payment method.</li>
+          <li>Only Bank Transfer and Bitcoin are currently live for customer approvals.</li>
+          <li>Add clear, exact settlement details for each active method.</li>
           <li>Customers see these after approval.</li>
           <li>BTC totals are calculated automatically.</li>
           <li>Only phone, WhatsApp, Instagram, and response hours appear on customer-facing pages and emails.</li>

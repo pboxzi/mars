@@ -163,6 +163,38 @@ const sendGoogleConversion = (label, payload) => {
 const cleanPayload = (payload) =>
   Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== undefined && value !== null && value !== ''));
 
+export const trackPageView = ({ path, title } = {}) => {
+  loadAdTracking();
+
+  const pagePath =
+    path ||
+    (hasWindow && window.location
+      ? `${window.location.pathname}${window.location.search}${window.location.hash}`
+      : undefined);
+  const pageLocation =
+    hasWindow && window.location && pagePath
+      ? `${window.location.origin}${pagePath}`
+      : undefined;
+
+  const payload = cleanPayload({
+    page_path: pagePath,
+    page_title: title,
+    page_location: pageLocation,
+  });
+
+  if (hasWindow && window.fbq) {
+    window.fbq('track', 'PageView');
+  }
+
+  if (hasWindow && window.gtag) {
+    window.gtag('event', 'page_view', payload);
+  }
+
+  if (hasWindow && window.posthog && typeof window.posthog.capture === 'function') {
+    window.posthog.capture('$pageview', payload);
+  }
+};
+
 export const trackBookingSubmitted = ({ value, currency = 'USD', ticketType, quantity, eventId, source = 'booking-modal' } = {}) => {
   loadAdTracking();
   const payload = cleanPayload({

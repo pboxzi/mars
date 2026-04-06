@@ -1,0 +1,47 @@
+name: Facebook Page Autopost
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Preview the selected post without publishing"
+        required: false
+        default: "true"
+      post_index:
+        description: "Optional zero-based post index override"
+        required: false
+        default: ""
+  schedule:
+    - cron: "0 14 * * 1,3,5"
+
+jobs:
+  post-to-facebook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install publisher dependency
+        run: python -m pip install --upgrade pip requests
+
+      - name: Publish or preview Facebook Page post
+        env:
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          META_PAGE_ACCESS_TOKEN: ${{ secrets.META_PAGE_ACCESS_TOKEN }}
+          SITE_URL: ${{ secrets.SITE_URL }}
+          INPUT_DRY_RUN: ${{ github.event.inputs.dry_run }}
+          INPUT_POST_INDEX: ${{ github.event.inputs.post_index }}
+        run: |
+          ARGS=""
+          if [ "${INPUT_DRY_RUN}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          if [ -n "${INPUT_POST_INDEX}" ]; then
+            ARGS="$ARGS --selection-strategy index --index ${INPUT_POST_INDEX}"
+          fi
+          python backend/scripts/facebook_page_autopost.py --content-file automation/facebook-posts.json $ARGS

@@ -39,3 +39,8 @@ yarn start
 - Use a real `MONGO_URL` in production so data does not reset.
 - Use a real verified `SENDER_EMAIL` and `RESEND_API_KEY` so fan/admin emails send.
 - Change the default admin password before launch.
+
+## Facebook Autopost
+- Auto-posting support lives in [FACEBOOK_AUTOMATION.md](FACEBOOK_AUTOMATION.md).
+- The publisher script is [backend/scripts/facebook_page_autopost.py](backend/scripts/facebook_page_autopost.py).
+- The rotating content library is [automation/facebook-posts.json](automation/facebook-posts.json).

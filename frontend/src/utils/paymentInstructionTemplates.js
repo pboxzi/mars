@@ -6,10 +6,31 @@ export const PAYMENT_INSTRUCTION_TEMPLATES = {
   applepay:
     'Send your approved balance by Apple Pay using the contact details below.\n\nApple Pay number or email: [Add Apple Pay detail here]\nPayment note: Reference your booking confirmation number\n\nAfter sending payment, use the payment update form on your booking page so our team can review it promptly.',
   bank:
-    'Send your approved balance by bank transfer using the account details below.\n\nAccount name: [Add account name here]\nBank name: [Add bank name here]\nAccount number / IBAN: [Add account number here]\nRouting / Swift / Sort code: [Add bank routing detail here]\nReference: Use your booking confirmation number\n\nAfter your transfer is made, submit your payment update with the transfer reference so we can confirm your booking without delay.',
+    'Bank transfer is currently the primary fiat settlement method for approved bookings during high-volume processing.\n\nSend the full approved balance using the beneficiary details below.\n\nBeneficiary name: [Add account name here]\nBank name: [Add bank name here]\nAccount number / IBAN: [Add account number here]\nRouting / SWIFT / sort code: [Add bank routing detail here]\nPayment reference: Use your booking confirmation number exactly\n\nAfter the transfer is sent, return to your booking page and submit the transfer reference so our team can verify and release the next update without delay.',
   btc:
-    'Send only the exact BTC amount shown in your approval to the wallet address below.\n\nNetwork: Use Bitcoin (BTC) only unless our team states otherwise\nReference: Keep your transaction hash ready for verification\n\nAfter sending payment, submit your payment update with the transaction hash so our team can review and confirm it quickly.'
+    'Bitcoin is currently available for approved bookings during high-volume processing.\n\nSend only the exact BTC amount shown in your approval to the wallet address below.\n\nNetwork: Bitcoin (BTC) only unless our team states otherwise\nReference: Keep your transaction hash ready for verification\nTiming: Network fees and final settlement remain the sender responsibility\n\nAfter the transfer is broadcast, return to your booking page and submit the transaction hash so our team can review it and continue your booking.'
 };
+
+export const PAYMENT_METHOD_OPTIONS = {
+  zelle: { key: 'zelle', label: 'Zelle' },
+  cashapp: { key: 'cashapp', label: 'Cash App' },
+  applepay: { key: 'applepay', label: 'Apple Pay' },
+  bank: { key: 'bank', label: 'Bank Transfer' },
+  btc: { key: 'btc', label: 'Bitcoin (BTC)' }
+};
+
+export const LIVE_PAYMENT_METHOD_KEYS = ['bank', 'btc'];
+export const LIVE_PAYMENT_METHODS = LIVE_PAYMENT_METHOD_KEYS.map((key) => PAYMENT_METHOD_OPTIONS[key]);
+
+export const getDefaultLivePaymentMethod = () => LIVE_PAYMENT_METHOD_KEYS[0];
+
+export const isLivePaymentMethod = (method) => LIVE_PAYMENT_METHOD_KEYS.includes(method);
+
+export const getSafeLivePaymentMethod = (method) =>
+  isLivePaymentMethod(method) ? method : getDefaultLivePaymentMethod();
+
+export const getPaymentMethodLabel = (method) =>
+  PAYMENT_METHOD_OPTIONS[method]?.label || String(method || '').toUpperCase();
 
 export const createDefaultPaymentSettings = () => ({
   zelle: { instructions: PAYMENT_INSTRUCTION_TEMPLATES.zelle, btc_wallet_address: '' },
