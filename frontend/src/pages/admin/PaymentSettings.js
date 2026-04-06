@@ -141,30 +141,27 @@ const PaymentSettings = () => {
   const ActiveIcon = paymentIcons[activeMethod.key] || CreditCard;
 
   return (
-    <div className="space-y-6" data-testid="payment-settings">
+    <div className="space-y-5" data-testid="payment-settings">
       <div>
         <p className="text-xs uppercase tracking-[0.28em] text-[#9d172b]">Payments</p>
-        <h1 className="mt-2 text-3xl font-black text-[#151515] sm:text-4xl">Payment Settings</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600">
+        <h1 className="mt-1 text-3xl font-black text-[#151515] sm:text-4xl">Payment Settings</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">
           Keep payment instructions and support contact details simple and current.
         </p>
       </div>
 
-      <section className="rounded-[24px] border border-stone-200 bg-white p-5">
-        <div className="flex items-center gap-3">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
-            <Bitcoin className="h-6 w-6" />
-          </div>
+      <section className="rounded-[24px] border border-stone-200 bg-white p-4 sm:p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold text-stone-500">BTC Reference</p>
-            <p className="mt-1 text-2xl font-black text-[#151515]">
-              {btcPrice ? `$${btcPrice.toFixed(2)}` : 'Loading...'}
-            </p>
+            <p className="text-sm font-semibold text-stone-500">Payment Methods</p>
+            <h2 className="mt-1 text-2xl font-black text-[#151515]">Customer Instructions</h2>
+          </div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-700">
+            <Bitcoin className="h-4 w-4" />
+            BTC Ref {btcPrice ? `$${btcPrice.toFixed(2)}` : 'Loading...'}
           </div>
         </div>
-      </section>
 
-      <section className="rounded-[24px] border border-stone-200 bg-white p-5 sm:p-6">
         <div className="flex gap-2 overflow-x-auto pb-1">
           {methods.map((method) => (
             <button
@@ -182,25 +179,25 @@ const PaymentSettings = () => {
           ))}
         </div>
 
-        <div className="mt-6">
+        <div className="mt-4">
           <div className="flex items-center gap-3">
             <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-stone-100 text-stone-700">
               <ActiveIcon className="h-5 w-5" />
             </div>
             <div>
               <p className="text-sm font-semibold text-stone-500">Editing</p>
-              <h2 className="text-2xl font-black text-[#151515]">{activeMethod.label}</h2>
+              <h2 className="text-xl font-black text-[#151515]">{activeMethod.label}</h2>
             </div>
           </div>
 
-          <div className="mt-6 space-y-4">
+          <div className="mt-4 space-y-3.5">
             <div>
               <label className="mb-2 block text-sm font-semibold text-[#151515]">Instructions</label>
               <textarea
                 value={settings[activeMethod.key]?.instructions || ''}
                 onChange={(e) => handleSettingChange(activeMethod.key, 'instructions', e.target.value)}
                 className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
-                rows="7"
+                rows="5"
               />
             </div>
 
@@ -230,20 +227,33 @@ const PaymentSettings = () => {
         </div>
       </section>
 
-      <section className="rounded-[24px] border border-stone-200 bg-white p-5 sm:p-6">
-        <h2 className="text-2xl font-black text-[#151515]">Support Details</h2>
-        <p className="mt-2 text-sm leading-7 text-stone-600">
-          These details appear across booking pages and customer emails.
-        </p>
+      <section className="rounded-[24px] border border-stone-200 bg-white p-4 sm:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-black text-[#151515]">Support Details</h2>
+            <p className="mt-1 text-sm leading-6 text-stone-600">
+              Used across booking pages and customer emails.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleSaveSupport}
+            disabled={loading}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#151515] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            <Save className="h-4 w-4" />
+            Save Support
+          </button>
+        </div>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
           <div>
             <label className="mb-2 block text-sm font-semibold text-[#151515]">Support Email</label>
             <input
               type="email"
               value={supportSettings.support_email}
               onChange={(e) => handleSupportChange('support_email', e.target.value)}
-              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
             />
           </div>
           <div>
@@ -252,7 +262,7 @@ const PaymentSettings = () => {
               type="text"
               value={supportSettings.support_phone}
               onChange={(e) => handleSupportChange('support_phone', e.target.value)}
-              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
             />
           </div>
           <div>
@@ -261,7 +271,7 @@ const PaymentSettings = () => {
               type="text"
               value={supportSettings.support_whatsapp}
               onChange={(e) => handleSupportChange('support_whatsapp', e.target.value)}
-              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
             />
           </div>
           <div>
@@ -270,30 +280,20 @@ const PaymentSettings = () => {
               type="text"
               value={supportSettings.support_instagram}
               onChange={(e) => handleSupportChange('support_instagram', e.target.value)}
-              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
             />
           </div>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-3">
           <label className="mb-2 block text-sm font-semibold text-[#151515]">Response Hours</label>
           <input
             type="text"
             value={supportSettings.support_hours}
             onChange={(e) => handleSupportChange('support_hours', e.target.value)}
-            className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+            className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
           />
         </div>
-
-        <button
-          type="button"
-          onClick={handleSaveSupport}
-          disabled={loading}
-          className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-[#151515] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
-        >
-          <Save className="h-4 w-4" />
-          Save Support Details
-        </button>
       </section>
     </div>
   );

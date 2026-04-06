@@ -161,12 +161,12 @@ const EventManagement = () => {
   };
 
   return (
-    <div className="space-y-6" data-testid="event-management">
+    <div className="space-y-5" data-testid="event-management">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.28em] text-[#9d172b]">Events</p>
-          <h1 className="mt-2 text-3xl font-black text-[#151515] sm:text-4xl">Event Manager</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600">
+          <h1 className="mt-1 text-3xl font-black text-[#151515] sm:text-4xl">Event Manager</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">
             Add, edit, and remove tour dates in one simple workspace.
           </p>
         </div>
@@ -183,11 +183,11 @@ const EventManagement = () => {
       </div>
 
       {showForm && (
-        <section className="rounded-[24px] border border-stone-200 bg-white p-5 sm:p-6" data-testid="event-form">
+        <section className="rounded-[24px] border border-stone-200 bg-white p-4 sm:p-5" data-testid="event-form">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-stone-500">Event Form</p>
-              <h2 className="mt-1 text-2xl font-black text-[#151515]">
+              <h2 className="mt-1 text-xl font-black text-[#151515] sm:text-2xl">
                 {editingEvent ? 'Edit Event' : 'New Event'}
               </h2>
             </div>
@@ -200,15 +200,15 @@ const EventManagement = () => {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+          <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
+            <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-[#151515]">Event Title</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
                   required
                 />
               </div>
@@ -218,20 +218,20 @@ const EventManagement = () => {
                   type="text"
                   value={formData.venue}
                   onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
-                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
                   required
                 />
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-3">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-[#151515]">City</label>
                 <input
                   type="text"
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
                   required
                 />
               </div>
@@ -241,7 +241,7 @@ const EventManagement = () => {
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
                   required
                 />
               </div>
@@ -251,21 +251,35 @@ const EventManagement = () => {
                   type="time"
                   value={formData.time}
                   onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
+                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
                   required
                 />
               </div>
             </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-[#151515]">Image URL</label>
-              <input
-                type="url"
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
-                required
-              />
+            <div className="grid gap-3 sm:grid-cols-[1fr,180px]">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-[#151515]">Image URL</label>
+                <input
+                  type="url"
+                  value={formData.image_url}
+                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-[#151515]">Status</label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
             </div>
 
             <div>
@@ -273,31 +287,19 @@ const EventManagement = () => {
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
-                rows="4"
+                className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
+                rows="3"
                 required
               />
             </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-[#151515]">Status</label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
-              >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-
-            <div className="border-t border-stone-200 pt-6">
-              <h3 className="text-xl font-black text-[#151515]">Premium Experience Tiers</h3>
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div className="border-t border-stone-200 pt-4">
+              <h3 className="text-lg font-black text-[#151515]">Premium Experience Tiers</h3>
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
                 {PREMIUM_TICKET_TIERS.map((tier) => (
-                  <div key={tier.type} className="rounded-[20px] border border-stone-200 bg-stone-50 p-4">
+                  <div key={tier.type} className="rounded-[20px] border border-stone-200 bg-stone-50 p-3.5">
                     <h4 className="font-bold text-[#151515]">{tier.label}</h4>
-                    <div className="mt-3 space-y-3">
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
                       <div>
                         <label className="mb-1 block text-sm text-stone-500">Price ($)</label>
                         <input
@@ -305,7 +307,7 @@ const EventManagement = () => {
                           step="0.01"
                           value={ticketData[tier.type].price_usd}
                           onChange={(e) => handleTicketChange(tier.type, 'price_usd', e.target.value)}
-                          className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5"
+                          className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm"
                         />
                       </div>
                       <div>
@@ -318,7 +320,7 @@ const EventManagement = () => {
                             handleTicketChange(tier.type, 'total_quantity', value);
                             handleTicketChange(tier.type, 'available_quantity', value);
                           }}
-                          className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5"
+                          className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm"
                         />
                       </div>
                     </div>
@@ -342,8 +344,8 @@ const EventManagement = () => {
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {events.map((event) => (
           <div key={event.id} className="overflow-hidden rounded-[24px] border border-stone-200 bg-white">
-            <img src={event.image_url} alt={event.title} className="h-48 w-full object-cover" />
-            <div className="p-5">
+            <img src={event.image_url} alt={event.title} className="h-44 w-full object-cover" />
+            <div className="p-4">
               <div className="flex items-start justify-between gap-3">
                 <h3 className="text-xl font-black text-[#151515]">{event.title}</h3>
                 <span className={`rounded-full px-3 py-1 text-xs font-bold ${
@@ -356,7 +358,7 @@ const EventManagement = () => {
               <p className="mt-1 text-sm text-stone-600">{event.city}</p>
               <p className="mt-1 text-sm text-stone-500">{event.date} | {event.time}</p>
 
-              <div className="mt-5 flex gap-2">
+              <div className="mt-4 flex gap-2">
                 <button
                   type="button"
                   onClick={() => handleEdit(event)}

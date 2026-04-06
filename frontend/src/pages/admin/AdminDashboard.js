@@ -56,59 +56,59 @@ const AdminDashboard = () => {
     );
   }
 
+  const activeQueue = stats.pending_count + stats.approved_count + stats.paid_count;
+  const headlineCards = [
+    { label: 'Requests', value: stats.total_requests, note: 'All files on record' },
+    { label: 'Revenue', value: `$${stats.total_revenue.toFixed(2)}`, note: 'Confirmed bookings' },
+    { label: 'Active Queue', value: activeQueue, note: 'Pending to paid' },
+  ];
+
   return (
-    <div className="space-y-6" data-testid="admin-dashboard">
+    <div className="space-y-5" data-testid="admin-dashboard">
       <div>
         <p className="text-xs uppercase tracking-[0.28em] text-[#9d172b]">Dashboard</p>
-        <h1 className="mt-2 text-3xl font-black text-[#151515] sm:text-4xl">Overview</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600">
-          A simple view of bookings, status counts, and recent activity.
+        <h1 className="mt-1 text-3xl font-black text-[#151515] sm:text-4xl">Overview</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">
+          Status counts, recent bookings, and a quick read on what still needs attention.
         </p>
       </div>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <div className="rounded-[24px] border border-stone-200 bg-white p-5 sm:col-span-2 xl:col-span-1">
-          <p className="text-sm font-semibold text-stone-500">Total Requests</p>
-          <p className="mt-3 text-4xl font-black text-[#151515]">{stats.total_requests}</p>
-          <p className="mt-2 text-sm text-stone-500">All booking files currently on record.</p>
-        </div>
-
-        <div className="rounded-[24px] border border-stone-200 bg-white p-5 sm:col-span-2 xl:col-span-1">
-          <p className="text-sm font-semibold text-stone-500">Revenue</p>
-          <p className="mt-3 text-4xl font-black text-[#151515]">${stats.total_revenue.toFixed(2)}</p>
-          <p className="mt-2 text-sm text-stone-500">Total value from confirmed bookings.</p>
-        </div>
-
-        <div className="rounded-[24px] border border-stone-200 bg-white p-5 sm:col-span-2 xl:col-span-1">
-          <p className="text-sm font-semibold text-stone-500">Active Queue</p>
-          <p className="mt-3 text-4xl font-black text-[#151515]">
-            {stats.pending_count + stats.approved_count + stats.paid_count}
-          </p>
-          <p className="mt-2 text-sm text-stone-500">Items still moving through the process.</p>
-        </div>
+      <section className="grid gap-3 sm:grid-cols-3">
+        {headlineCards.map((card) => (
+          <div key={card.label} className="rounded-[22px] border border-stone-200 bg-white p-4 sm:p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">{card.label}</p>
+            <p className="mt-3 text-3xl font-black text-[#151515] sm:text-[2rem]">{card.value}</p>
+            <p className="mt-1 text-sm text-stone-500">{card.note}</p>
+          </div>
+        ))}
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {dashboardCards.map((item) => {
           const Icon = item.icon;
           const tone = statusTone[item.key.replace('_count', '')] || 'bg-stone-100 text-stone-700';
           return (
-            <div key={item.key} className="rounded-[24px] border border-stone-200 bg-white p-5">
+            <div key={item.key} className="rounded-[22px] border border-stone-200 bg-white p-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-stone-500">{item.label}</p>
-                <div className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${tone}`}>
-                  <Icon className="h-5 w-5" />
+                <div className={`inline-flex h-9 w-9 items-center justify-center rounded-2xl ${tone}`}>
+                  <Icon className="h-4 w-4" />
                 </div>
               </div>
-              <p className="mt-4 text-3xl font-black text-[#151515]">{stats[item.key]}</p>
+              <p className="mt-3 text-3xl font-black text-[#151515]">{stats[item.key]}</p>
             </div>
           );
         })}
       </section>
 
       <section className="rounded-[24px] border border-stone-200 bg-white">
-        <div className="border-b border-stone-200 px-5 py-4 sm:px-6">
-          <h2 className="text-xl font-black text-[#151515]">Recent Bookings</h2>
+        <div className="flex items-center justify-between gap-3 border-b border-stone-200 px-5 py-4 sm:px-6">
+          <div>
+            <h2 className="text-xl font-black text-[#151515]">Recent Bookings</h2>
+            <p className="mt-1 text-sm text-stone-500">
+              {stats.recent_bookings.length} recent {stats.recent_bookings.length === 1 ? 'record' : 'records'}
+            </p>
+          </div>
         </div>
 
         <div className="md:hidden">
@@ -117,7 +117,7 @@ const AdminDashboard = () => {
           ) : (
             <div className="space-y-3 p-4">
               {stats.recent_bookings.map((booking) => (
-                <div key={booking.id} className="rounded-[20px] border border-stone-200 bg-stone-50 p-4">
+                <div key={booking.id} className="rounded-[18px] border border-stone-200 bg-stone-50 p-3.5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="font-mono text-xs text-stone-500">{booking.confirmation_number}</p>

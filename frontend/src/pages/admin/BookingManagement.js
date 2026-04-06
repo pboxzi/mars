@@ -21,7 +21,11 @@ const statusTone = {
   rejected: 'bg-rose-50 text-rose-700',
 };
 
-const createApprovalData = (method = getDefaultLivePaymentMethod(), paymentSettings = defaultPaymentSettings, adminNotes = '') => ({
+const createApprovalData = (
+  method = getDefaultLivePaymentMethod(),
+  paymentSettings = defaultPaymentSettings,
+  adminNotes = ''
+) => ({
   payment_method: method,
   payment_instructions: paymentSettings[method]?.instructions || '',
   btc_wallet_address: method === 'btc' ? paymentSettings.btc?.btc_wallet_address || '' : '',
@@ -205,6 +209,28 @@ const BookingManagement = () => {
     }
   };
 
+  const getProgressAction = (booking) => {
+    if (booking.status === 'approved') {
+      return {
+        label: 'Mark Paid',
+        icon: DollarSign,
+        onClick: () => handleMarkPaid(booking.id, booking.customer_payment_reference || ''),
+        tone: 'bg-emerald-600 text-white',
+      };
+    }
+
+    if (booking.status === 'paid') {
+      return {
+        label: 'Confirm',
+        icon: CheckCircle2,
+        onClick: () => handleConfirm(booking.id),
+        tone: 'bg-[#151515] text-white',
+      };
+    }
+
+    return null;
+  };
+
   const filteredBookings = filterStatus === 'all'
     ? bookings
     : bookings.filter((booking) => booking.status === filterStatus);
@@ -218,17 +244,20 @@ const BookingManagement = () => {
     { value: 'rejected', label: 'Rejected', count: bookings.filter((item) => item.status === 'rejected').length },
   ];
 
+  const selectedProgressAction = selectedBooking ? getProgressAction(selectedBooking) : null;
+  const SelectedProgressIcon = selectedProgressAction ? selectedProgressAction.icon : null;
+
   return (
-    <div className="space-y-6" data-testid="booking-management">
+    <div className="space-y-5" data-testid="booking-management">
       <div>
         <p className="text-xs uppercase tracking-[0.28em] text-[#9d172b]">Bookings</p>
-        <h1 className="mt-2 text-3xl font-black text-[#151515] sm:text-4xl">Booking Queue</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600">
-          Review requests, move them through the process, or delete them when needed.
+        <h1 className="mt-1 text-3xl font-black text-[#151515] sm:text-4xl">Booking Queue</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">
+          Review requests, move them forward, or remove them when needed.
         </p>
       </div>
 
-      <section className="rounded-[24px] border border-stone-200 bg-white p-4 sm:p-5">
+      <section className="rounded-[24px] border border-stone-200 bg-white p-3 sm:p-4">
         <div className="flex gap-2 overflow-x-auto pb-1">
           {tabs.map((tab) => (
             <button
@@ -242,7 +271,12 @@ const BookingManagement = () => {
               }`}
               data-testid={`tab-${tab.value}`}
             >
-              {tab.label} ({tab.count})
+              {tab.label}
+              <span className={`ml-2 inline-flex min-w-6 items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] ${
+                filterStatus === tab.value ? 'bg-white/20 text-white' : 'bg-white text-stone-500'
+              }`}>
+                {tab.count}
+              </span>
             </button>
           ))}
         </div>
@@ -255,55 +289,70 @@ const BookingManagement = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredBookings.map((booking) => (
-              <div key={booking.id} className="rounded-[24px] border border-stone-200 bg-white p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-mono text-xs text-stone-500">{booking.confirmation_number}</p>
-                    <p className="mt-1 text-base font-bold text-[#151515]">{booking.customer_name}</p>
-                    <p className="mt-1 break-all text-sm text-stone-500">{booking.email}</p>
-                  </div>
-                  <span className={`rounded-full px-3 py-1 text-[11px] font-bold ${statusTone[booking.status] || 'bg-stone-100 text-stone-700'}`}>
-                    {booking.status.toUpperCase()}
-                  </span>
-                </div>
+            {filteredBookings.map((booking) => {
+              const progressAction = getProgressAction(booking);
+              const ProgressIcon = progressAction ? progressAction.icon : null;
 
-                <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-stone-600">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-stone-400">Access</p>
-                    <p className="mt-1">{getTicketTierLabel(booking.ticket_type)}</p>
+              return (
+                <div key={booking.id} className="rounded-[22px] border border-stone-200 bg-white p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-mono text-xs text-stone-500">{booking.confirmation_number}</p>
+                      <p className="mt-1 text-base font-bold text-[#151515]">{booking.customer_name}</p>
+                      <p className="mt-1 break-all text-sm text-stone-500">{booking.email}</p>
+                    </div>
+                    <span className={`rounded-full px-3 py-1 text-[11px] font-bold ${statusTone[booking.status] || 'bg-stone-100 text-stone-700'}`}>
+                      {booking.status.toUpperCase()}
+                    </span>
                   </div>
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-stone-400">Quantity</p>
-                    <p className="mt-1">{booking.quantity}</p>
-                  </div>
-                  <div className="col-span-2">
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-stone-400">Date</p>
-                    <p className="mt-1">{new Date(booking.request_date).toLocaleDateString()}</p>
-                  </div>
-                </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => openBooking(booking)}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#151515] px-4 py-3 text-sm font-semibold text-white"
-                  >
-                    <Eye className="h-4 w-4" />
-                    Open
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteBooking(booking)}
-                    disabled={deletingBookingId === booking.id}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    {deletingBookingId === booking.id ? 'Deleting...' : 'Delete'}
-                  </button>
+                  <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-stone-600">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.15em] text-stone-400">Access</p>
+                      <p className="mt-1">{getTicketTierLabel(booking.ticket_type)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.15em] text-stone-400">Quantity</p>
+                      <p className="mt-1">{booking.quantity}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-[11px] uppercase tracking-[0.15em] text-stone-400">Date</p>
+                      <p className="mt-1">{new Date(booking.request_date).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+
+                  <div className={`mt-4 grid gap-2 ${progressAction ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                    <button
+                      type="button"
+                      onClick={() => openBooking(booking)}
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-[#151515] px-4 py-2.5 text-sm font-semibold text-white"
+                    >
+                      <Eye className="h-4 w-4" />
+                      Open
+                    </button>
+                    {progressAction && ProgressIcon && (
+                      <button
+                        type="button"
+                        onClick={progressAction.onClick}
+                        className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold ${progressAction.tone}`}
+                      >
+                        <ProgressIcon className="h-4 w-4" />
+                        {progressAction.label}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteBooking(booking)}
+                      disabled={deletingBookingId === booking.id}
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 disabled:opacity-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      {deletingBookingId === booking.id ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
@@ -331,63 +380,62 @@ const BookingManagement = () => {
                   </td>
                 </tr>
               ) : (
-                filteredBookings.map((booking) => (
-                  <tr key={booking.id} className="border-t border-stone-200">
-                    <td className="px-6 py-4 font-mono text-sm">{booking.confirmation_number}</td>
-                    <td className="px-6 py-4">{booking.customer_name}</td>
-                    <td className="px-6 py-4 text-sm">
-                      <div>{booking.email}</div>
-                      <div className="text-stone-500">{booking.phone}</div>
-                    </td>
-                    <td className="px-6 py-4">{getTicketTierLabel(booking.ticket_type)}</td>
-                    <td className="px-6 py-4">{booking.quantity}</td>
-                    <td className="px-6 py-4">
-                      <span className={`rounded-full px-3 py-1 text-xs font-bold ${statusTone[booking.status] || 'bg-stone-100 text-stone-700'}`}>
-                        {booking.status.toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-stone-500">
-                      {new Date(booking.request_date).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => openBooking(booking)}
-                          className="inline-flex items-center justify-center rounded-full bg-[#151515] p-2 text-white"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        {booking.status === 'approved' && (
+                filteredBookings.map((booking) => {
+                  const progressAction = getProgressAction(booking);
+                  const ProgressIcon = progressAction ? progressAction.icon : null;
+
+                  return (
+                    <tr key={booking.id} className="border-t border-stone-200">
+                      <td className="px-6 py-4 font-mono text-sm">{booking.confirmation_number}</td>
+                      <td className="px-6 py-4">{booking.customer_name}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <div>{booking.email}</div>
+                        <div className="text-stone-500">{booking.phone}</div>
+                      </td>
+                      <td className="px-6 py-4">{getTicketTierLabel(booking.ticket_type)}</td>
+                      <td className="px-6 py-4">{booking.quantity}</td>
+                      <td className="px-6 py-4">
+                        <span className={`rounded-full px-3 py-1 text-xs font-bold ${statusTone[booking.status] || 'bg-stone-100 text-stone-700'}`}>
+                          {booking.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-stone-500">
+                        {new Date(booking.request_date).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-wrap gap-2">
                           <button
                             type="button"
-                            onClick={() => handleMarkPaid(booking.id, booking.customer_payment_reference || '')}
-                            className="inline-flex items-center justify-center rounded-full bg-emerald-600 p-2 text-white"
+                            onClick={() => openBooking(booking)}
+                            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#151515] px-3 py-2 text-xs font-semibold text-white"
                           >
-                            <DollarSign className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
+                            Open
                           </button>
-                        )}
-                        {booking.status === 'paid' && (
+                          {progressAction && ProgressIcon && (
+                            <button
+                              type="button"
+                              onClick={progressAction.onClick}
+                              className={`inline-flex items-center justify-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ${progressAction.tone}`}
+                            >
+                              <ProgressIcon className="h-4 w-4" />
+                              {progressAction.label}
+                            </button>
+                          )}
                           <button
                             type="button"
-                            onClick={() => handleConfirm(booking.id)}
-                            className="inline-flex items-center justify-center rounded-full bg-emerald-600 p-2 text-white"
+                            onClick={() => handleDeleteBooking(booking)}
+                            disabled={deletingBookingId === booking.id}
+                            className="inline-flex items-center justify-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 disabled:opacity-50"
                           >
-                            <CheckCircle2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" />
+                            Delete
                           </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteBooking(booking)}
-                          disabled={deletingBookingId === booking.id}
-                          className="inline-flex items-center justify-center rounded-full bg-rose-600 p-2 text-white disabled:opacity-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -396,12 +444,17 @@ const BookingManagement = () => {
 
       {selectedBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[28px] bg-white p-6 shadow-[0_20px_60px_rgba(0,0,0,0.18)] sm:p-8">
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[28px] bg-white p-5 shadow-[0_20px_60px_rgba(0,0,0,0.18)] sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-[#9d172b]">Booking</p>
-                <h2 className="mt-2 text-2xl font-black text-[#151515]">{selectedBooking.customer_name}</h2>
-                <p className="mt-1 font-mono text-sm text-stone-500">{selectedBooking.confirmation_number}</p>
+                <h2 className="mt-1 text-2xl font-black text-[#151515]">{selectedBooking.customer_name}</h2>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <p className="font-mono text-sm text-stone-500">{selectedBooking.confirmation_number}</p>
+                  <span className={`inline-flex rounded-full px-3 py-1 text-[11px] font-bold ${statusTone[selectedBooking.status] || 'bg-stone-100 text-stone-700'}`}>
+                    {selectedBooking.status.toUpperCase()}
+                  </span>
+                </div>
               </div>
               <button
                 type="button"
@@ -412,44 +465,34 @@ const BookingManagement = () => {
               </button>
             </div>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 p-4">
                 <p className="text-sm font-semibold text-stone-500">Guest</p>
-                <div className="mt-4 space-y-3 text-sm text-stone-700">
+                <div className="mt-3 grid gap-3 text-sm text-stone-700">
                   <div>
-                    <p className="text-stone-400">Name</p>
-                    <p className="mt-1 font-semibold">{selectedBooking.customer_name}</p>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-stone-400">Email</p>
+                    <p className="mt-1 break-all font-medium">{selectedBooking.email}</p>
                   </div>
                   <div>
-                    <p className="text-stone-400">Email</p>
-                    <p className="mt-1 break-all">{selectedBooking.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-stone-400">Phone</p>
-                    <p className="mt-1">{selectedBooking.phone}</p>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-stone-400">Phone</p>
+                    <p className="mt-1">{selectedBooking.phone || 'Not provided'}</p>
                   </div>
                 </div>
               </div>
 
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 p-4">
                 <p className="text-sm font-semibold text-stone-500">Order</p>
-                <div className="mt-4 space-y-3 text-sm text-stone-700">
+                <div className="mt-3 grid gap-3 text-sm text-stone-700">
                   <div>
-                    <p className="text-stone-400">Status</p>
-                    <span className={`mt-1 inline-flex rounded-full px-3 py-1 text-xs font-bold ${statusTone[selectedBooking.status] || 'bg-stone-100 text-stone-700'}`}>
-                      {selectedBooking.status.toUpperCase()}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-stone-400">Access</p>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-stone-400">Access</p>
                     <p className="mt-1">{getTicketTierLabel(selectedBooking.ticket_type)}</p>
                   </div>
                   <div>
-                    <p className="text-stone-400">Quantity</p>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-stone-400">Quantity</p>
                     <p className="mt-1">{selectedBooking.quantity}</p>
                   </div>
                   <div>
-                    <p className="text-stone-400">Requested</p>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-stone-400">Requested</p>
                     <p className="mt-1">{new Date(selectedBooking.request_date).toLocaleString()}</p>
                   </div>
                 </div>
@@ -457,34 +500,34 @@ const BookingManagement = () => {
             </div>
 
             {selectedBooking.message && (
-              <div className="mt-4 rounded-[20px] border border-stone-200 bg-white p-4">
-                <p className="text-sm font-semibold text-stone-500">Message</p>
-                <p className="mt-3 text-sm leading-7 text-stone-700">{selectedBooking.message}</p>
+              <div className="mt-3 rounded-[20px] border border-stone-200 bg-white p-4">
+                <p className="text-sm font-semibold text-stone-500">Customer Message</p>
+                <p className="mt-2 text-sm leading-6 text-stone-700">{selectedBooking.message}</p>
               </div>
             )}
 
             {selectedBooking.customer_payment_submitted_at && (
-              <div className="mt-4 rounded-[20px] border border-emerald-200 bg-emerald-50 p-4">
+              <div className="mt-3 rounded-[20px] border border-emerald-200 bg-emerald-50 p-4">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4 text-emerald-700" />
                   <p className="text-sm font-semibold text-emerald-800">Customer Payment Update</p>
                 </div>
-                <div className="mt-4 grid gap-3 text-sm text-emerald-900 md:grid-cols-2">
+                <div className="mt-3 grid gap-3 text-sm text-emerald-900 md:grid-cols-2">
                   <div>
-                    <p className="text-emerald-700">Submitted</p>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-emerald-700">Submitted</p>
                     <p className="mt-1">{new Date(selectedBooking.customer_payment_submitted_at).toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-emerald-700">Method</p>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-emerald-700">Method</p>
                     <p className="mt-1 uppercase">{selectedBooking.customer_payment_method || 'Not provided'}</p>
                   </div>
                   <div>
-                    <p className="text-emerald-700">Reference</p>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-emerald-700">Reference</p>
                     <p className="mt-1">{selectedBooking.customer_payment_reference || 'Not provided'}</p>
                   </div>
                   {selectedBooking.customer_payment_amount && (
                     <div>
-                      <p className="text-emerald-700">Amount</p>
+                      <p className="text-[11px] uppercase tracking-[0.15em] text-emerald-700">Amount</p>
                       <p className="mt-1">${Number(selectedBooking.customer_payment_amount).toLocaleString()}</p>
                     </div>
                   )}
@@ -493,9 +536,9 @@ const BookingManagement = () => {
             )}
 
             {selectedBooking.status === 'pending' && (
-              <div className="mt-4 rounded-[20px] border border-stone-200 bg-white p-4">
-                <h3 className="text-lg font-black text-[#151515]">Approve Booking</h3>
-                <div className="mt-4 space-y-4">
+              <div className="mt-3 rounded-[20px] border border-stone-200 bg-white p-4">
+                <h3 className="text-lg font-black text-[#151515]">Approval</h3>
+                <div className="mt-3 space-y-3.5">
                   <div>
                     <label className="mb-2 block text-sm font-semibold text-[#151515]">Payment Method</label>
                     <select
@@ -519,12 +562,12 @@ const BookingManagement = () => {
                       value={approvalData.payment_instructions}
                       onChange={(e) => setApprovalData({ ...approvalData, payment_instructions: e.target.value })}
                       className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
-                      rows="5"
+                      rows="4"
                     />
                   </div>
 
                   {approvalData.payment_method === 'btc' && (
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-3 md:grid-cols-2">
                       <div>
                         <label className="mb-2 block text-sm font-semibold text-[#151515]">BTC Wallet Address</label>
                         <input
@@ -559,6 +602,7 @@ const BookingManagement = () => {
                       value={approvalData.admin_notes}
                       onChange={(e) => setApprovalData({ ...approvalData, admin_notes: e.target.value })}
                       className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm"
+                      placeholder="Optional note for this approval"
                     />
                   </div>
 
@@ -584,46 +628,37 @@ const BookingManagement = () => {
               </div>
             )}
 
-            {selectedBooking.status === 'approved' && (
-              <div className="mt-4 rounded-[20px] border border-stone-200 bg-white p-4">
-                <h3 className="text-lg font-black text-[#151515]">Payment Control</h3>
-                <p className="mt-2 text-sm text-stone-600">Mark this booking as paid after you verify the transfer.</p>
+            {selectedProgressAction && SelectedProgressIcon && (
+              <div className="mt-3 rounded-[20px] border border-stone-200 bg-white p-4">
+                <h3 className="text-lg font-black text-[#151515]">
+                  {selectedBooking.status === 'approved' ? 'Payment Control' : 'Final Step'}
+                </h3>
+                <p className="mt-1 text-sm text-stone-600">
+                  {selectedBooking.status === 'approved'
+                    ? 'Use this after the payment is verified.'
+                    : 'Finish the booking once everything is complete.'}
+                </p>
                 <button
                   type="button"
-                  onClick={() => handleMarkPaid(selectedBooking.id, selectedBooking.customer_payment_reference || '')}
-                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white"
+                  onClick={selectedProgressAction.onClick}
+                  className={`mt-3 inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold ${selectedProgressAction.tone}`}
                 >
-                  <DollarSign className="h-4 w-4" />
-                  Mark Paid
-                </button>
-              </div>
-            )}
-
-            {selectedBooking.status === 'paid' && (
-              <div className="mt-4 rounded-[20px] border border-stone-200 bg-white p-4">
-                <h3 className="text-lg font-black text-[#151515]">Final Step</h3>
-                <p className="mt-2 text-sm text-stone-600">Confirm the booking when everything is complete.</p>
-                <button
-                  type="button"
-                  onClick={() => handleConfirm(selectedBooking.id)}
-                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-[#151515] px-5 py-3 text-sm font-semibold text-white"
-                >
-                  <CheckCircle2 className="h-4 w-4" />
-                  Confirm Booking
+                  <SelectedProgressIcon className="h-4 w-4" />
+                  {selectedProgressAction.label}
                 </button>
               </div>
             )}
 
             {(selectedBooking.status === 'approved' || selectedBooking.status === 'paid' || selectedBooking.status === 'confirmed') && selectedBooking.payment_instructions && (
-              <div className="mt-4 rounded-[20px] border border-stone-200 bg-white p-4">
+              <div className="mt-3 rounded-[20px] border border-stone-200 bg-white p-4">
                 <p className="text-sm font-semibold text-stone-500">Payment Instructions Sent</p>
-                <div className="mt-3 rounded-2xl bg-stone-50 p-4 text-sm leading-7 text-stone-700">
+                <div className="mt-3 rounded-2xl bg-stone-50 p-4 text-sm leading-6 text-stone-700">
                   <p className="whitespace-pre-wrap">{selectedBooking.payment_instructions}</p>
                 </div>
               </div>
             )}
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
               <button
                 type="button"
                 onClick={closeBooking}
@@ -635,7 +670,7 @@ const BookingManagement = () => {
                 type="button"
                 onClick={() => handleDeleteBooking(selectedBooking)}
                 disabled={deletingBookingId === selectedBooking.id}
-                className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700 disabled:opacity-50"
               >
                 <Trash2 className="h-4 w-4" />
                 {deletingBookingId === selectedBooking.id ? 'Deleting...' : 'Delete Booking'}
