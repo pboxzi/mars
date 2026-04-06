@@ -112,6 +112,7 @@ PAYMENT_UPDATE_RATE_LIMIT = int(os.environ.get('PAYMENT_UPDATE_RATE_LIMIT', '6')
 PAYMENT_UPDATE_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get('PAYMENT_UPDATE_RATE_LIMIT_WINDOW_SECONDS', '900'))
 PUBLIC_VISIT_RATE_LIMIT = int(os.environ.get('PUBLIC_VISIT_RATE_LIMIT', '20'))
 PUBLIC_VISIT_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get('PUBLIC_VISIT_RATE_LIMIT_WINDOW_SECONDS', '300'))
+TOUR_SCHEDULE_SYNC_INTERVAL_SECONDS = max(int(os.environ.get('TOUR_SCHEDULE_SYNC_INTERVAL_SECONDS', '900')), 0)
 resend.api_key = RESEND_API_KEY
 
 if (TURNSTILE_SITE_KEY and not TURNSTILE_SECRET_KEY) or (TURNSTILE_SECRET_KEY and not TURNSTILE_SITE_KEY):
@@ -138,6 +139,8 @@ app = FastAPI()
 api_router = APIRouter(prefix="/api")
 PUBLIC_RATE_LIMITS: Dict[str, List[float]] = {}
 PUBLIC_RATE_LIMIT_LOCK = asyncio.Lock()
+TOUR_SCHEDULE_LAST_SYNC: Optional[datetime] = None
+TOUR_SCHEDULE_SYNC_LOCK = asyncio.Lock()
 BTC_PRICE_CACHE = {
     "btc_to_usd": None,
     "timestamp": None,
@@ -1126,49 +1129,72 @@ def build_official_event_document(schedule_item: dict) -> dict:
     return doc
 
 
-async def ensure_official_tour_schedule() -> None:
+async def ensure_official_tour_schedule(force: bool = False) -> None:
     """Make sure the official Bruno tour schedule exists in the database."""
-    existing_events = await db.events.find({}, {"_id": 0, "id": 1, "date": 1, "venue": 1, "city": 1}).to_list(500)
-    existing_keys = {
-        normalize_event_key(event.get('date', ''), event.get('venue', ''), event.get('city', '')): event
-        for event in existing_events
-    }
+    global TOUR_SCHEDULE_LAST_SYNC
 
-    seeded_event_ids = []
+    now = datetime.now(timezone.utc)
+    if (
+        not force
+        and TOUR_SCHEDULE_SYNC_INTERVAL_SECONDS > 0
+        and TOUR_SCHEDULE_LAST_SYNC is not None
+        and (now - TOUR_SCHEDULE_LAST_SYNC).total_seconds() < TOUR_SCHEDULE_SYNC_INTERVAL_SECONDS
+    ):
+        return
 
-    for schedule_item in OFFICIAL_TOUR_SCHEDULE:
-        normalized_key = normalize_event_key(schedule_item['date'], schedule_item['venue'], schedule_item['city'])
-        existing_event = existing_keys.get(normalized_key)
+    async with TOUR_SCHEDULE_SYNC_LOCK:
+        now = datetime.now(timezone.utc)
+        if (
+            not force
+            and TOUR_SCHEDULE_SYNC_INTERVAL_SECONDS > 0
+            and TOUR_SCHEDULE_LAST_SYNC is not None
+            and (now - TOUR_SCHEDULE_LAST_SYNC).total_seconds() < TOUR_SCHEDULE_SYNC_INTERVAL_SECONDS
+        ):
+            return
 
-        if existing_event:
-            seeded_event_ids.append(existing_event['id'])
-            continue
+        existing_events = await db.events.find({}, {"_id": 0, "id": 1, "date": 1, "venue": 1, "city": 1}).to_list(500)
+        existing_keys = {
+            normalize_event_key(event.get('date', ''), event.get('venue', ''), event.get('city', '')): event
+            for event in existing_events
+        }
 
-        event_doc = build_official_event_document(schedule_item)
-        await db.events.update_one(
-            {"id": event_doc['id']},
-            {"$setOnInsert": event_doc},
-            upsert=True
-        )
-        seeded_event_ids.append(event_doc['id'])
-        existing_keys[normalized_key] = {"id": event_doc['id']}
+        seeded_event_ids = []
 
-    for event_id in seeded_event_ids:
-        for ticket_setup in DEFAULT_TICKET_SETUP:
-            ticket = TicketType(
-                event_id=event_id,
-                type=ticket_setup['type'],
-                price_usd=ticket_setup['price_usd'],
-                available_quantity=ticket_setup['available_quantity'],
-                total_quantity=ticket_setup['total_quantity']
-            )
-            ticket_doc = ticket.model_dump()
-            ticket_doc['created_at'] = ticket_doc['created_at'].isoformat()
-            await db.ticket_types.update_one(
-                {"event_id": event_id, "type": ticket_doc['type']},
-                {"$setOnInsert": ticket_doc},
+        for schedule_item in OFFICIAL_TOUR_SCHEDULE:
+            normalized_key = normalize_event_key(schedule_item['date'], schedule_item['venue'], schedule_item['city'])
+            existing_event = existing_keys.get(normalized_key)
+
+            if existing_event:
+                seeded_event_ids.append(existing_event['id'])
+                continue
+
+            event_doc = build_official_event_document(schedule_item)
+            await db.events.update_one(
+                {"id": event_doc['id']},
+                {"$setOnInsert": event_doc},
                 upsert=True
             )
+            seeded_event_ids.append(event_doc['id'])
+            existing_keys[normalized_key] = {"id": event_doc['id']}
+
+        for event_id in seeded_event_ids:
+            for ticket_setup in DEFAULT_TICKET_SETUP:
+                ticket = TicketType(
+                    event_id=event_id,
+                    type=ticket_setup['type'],
+                    price_usd=ticket_setup['price_usd'],
+                    available_quantity=ticket_setup['available_quantity'],
+                    total_quantity=ticket_setup['total_quantity']
+                )
+                ticket_doc = ticket.model_dump()
+                ticket_doc['created_at'] = ticket_doc['created_at'].isoformat()
+                await db.ticket_types.update_one(
+                    {"event_id": event_id, "type": ticket_doc['type']},
+                    {"$setOnInsert": ticket_doc},
+                    upsert=True
+                )
+
+        TOUR_SCHEDULE_LAST_SYNC = datetime.now(timezone.utc)
 
 
 async def get_site_settings_model() -> SiteSettings:
@@ -3162,7 +3188,7 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_tasks():
-    await ensure_official_tour_schedule()
+    await ensure_official_tour_schedule(force=True)
     try:
         await db.public_visit_notifications.create_index("created_at")
         await db.public_visit_notifications.create_index("read_at")
