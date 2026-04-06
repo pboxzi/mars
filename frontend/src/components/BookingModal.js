@@ -228,10 +228,10 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
         >
           <div className="text-center">
             <CheckCircle className="mx-auto mb-4 h-14 w-14 text-[#9d172b]" />
-            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8c7f72]">Premium Request</div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8c7f72]">Access Request</div>
             <h2 className="mt-3 text-[34px] font-black uppercase tracking-[-0.05em]">Request Submitted</h2>
             <p className="mt-3 text-sm leading-7 text-[#5f564d]">
-              Your premium access request has been received for this Bruno Mars show.
+              Your premium access request has been received. Use your confirmation number to track approval and payment steps.
             </p>
 
             <div className="mt-6 rounded-[22px] border border-[#dfd2c0] bg-white px-5 py-4">
@@ -301,7 +301,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
               <div className="flex flex-1 flex-col justify-between p-6 text-white sm:p-8 lg:p-10">
                 <div>
                   <div className="inline-flex rounded-full border border-white/18 bg-white/8 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#f0c98d] backdrop-blur-sm">
-                    Official Bruno Mars Premium Access
+                    Premium Access Request
                   </div>
 
                   <div className="mt-8">
@@ -377,14 +377,13 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
             <div className="bg-[#fcfaf6] px-5 pb-6 pt-16 lg:max-h-[820px] lg:overflow-y-auto lg:px-7 lg:pb-8 lg:pt-12">
               <div>
                 <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8b7c6d]">
-                  Premium Tiers
+                  Access Options
                 </div>
                 <h3 className="mt-2 text-[28px] font-black uppercase tracking-[-0.05em] text-[#171717] lg:text-[30px]">
-                  Choose Your Access
+                  Choose Premium Access
                 </h3>
                 <p className="mt-2 max-w-[680px] text-[15px] leading-6 text-[#5f564d]">
-                  Select the premium experience that fits your guest plan. Each tier includes private handling,
-                  elevated access, and concierge-level coordination for this show.
+                  Select the access level that fits your plans. Your request is reviewed first, and payment instructions are only sent after approval.
                 </p>
               </div>
 
@@ -618,7 +617,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                       ? 'Submitting...'
                       : isLoadingTurnstileConfig
                         ? 'Loading Security Check...'
-                        : 'Submit Premium Request'}
+                        : 'Submit Access Request'}
                   </button>
                 </div>
               </div>

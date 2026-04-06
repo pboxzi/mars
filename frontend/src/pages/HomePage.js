@@ -264,7 +264,7 @@ const HomePage = () => {
             </a>
           ) : (
             <button type="button" onClick={openBookingRequest} className="homepage-promo-button">
-              TICKETS
+              REQUEST ACCESS
             </button>
           )}
         </div>
