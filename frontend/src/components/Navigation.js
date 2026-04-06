@@ -6,10 +6,12 @@ const NAV_LINKS = [
   { label: 'STORE', to: 'https://brunomars.lnk.to/officialstore', external: true, group: 'left' },
   { label: 'MUSIC', to: '/music', external: false, group: 'right' },
   { label: 'SUBSCRIBE', to: '/subscribe', external: false, group: 'right' },
-  { label: 'TRACK BOOKING', to: '/booking-status', external: false, group: 'right' }
+  { label: 'PREMIUM ACCESS', to: '/tour', external: false, group: 'right', accent: true }
 ];
 
 const renderLink = (item, className, onClick) => {
+  const nextClassName = item.accent ? `${className} nav-link-accent` : className;
+
   if (item.external) {
     return (
       <a
@@ -17,7 +19,7 @@ const renderLink = (item, className, onClick) => {
         href={item.to}
         target="_blank"
         rel="noreferrer"
-        className={className}
+        className={nextClassName}
         onClick={onClick}
       >
         {item.label}
@@ -29,7 +31,7 @@ const renderLink = (item, className, onClick) => {
     <Link
       key={item.label}
       to={item.to}
-      className={className}
+      className={nextClassName}
       onClick={onClick}
     >
       {item.label}
@@ -108,6 +110,26 @@ const Navigation = () => {
 
         .nav-link:hover {
           opacity: 0.6;
+        }
+
+        .nav-link-accent {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.65vw 1.1vw;
+          border-radius: 999px;
+          background: #151515;
+          color: #fff;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-link-accent:hover {
+          opacity: 1;
+          transform: translateY(-1px);
+          background: #8b1d2c;
+          color: #fff;
         }
 
         .mobile-logo,
@@ -215,6 +237,11 @@ const Navigation = () => {
 
           .site-menu-link {
             font-size: 6vw;
+          }
+
+          .nav-link-accent {
+            padding: 2.8vw 4.6vw;
+            font-size: 4.6vw;
           }
         }
       `}</style>
