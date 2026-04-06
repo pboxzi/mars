@@ -76,6 +76,14 @@ const formatReferrer = (visit) => {
   return 'Direct visit';
 };
 
+const formatIpAddress = (visit) => {
+  if (visit.ip_address) {
+    return visit.ip_address;
+  }
+
+  return 'IP unavailable';
+};
+
 const getDeviceIcon = (deviceType) => {
   const normalized = (deviceType || '').toLowerCase();
   if (normalized.includes('mobile')) {
@@ -88,7 +96,7 @@ const getDeviceIcon = (deviceType) => {
 };
 
 const buildDesktopNotificationBody = (visit) => {
-  const detailParts = [visit.source, visit.path, formatLocation(visit)].filter(Boolean);
+  const detailParts = [visit.source, visit.path, formatLocation(visit), formatIpAddress(visit)].filter(Boolean);
   return detailParts.join(' | ');
 };
 
@@ -371,6 +379,11 @@ const AdminNotificationCenter = ({ compact = false }) => {
                         <div className="flex items-center gap-2">
                           <MapPin className="h-3.5 w-3.5 shrink-0 text-[#9d172b]" />
                           <span className="break-words">{formatLocation(visit)}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Globe className="h-3.5 w-3.5 shrink-0 text-[#9d172b]" />
+                          <span className="break-all">IP: {formatIpAddress(visit)}</span>
                         </div>
 
                         <div className="flex items-center gap-2">
