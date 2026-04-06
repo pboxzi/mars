@@ -153,6 +153,52 @@ const TourPage = () => {
           padding: 4vw 0;
         }
 
+        .tour-status-loading {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.8vw;
+        }
+
+        .tour-status-kicker {
+          font-size: 0.78vw;
+          font-weight: 700;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: #8b1d2c;
+        }
+
+        .tour-status-title {
+          font-size: 1.3021vw;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+
+        .tour-status-loader {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.45vw;
+          margin-top: 0.2vw;
+        }
+
+        .tour-status-loader span {
+          width: 0.5vw;
+          height: 0.5vw;
+          border-radius: 999px;
+          background: #000;
+          opacity: 0.2;
+          animation: tourStatusPulse 1.2s infinite ease-in-out;
+        }
+
+        .tour-status-loader span:nth-child(2) {
+          animation-delay: 0.15s;
+        }
+
+        .tour-status-loader span:nth-child(3) {
+          animation-delay: 0.3s;
+        }
+
         .tour-status-message span {
           display: block;
           margin-top: 0.8vw;
@@ -161,6 +207,20 @@ const TourPage = () => {
           letter-spacing: 0.02em;
           text-transform: none;
           color: #4f4f4f;
+        }
+
+        @keyframes tourStatusPulse {
+          0%,
+          80%,
+          100% {
+            opacity: 0.2;
+            transform: scale(1);
+          }
+
+          40% {
+            opacity: 1;
+            transform: scale(1.1);
+          }
         }
 
         .tour-events-list {
@@ -311,6 +371,28 @@ const TourPage = () => {
             padding: 8vw 0;
           }
 
+          .tour-status-loading {
+            gap: 2.5vw;
+          }
+
+          .tour-status-kicker {
+            font-size: 2.8vw;
+          }
+
+          .tour-status-title {
+            font-size: 5.2vw;
+            line-height: 1.15;
+          }
+
+          .tour-status-loader {
+            gap: 1.6vw;
+          }
+
+          .tour-status-loader span {
+            width: 1.8vw;
+            height: 1.8vw;
+          }
+
           .tour-status-message span {
             margin-top: 2.5vw;
             font-size: 3.2vw;
@@ -329,9 +411,18 @@ const TourPage = () => {
 
         <section className="tour-page-content">
           {loading && (
-            <div className="tour-status-message">
-              Loading Tour Dates
-              {slowLoad && <span>First visit may take a few seconds while the live server wakes up.</span>}
+            <div className="tour-status-message tour-status-loading">
+              <div className="tour-status-kicker">Please Wait</div>
+              <div className="tour-status-title">Updating Current Tour Dates</div>
+              <div className="tour-status-loader" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </div>
+              <span>
+                Please stay on this page while we update the current tour dates for this tour.
+                {slowLoad ? ' First visit may take a few seconds while the live server wakes up.' : ''}
+              </span>
             </div>
           )}
 
