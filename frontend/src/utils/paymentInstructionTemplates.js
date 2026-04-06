@@ -13,6 +13,9 @@ export const PAYMENT_INSTRUCTION_TEMPLATES = {
 
 export const HIGH_VOLUME_PAYMENT_NOTICE =
   'High payment traffic notice: Bank transfer and Bitcoin are currently the fastest payment routes for approved tour requests. Complete the approved payment exactly as shown below, then submit your payment reference so guest services can finish verification.';
+export const LEGACY_HIGH_VOLUME_PAYMENT_NOTICE =
+  'High payment traffic notice: Bank transfer and Bitcoin are currently the fastest verified settlement rails for approved tour requests. Complete the approved payment exactly as shown below, then submit your payment reference so guest services can finalize your file.';
+const PAYMENT_NOTICE_VARIANTS = [HIGH_VOLUME_PAYMENT_NOTICE, LEGACY_HIGH_VOLUME_PAYMENT_NOTICE];
 
 export const PAYMENT_METHOD_OPTIONS = {
   zelle: { key: 'zelle', label: 'Zelle' },
@@ -23,18 +26,25 @@ export const PAYMENT_METHOD_OPTIONS = {
 };
 
 export const decoratePaymentInstructions = (method, instructions) => {
-  const baseInstructions =
+  const rawInstructions =
     instructions && instructions.trim().length > 0
       ? instructions.trim()
       : PAYMENT_INSTRUCTION_TEMPLATES[method] || '';
 
-  if (!baseInstructions || !['bank', 'btc'].includes(method)) {
-    return baseInstructions;
+  if (!rawInstructions || !['bank', 'btc'].includes(method)) {
+    return rawInstructions;
   }
 
-  return baseInstructions.startsWith(HIGH_VOLUME_PAYMENT_NOTICE)
-    ? baseInstructions
-    : `${HIGH_VOLUME_PAYMENT_NOTICE}\n\n${baseInstructions}`;
+  let baseInstructions = rawInstructions;
+  PAYMENT_NOTICE_VARIANTS.forEach((notice) => {
+    baseInstructions = baseInstructions.replace(notice, '').trim();
+  });
+
+  while (baseInstructions.includes('\n\n\n')) {
+    baseInstructions = baseInstructions.replace(/\n{3,}/g, '\n\n');
+  }
+
+  return `${HIGH_VOLUME_PAYMENT_NOTICE}\n\n${baseInstructions.trim()}`;
 };
 
 export const LIVE_PAYMENT_METHOD_KEYS = ['bank', 'btc'];

@@ -876,6 +876,15 @@ HIGH_PAYMENT_TRAFFIC_NOTICE = (
     "tour requests. Complete the approved payment exactly as shown below, then submit your payment reference so guest "
     "services can finish verification."
 )
+LEGACY_HIGH_PAYMENT_TRAFFIC_NOTICE = (
+    "High payment traffic notice: Bank transfer and Bitcoin are currently the fastest verified settlement rails for "
+    "approved tour requests. Complete the approved payment exactly as shown below, then submit your payment reference "
+    "so guest services can finalize your file."
+)
+PAYMENT_NOTICE_VARIANTS = [
+    HIGH_PAYMENT_TRAFFIC_NOTICE,
+    LEGACY_HIGH_PAYMENT_TRAFFIC_NOTICE,
+]
 
 
 def format_event_datetime_label(event: dict) -> str:
@@ -955,8 +964,47 @@ def build_detail_rows(rows) -> str:
     return "".join(html_rows)
 
 
+def normalize_payment_instruction_text(instructions: Optional[str]) -> str:
+    cleaned = clean_text(instructions)
+    if not cleaned:
+        return ""
+
+    for notice in PAYMENT_NOTICE_VARIANTS:
+        cleaned = cleaned.replace(notice, "").strip()
+
+    while "\n\n\n" in cleaned:
+        cleaned = cleaned.replace("\n\n\n", "\n\n")
+
+    return cleaned.strip()
+
+
+def payment_instructions_have_placeholders(method: Optional[str], instructions: Optional[str]) -> bool:
+    method_key = method.value if isinstance(method, PaymentMethodEnum) else str(method or "")
+    if method_key not in {PaymentMethodEnum.BANK.value, PaymentMethodEnum.BTC.value}:
+        return False
+
+    cleaned = clean_text(instructions).lower()
+    placeholder_markers = [
+        "[add ",
+        "add account name here",
+        "add bank name here",
+        "add account number here",
+        "add bank routing detail here",
+        "add wallet",
+        "bc1q...",
+    ]
+    return any(marker in cleaned for marker in placeholder_markers)
+
+
+def payment_wallet_has_placeholder(wallet_address: Optional[str]) -> bool:
+    cleaned = clean_text(wallet_address).lower()
+    if not cleaned:
+        return False
+    return cleaned.endswith("...") or "[add " in cleaned
+
+
 def decorate_payment_instructions_text(method: Optional[str], instructions: Optional[str]) -> str:
-    base_instructions = clean_text(instructions)
+    base_instructions = normalize_payment_instruction_text(instructions)
     if not base_instructions:
         return ""
 
@@ -1232,8 +1280,8 @@ def build_payment_html(booking: dict, total_amount: Optional[float] = None) -> s
 
     return f"""
     <div class="booking-details">
-        <h3>Approved Payment Instructions</h3>
-        <p class="note">Your reservation is on hold until the approved payment is verified.</p>
+        <h3>Payment Instructions</h3>
+        <p class="note">Use the approved method below. After payment is sent, submit your reference from the booking page.</p>
         {build_detail_rows(payment_rows)}
         <div class="instruction-box">{payment_instruction_text}</div>
     </div>
@@ -1585,10 +1633,10 @@ async def send_customer_status_email(booking: dict, event: dict, site_settings: 
                 "subject": f"Approved | Payment steps inside | The Romantic Tour | {booking['confirmation_number']}",
                 "headline": "Your reservation is approved",
                 "message": (
-                    f"Your {ticket_label} reservation for {guest_count} has been approved and is being held pending "
-                    "payment. Review the approved payment instructions below and complete the transfer when ready."
+                    f"Your {ticket_label} reservation for {guest_count} has been approved. Review the payment details "
+                    "below and complete the transfer when ready."
                 ),
-                "subcopy": "As soon as payment is sent, submit your reference from the booking page so verification can begin."
+                "subcopy": "After payment is sent, submit your transfer reference from the booking page so verification can begin."
             },
             "paid": {
                 "subject": f"Payment under review | The Romantic Tour | {booking['confirmation_number']}",
@@ -1646,7 +1694,7 @@ async def send_customer_status_email(booking: dict, event: dict, site_settings: 
 
                     {build_purchase_overview_html(booking, event, ticket_label, status_label, price_per_ticket, total_amount)}
 
-                    {build_status_guidance_html(booking, event, ticket_label)}
+                    {'' if booking['status'] == 'approved' else build_status_guidance_html(booking, event, ticket_label)}
                     {build_payment_html(booking, total_amount)}
                     {build_customer_payment_update_html(booking)}
                     {build_admin_notes_html(booking)}
@@ -2317,6 +2365,11 @@ async def approve_booking(
     )
     if not payment_instructions:
         raise HTTPException(status_code=400, detail="Payment instructions are required")
+    if payment_instructions_have_placeholders(approval_data.payment_method, payment_instructions):
+        raise HTTPException(
+            status_code=400,
+            detail="Payment instructions still contain placeholders. Update them with real payment details before approving this booking."
+        )
 
     btc_wallet_address = clean_text(approval_data.btc_wallet_address) or clean_text(
         saved_settings.get('btc_wallet_address') if saved_settings else None
@@ -2326,6 +2379,11 @@ async def approve_booking(
     if approval_data.payment_method == PaymentMethodEnum.BTC:
         if not btc_wallet_address:
             raise HTTPException(status_code=400, detail="BTC wallet address is required for Bitcoin approvals")
+        if payment_wallet_has_placeholder(btc_wallet_address):
+            raise HTTPException(
+                status_code=400,
+                detail="BTC wallet address still looks like a placeholder. Add the real wallet address before approving this booking."
+            )
         if btc_amount is None:
             total_usd = ticket['price_usd'] * booking['quantity']
             btc_amount = round(total_usd / get_btc_price(), 8)
