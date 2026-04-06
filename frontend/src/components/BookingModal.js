@@ -861,6 +861,13 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
             </div>
 
             <div className="bg-[#fcfaf6] px-5 pb-6 pt-16 lg:max-h-[820px] lg:overflow-y-auto lg:px-7 lg:pb-8 lg:pt-12">
+              {renderStepIndicators()}
+              {bookingStep === 1 && renderStepOne()}
+              {bookingStep === 2 && renderStepTwo()}
+              {bookingStep === 3 && renderStepThree()}
+
+              {false && (
+              <>
               <div>
                 <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8b7c6d]">
                   Premium Tiers
@@ -1108,6 +1115,8 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                   </button>
                 </div>
               </div>
+              </>
+              )}
             </div>
           </div>
         </form>
