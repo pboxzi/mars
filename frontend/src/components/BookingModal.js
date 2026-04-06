@@ -30,7 +30,6 @@ const eventDateFormatter = new Intl.DateTimeFormat('en-US', {
 });
 
 const PACKAGE_TICKET_TYPES = new Set(['hospitality', 'birthday', 'corporate', 'privatemeetup']);
-const FEATURED_TICKET_TYPES = ['vip', 'meetgreet', 'soundcheck', 'hospitality'];
 
 const formatEventDate = (dateValue) => {
   if (!dateValue) {
@@ -83,9 +82,6 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
   const [captchaToken, setCaptchaToken] = useState('');
   const [captchaError, setCaptchaError] = useState('');
   const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
-  const [showPrivateOptions, setShowPrivateOptions] = useState(
-    initialTicketType ? !FEATURED_TICKET_TYPES.includes(initialTicketType) : false
-  );
   const { supportSettings } = useSupportSettings();
   const { isTurnstileEnabled, isLoadingTurnstileConfig } = useTurnstileConfig();
 
@@ -142,26 +138,10 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
     [tickets]
   );
 
-  const featuredTickets = useMemo(
-    () => orderedTickets.filter((ticket) => FEATURED_TICKET_TYPES.includes(ticket.type)),
-    [orderedTickets]
-  );
-
-  const privateRequestTickets = useMemo(
-    () => orderedTickets.filter((ticket) => !FEATURED_TICKET_TYPES.includes(ticket.type)),
-    [orderedTickets]
-  );
-
   const selectedTicket = useMemo(
     () => orderedTickets.find((ticket) => ticket.type === formData.ticket_type),
     [formData.ticket_type, orderedTickets]
   );
-
-  useEffect(() => {
-    if (formData.ticket_type && !FEATURED_TICKET_TYPES.includes(formData.ticket_type)) {
-      setShowPrivateOptions(true);
-    }
-  }, [formData.ticket_type]);
 
   const selectedTicketPrice = getDisplayTicketPrice(selectedTicket);
   const selectedTicketLabel = getTicketTierLabel(formData.ticket_type) || 'Select Ticket';
@@ -248,10 +228,10 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
         >
           <div className="text-center">
             <CheckCircle className="mx-auto mb-4 h-14 w-14 text-[#9d172b]" />
-            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8c7f72]">Premium Access</div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8c7f72]">Premium Request</div>
             <h2 className="mt-3 text-[34px] font-black uppercase tracking-[-0.05em]">Request Submitted</h2>
             <p className="mt-3 text-sm leading-7 text-[#5f564d]">
-              Your premium access request has been received. Keep your confirmation number ready for the next step.
+              Your premium access request has been received for this Bruno Mars show.
             </p>
 
             <div className="mt-6 rounded-[22px] border border-[#dfd2c0] bg-white px-5 py-4">
@@ -321,7 +301,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
               <div className="flex flex-1 flex-col justify-between p-6 text-white sm:p-8 lg:p-10">
                 <div>
                   <div className="inline-flex rounded-full border border-white/18 bg-white/8 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#f0c98d] backdrop-blur-sm">
-                    Premium Access
+                    Official Bruno Mars Premium Access
                   </div>
 
                   <div className="mt-8">
@@ -341,7 +321,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
 
                 <div className="mt-8">
                   <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#f0c98d]">
-                    Selected Access
+                    Featured Tier
                   </div>
                   <div className="mt-3 rounded-[24px] border border-white/16 bg-white/10 p-5 backdrop-blur-md">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -397,18 +377,19 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
             <div className="bg-[#fcfaf6] px-5 pb-6 pt-16 lg:max-h-[820px] lg:overflow-y-auto lg:px-7 lg:pb-8 lg:pt-12">
               <div>
                 <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8b7c6d]">
-                  Access Options
+                  Premium Tiers
                 </div>
                 <h3 className="mt-2 text-[28px] font-black uppercase tracking-[-0.05em] text-[#171717] lg:text-[30px]">
-                  Choose Premium Access
+                  Choose Your Access
                 </h3>
                 <p className="mt-2 max-w-[680px] text-[15px] leading-6 text-[#5f564d]">
-                  Choose the premium experience that fits your night. Featured access is shown first, with more private options available below.
+                  Select the premium experience that fits your guest plan. Each tier includes private handling,
+                  elevated access, and concierge-level coordination for this show.
                 </p>
               </div>
 
               <div className="mt-5 grid gap-2.5 xl:grid-cols-2">
-                {featuredTickets.map((ticket) => {
+                {orderedTickets.map((ticket) => {
                   const isSelected = formData.ticket_type === ticket.type;
                   const isSoldOut = ticket.available_quantity <= 0;
                   const displayPrice = getDisplayTicketPrice(ticket);
@@ -453,92 +434,13 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                       </div>
 
                       <div className="mt-3 flex items-center justify-between gap-4 border-t border-[#efe4d6] pt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8b7c6d]">
-                        <span>{isSoldOut ? 'Currently unavailable' : `${ticket.available_quantity} spots left`}</span>
-                        <span>{ticket.available_quantity <= 10 ? 'Highly limited' : 'Popular choice'}</span>
+                        <span>{isSoldOut ? 'Currently unavailable' : `${ticket.available_quantity} remaining`}</span>
+                        <span>{ticket.available_quantity <= 10 ? 'Highly limited' : 'Premium allocation'}</span>
                       </div>
                     </button>
                   );
                 })}
               </div>
-
-              {privateRequestTickets.length > 0 && (
-                <div className="mt-4 rounded-[20px] border border-[#e3d6c5] bg-[#fffaf3] p-4">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8b7c6d]">
-                        Private & Hosted Requests
-                      </div>
-                      <p className="mt-1 text-sm leading-6 text-[#5f564d]">
-                        For celebration plans, corporate hosting, backstage requests, or more private premium experiences.
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowPrivateOptions((current) => !current)}
-                      className="rounded-full border border-[#d7c7b4] bg-white px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[#171717]"
-                    >
-                      {showPrivateOptions ? 'Hide Private Requests' : 'View Private Requests'}
-                    </button>
-                  </div>
-
-                  {showPrivateOptions && (
-                    <div className="mt-4 grid gap-2.5 xl:grid-cols-2">
-                      {privateRequestTickets.map((ticket) => {
-                        const isSelected = formData.ticket_type === ticket.type;
-                        const isSoldOut = ticket.available_quantity <= 0;
-                        const displayPrice = getDisplayTicketPrice(ticket);
-
-                        return (
-                          <button
-                            key={ticket.type}
-                            type="button"
-                            disabled={isSoldOut}
-                            onClick={() =>
-                              !isSoldOut &&
-                              setFormData((prev) => ({
-                                ...prev,
-                                ticket_type: ticket.type,
-                                quantity: Math.min(prev.quantity, Math.min(ticket.available_quantity, 10)) || 1
-                              }))
-                            }
-                            className={`rounded-[20px] border px-4 py-4 text-left transition ${
-                              isSelected
-                                ? 'border-[#9d172b] bg-[#fff8ee] shadow-[0_10px_30px_rgba(157,23,43,0.08)]'
-                                : 'border-[#e3d6c5] bg-white hover:border-[#b89f82] hover:shadow-[0_8px_18px_rgba(0,0,0,0.05)]'
-                            } ${isSoldOut ? 'cursor-not-allowed opacity-40' : ''}`}
-                          >
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="max-w-[80%]">
-                                <div className="text-[17px] font-black uppercase leading-tight text-[#171717] lg:text-[18px]">
-                                  {getTicketTierLabel(ticket.type)}
-                                </div>
-                                <p className="mt-1.5 text-[15px] leading-6 text-[#5f564d]">
-                                  {getTicketTierDescription(ticket.type)}
-                                </p>
-                              </div>
-
-                              <div className="text-right">
-                                <div className="text-[20px] font-black leading-none text-[#171717] lg:text-[21px]">
-                                  {formatTicketPrice(displayPrice)}
-                                </div>
-                                <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#8b7c6d]">
-                                  Starting
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="mt-3 flex items-center justify-between gap-4 border-t border-[#efe4d6] pt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8b7c6d]">
-                              <span>{isSoldOut ? 'Currently unavailable' : `${ticket.available_quantity} spots left`}</span>
-                              <span>Private access</span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
 
               <div className="mt-6 grid gap-4 xl:grid-cols-[0.84fr_1fr]">
                 <div className="rounded-[22px] border border-[#dfd2c0] bg-[#fffdf9] px-4 py-4">
@@ -606,15 +508,11 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                       <span className="text-[24px] font-black text-[#171717]">{formatTicketPrice(subtotal)}</span>
                     </div>
                   </div>
-
-                  <div className="mt-4 rounded-[18px] border border-[#e6d7c4] bg-white px-4 py-3.5 text-sm leading-6 text-[#5e544a]">
-                    Continue with your details below and keep your confirmation number once submitted.
-                  </div>
                 </div>
 
                 <div className="rounded-[22px] border border-[#dfd2c0] bg-white px-4 py-4">
                   <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8b7c6d]">
-                    Continue Your Access
+                    Guest Details
                   </div>
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -712,15 +610,15 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                   )}
 
                   <button
-                        type="submit"
-                        disabled={loading || isLoadingTurnstileConfig || !selectedTicket || selectedTicket.available_quantity <= 0}
-                        className="mt-5 w-full rounded-full bg-[#141414] px-6 py-3.5 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:opacity-92 disabled:cursor-not-allowed disabled:opacity-50"
+                    type="submit"
+                    disabled={loading || isLoadingTurnstileConfig || !selectedTicket || selectedTicket.available_quantity <= 0}
+                    className="mt-5 w-full rounded-full bg-[#141414] px-6 py-3.5 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:opacity-92 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {loading
                       ? 'Submitting...'
                       : isLoadingTurnstileConfig
                         ? 'Loading Security Check...'
-                        : 'Continue Premium Access'}
+                        : 'Submit Premium Request'}
                   </button>
                 </div>
               </div>
