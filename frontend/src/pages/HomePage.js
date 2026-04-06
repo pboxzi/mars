@@ -1,12 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import HomeFooter from '../components/HomeFooter';
-import BookingModal from '../components/BookingModal';
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
 
 const STORE_URL = 'https://brunomars.lnk.to/officialstore';
 const ALBUM_URL = 'https://brunomars.lnk.to/theromantic';
@@ -14,9 +9,6 @@ const RISK_IT_ALL_URL = 'https://brunomars.lnk.to/theromantic/youtube';
 const I_JUST_MIGHT_URL = 'https://brunomars.lnk.to/ijustmight/youtube';
 
 const HomePage = () => {
-  const [events, setEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [showBookingModal, setShowBookingModal] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [footerOpen, setFooterOpen] = useState(false);
@@ -47,17 +39,6 @@ const HomePage = () => {
   const totalSlides = sections.length;
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get(`${API}/events`);
-        setEvents(response.data);
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      }
-    };
-
-    fetchEvents();
-
     const checkMobile = () => {
       setIsMobile(window.matchMedia('(max-width:1024px) and (orientation:portrait)').matches);
     };
@@ -225,15 +206,12 @@ const HomePage = () => {
     };
   }, [currentSlide, footerOpen, goToSlide, isAnimating, toggleFooter, totalSlides]);
 
-  const openBookingRequest = () => {
-    if (events.length > 0) {
-      setSelectedEvent(events[0]);
-      setShowBookingModal(true);
-    }
-  };
-
   const renderPromoCard = (kind) => {
     const isStore = kind === 'store';
+    const title = isStore ? 'The Romantic Collection' : 'The Romantic Tour';
+    const helperText = isStore
+      ? 'Shop the official collection inspired by the new era.'
+      : 'Explore tour dates and choose your premium access experience.';
 
     return (
       <div className="homepage-single-promo">
@@ -256,16 +234,20 @@ const HomePage = () => {
             </Link>
           )}
 
-          <div className="homepage-promo-label">{isStore ? 'Store' : 'Tour'}</div>
+          <div className="homepage-promo-copy">
+            <div className="homepage-promo-label">{isStore ? 'Store' : 'Premium Access'}</div>
+            <div className="homepage-promo-title">{title}</div>
+            <div className="homepage-promo-helper">{helperText}</div>
+          </div>
 
           {isStore ? (
             <a href={STORE_URL} target="_blank" rel="noreferrer" className="homepage-promo-button">
-              SHOP THE ROMANTIC
+              Shop The Collection
             </a>
           ) : (
-            <button type="button" onClick={openBookingRequest} className="homepage-promo-button">
-              TICKETS
-            </button>
+            <Link to="/tour" className="homepage-promo-button">
+              Explore Premium Access
+            </Link>
           )}
         </div>
       </div>
@@ -449,16 +431,37 @@ const HomePage = () => {
           display: block;
           width: auto;
           max-width: min(34.38vw, 660px);
-          max-height: 70vh;
-          margin: 0 auto 1vw;
+          max-height: 62vh;
+          margin: 0 auto;
           object-fit: cover;
         }
 
+        .homepage-promo-copy {
+          margin-top: 1.2vw;
+        }
+
         .homepage-promo-label {
-          font-size: 1.04vw;
-          font-weight: 600;
+          font-size: 0.78vw;
+          font-weight: 700;
+          letter-spacing: 0.18em;
           text-transform: uppercase;
-          color: #000;
+          color: #8b1d2c;
+        }
+
+        .homepage-promo-title {
+          margin-top: 0.45vw;
+          color: #111;
+          font-size: 1.52vw;
+          font-weight: 700;
+          letter-spacing: -0.04em;
+          text-transform: uppercase;
+        }
+
+        .homepage-promo-helper {
+          margin-top: 0.45vw;
+          color: #524942;
+          font-size: 0.9vw;
+          line-height: 1.7;
         }
 
         .homepage-promo-button,
@@ -466,20 +469,23 @@ const HomePage = () => {
         .homepage-hero-button {
           border: 1px solid #000;
           font-family: 'Poppins', sans-serif;
-          font-weight: 500;
-          font-size: 1.0417vw;
-          line-height: 1.5104vw;
+          font-weight: 700;
+          font-size: 0.95vw;
+          line-height: 1.4;
           text-transform: uppercase;
           color: #fff;
           background: #000;
-          width: 14.12vw;
-          display: inline-block;
-          padding: 0.5208vw 0;
-          margin: 0.5208vw auto 0;
+          width: 16.8vw;
+          min-width: 220px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.78vw 1.2vw;
+          margin: 1.05vw auto 0;
           text-align: center;
           text-decoration: none;
           cursor: pointer;
-          transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+          transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
         }
 
         .homepage-promo-button:hover,
@@ -488,6 +494,7 @@ const HomePage = () => {
           background: #fff;
           color: #000;
           opacity: 1;
+          transform: translateY(-1px);
         }
 
         .homepage-media-panel {
@@ -599,23 +606,40 @@ const HomePage = () => {
             width: 100%;
             max-width: 88.27vw;
             max-height: none;
-            margin-bottom: 4vw;
+          }
+
+          .homepage-promo-copy {
+            margin-top: 4.6vw;
           }
 
           .homepage-promo-label {
-            font-size: 4.8vw;
-            line-height: 10vw;
-            padding-bottom: 1vw;
+            font-size: 2.8vw;
+            line-height: 1.4;
+            letter-spacing: 0.22em;
+          }
+
+          .homepage-promo-title {
+            margin-top: 1.8vw;
+            font-size: 6.4vw;
+            line-height: 1.02;
+          }
+
+          .homepage-promo-helper {
+            margin-top: 2vw;
+            font-size: 3.35vw;
+            line-height: 1.65;
+            padding: 0 2vw;
           }
 
           .homepage-promo-button,
           .homepage-video-button,
           .homepage-hero-button {
-            font-size: 3.73vw;
-            width: 49.0667vw;
-            line-height: 5.3333vw;
-            padding: 2.1333vw 0;
-            margin-top: 4.5333vw;
+            font-size: 3.35vw;
+            width: 68vw;
+            min-width: 0;
+            line-height: 1.35;
+            padding: 3.2vw 4vw;
+            margin-top: 4.8vw;
           }
 
           .homepage-media-overlay,
@@ -680,16 +704,6 @@ const HomePage = () => {
       <div className={`site-footer-custom ${footerOpen ? 'show' : ''}`}>
         <HomeFooter />
       </div>
-
-      {showBookingModal && selectedEvent && (
-        <BookingModal
-          event={selectedEvent}
-          onClose={() => {
-            setShowBookingModal(false);
-            setSelectedEvent(null);
-          }}
-        />
-      )}
     </>
   );
 };
