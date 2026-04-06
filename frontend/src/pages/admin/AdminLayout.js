@@ -79,12 +79,12 @@ const AdminLayout = ({ children }) => {
               <p className="text-[11px] uppercase tracking-[0.22em] text-[#9d172b]">Admin</p>
               <p className="mt-1 text-lg font-black text-[#151515]">The Romantic Tour</p>
             </div>
-            <div className="flex items-center gap-2">
-              <AdminNotificationCenter />
+            <div className="flex shrink-0 items-center gap-2">
+              <AdminNotificationCenter compact />
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex items-center justify-center rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700"
+                className="inline-flex items-center justify-center rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-semibold text-stone-700"
               >
                 Logout
               </button>

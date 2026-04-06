@@ -92,7 +92,7 @@ const buildDesktopNotificationBody = (visit) => {
   return detailParts.join(' | ');
 };
 
-const AdminNotificationCenter = () => {
+const AdminNotificationCenter = ({ compact = false }) => {
   const [feed, setFeed] = useState({ unread_count: 0, notifications: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -261,21 +261,29 @@ const AdminNotificationCenter = () => {
       <button
         type="button"
         onClick={handleTogglePanel}
-        className="relative inline-flex h-11 items-center gap-2 rounded-full border border-stone-200 bg-white px-4 text-sm font-semibold text-[#151515] shadow-sm transition hover:border-stone-300"
+        className={`relative inline-flex items-center rounded-full border border-stone-200 bg-white text-sm font-semibold text-[#151515] shadow-sm transition hover:border-stone-300 ${
+          compact
+            ? 'h-10 w-10 justify-center'
+            : 'h-11 gap-2 px-4'
+        }`}
         aria-label="Open live notifications"
       >
         <Bell className="h-4 w-4" />
-        <span className="hidden sm:inline">Live Alerts</span>
-        <span className="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+        {!compact && <span className="hidden sm:inline">Live Alerts</span>}
+        <span className={`inline-flex rounded-full bg-emerald-500 ${compact ? 'absolute right-2 top-2 h-2 w-2' : 'h-2.5 w-2.5'}`} />
         {feed.unread_count > 0 && (
-          <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-[#9d172b] px-1.5 text-[10px] font-bold text-white">
+          <span className={`absolute inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-[#9d172b] px-1.5 text-[10px] font-bold text-white ${
+            compact ? '-right-1 -top-1' : '-right-1 -top-1'
+          }`}>
             {feed.unread_count > 9 ? '9+' : feed.unread_count}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-3 w-[min(94vw,26rem)] overflow-hidden rounded-[24px] border border-stone-200 bg-[#fcfaf6] shadow-[0_18px_50px_rgba(48,32,11,0.18)]">
+        <div className={`absolute right-0 top-full z-50 mt-3 overflow-hidden rounded-[24px] border border-stone-200 bg-[#fcfaf6] shadow-[0_18px_50px_rgba(48,32,11,0.18)] ${
+          compact ? 'w-[min(92vw,22rem)]' : 'w-[min(94vw,26rem)]'
+        }`}>
           <div className="border-b border-stone-200 px-4 py-4">
             <div className="flex items-start justify-between gap-3">
               <div>
