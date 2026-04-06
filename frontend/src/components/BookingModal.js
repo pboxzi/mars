@@ -65,6 +65,8 @@ const getDisplayTicketPrice = (ticket) => {
 };
 
 const BookingModal = ({ event, onClose, initialTicketType = null }) => {
+  const [bookingStep, setBookingStep] = useState(1);
+  const [showMoreAccessOptions, setShowMoreAccessOptions] = useState(false);
   const [tickets, setTickets] = useState([]);
   const [formData, setFormData] = useState({
     ticket_type: 'vip',
@@ -130,6 +132,13 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
     fetchTickets();
   }, [fetchTickets]);
 
+  useEffect(() => {
+    setBookingStep(1);
+    setShowMoreAccessOptions(false);
+    setError('');
+    setCaptchaError('');
+  }, [event?.id]);
+
   const orderedTickets = useMemo(
     () =>
       [...tickets].sort((left, right) => {
@@ -141,6 +150,16 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
   const selectedTicket = useMemo(
     () => orderedTickets.find((ticket) => ticket.type === formData.ticket_type),
     [formData.ticket_type, orderedTickets]
+  );
+
+  const featuredAccessTickets = useMemo(
+    () => orderedTickets.filter((ticket) => ['vip', 'meetgreet', 'backstage'].includes(ticket.type)),
+    [orderedTickets]
+  );
+
+  const extendedAccessTickets = useMemo(
+    () => orderedTickets.filter((ticket) => !['vip', 'meetgreet', 'backstage'].includes(ticket.type)),
+    [orderedTickets]
   );
 
   const selectedTicketPrice = getDisplayTicketPrice(selectedTicket);
@@ -175,6 +194,49 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
       ...prev,
       [name]: name === 'quantity' ? Number(value) : value
     }));
+  };
+
+  const selectAccessTier = (ticket) => {
+    if (!ticket || ticket.available_quantity <= 0) {
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      ticket_type: ticket.type,
+      quantity: Math.min(prev.quantity, Math.min(ticket.available_quantity, 10)) || 1
+    }));
+    setError('');
+  };
+
+  const continueToGuestDetails = () => {
+    if (!selectedTicket || selectedTicket.available_quantity <= 0) {
+      setError('Choose an available premium access option to continue.');
+      return;
+    }
+
+    setError('');
+    setBookingStep(2);
+  };
+
+  const continueToReview = () => {
+    if (!formData.customer_name.trim()) {
+      setError('Enter the guest name to continue.');
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      setError('Enter the email address to continue.');
+      return;
+    }
+
+    if (!formData.phone.trim()) {
+      setError('Enter the phone number to continue.');
+      return;
+    }
+
+    setError('');
+    setBookingStep(3);
   };
 
   const handleSubmit = async (submitEvent) => {
@@ -217,6 +279,200 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
       setLoading(false);
     }
   };
+
+  const renderStepIndicators = () => (
+    <div className="flex flex-wrap items-center gap-2">
+      {[
+        { id: 1, label: 'Choose Access' },
+        { id: 2, label: 'Guest Details' },
+        { id: 3, label: 'Review & Submit' }
+      ].map((step) => {
+        const isActive = bookingStep === step.id;
+        const isComplete = bookingStep > step.id;
+
+        return (
+          <div
+            key={step.id}
+            className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[11px] font-bold uppercase tracking-[0.16em] ${
+              isActive
+                ? 'border-[#9d172b] bg-[#fff2e7] text-[#9d172b]'
+                : isComplete
+                  ? 'border-[#d7cab8] bg-white text-[#171717]'
+                  : 'border-[#e6d7c5] bg-[#fffdf9] text-[#8b7c6d]'
+            }`}
+          >
+            <span
+              className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${
+                isActive ? 'bg-[#9d172b] text-white' : isComplete ? 'bg-[#171717] text-white' : 'bg-[#efe4d6] text-[#8b7c6d]'
+              }`}
+            >
+              {step.id}
+            </span>
+            <span>{step.label}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  const renderStepOne = () => (
+    <>
+      <div className="mt-5">
+        <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8b7c6d]">Step 1</div>
+        <h3 className="mt-2 text-[28px] font-black uppercase tracking-[-0.05em] text-[#171717] lg:text-[30px]">
+          Choose Your Access
+        </h3>
+        <p className="mt-2 max-w-[680px] text-[15px] leading-6 text-[#5f564d]">
+          Pick the experience that fits your night, then continue with your guest details.
+        </p>
+      </div>
+
+      <div className="mt-5 grid gap-3 xl:grid-cols-3">
+        {featuredAccessTickets.map((ticket) => {
+          const isSelected = formData.ticket_type === ticket.type;
+          const isSoldOut = ticket.available_quantity <= 0;
+
+          return (
+            <button
+              key={ticket.type}
+              type="button"
+              disabled={isSoldOut}
+              onClick={() => selectAccessTier(ticket)}
+              className={`rounded-[22px] border px-4 py-4 text-left transition ${
+                isSelected
+                  ? 'border-[#9d172b] bg-[#fff5ea] shadow-[0_10px_30px_rgba(157,23,43,0.08)]'
+                  : 'border-[#e3d6c5] bg-white hover:border-[#b89f82] hover:shadow-[0_8px_18px_rgba(0,0,0,0.05)]'
+              } ${isSoldOut ? 'cursor-not-allowed opacity-40' : ''}`}
+            >
+              <div className="text-[18px] font-black uppercase text-[#171717]">{getTicketTierLabel(ticket.type)}</div>
+              <div className="mt-2 text-[14px] leading-6 text-[#5f564d]">{getTicketTierDescription(ticket.type)}</div>
+              <div className="mt-4 flex items-end justify-between gap-3">
+                <div>
+                  <div className="text-[24px] font-black text-[#171717]">
+                    {formatTicketPrice(getDisplayTicketPrice(ticket))}
+                  </div>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8b7c6d]">Starting</div>
+                </div>
+                <div className="text-right text-[11px] font-bold uppercase tracking-[0.14em] text-[#8b7c6d]">
+                  {isSoldOut ? 'Unavailable' : `${ticket.available_quantity} left`}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {extendedAccessTickets.length > 0 && (
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={() => setShowMoreAccessOptions((current) => !current)}
+            className="inline-flex items-center rounded-full border border-[#dacdbd] bg-white px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-[#171717] transition hover:bg-[#f5ecdf]"
+          >
+            {showMoreAccessOptions ? 'Hide More Access Options' : 'View More Access Options'}
+          </button>
+        </div>
+      )}
+
+      {showMoreAccessOptions && extendedAccessTickets.length > 0 && (
+        <div className="mt-4 grid gap-2.5">
+          {extendedAccessTickets.map((ticket) => {
+            const isSelected = formData.ticket_type === ticket.type;
+            const isSoldOut = ticket.available_quantity <= 0;
+
+            return (
+              <button
+                key={ticket.type}
+                type="button"
+                disabled={isSoldOut}
+                onClick={() => selectAccessTier(ticket)}
+                className={`rounded-[18px] border px-4 py-3 text-left transition ${
+                  isSelected ? 'border-[#9d172b] bg-[#fff5ea]' : 'border-[#e3d6c5] bg-white hover:border-[#b89f82]'
+                } ${isSoldOut ? 'cursor-not-allowed opacity-40' : ''}`}
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-[16px] font-black uppercase text-[#171717]">
+                      {getTicketTierLabel(ticket.type)}
+                    </div>
+                    <div className="mt-1 text-sm leading-6 text-[#5f564d]">{getTicketTierDescription(ticket.type)}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[18px] font-black text-[#171717]">
+                      {formatTicketPrice(getDisplayTicketPrice(ticket))}
+                    </div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8b7c6d]">Starting</div>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="mt-6 rounded-[22px] border border-[#dfd2c0] bg-white px-4 py-4">
+        <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8b7c6d]">Selected Experience</div>
+        <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-[540px]">
+            <div className="text-[26px] font-black uppercase tracking-[-0.04em] text-[#171717]">
+              {selectedTicketLabel}
+            </div>
+            <p className="mt-2 text-[15px] leading-6 text-[#5f564d]">{selectedTicketDescription}</p>
+          </div>
+          <div className="text-left sm:text-right">
+            <div className="text-[28px] font-black text-[#171717]">{formatTicketPrice(selectedTicketPrice)}</div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#8b7c6d]">Starting</div>
+          </div>
+        </div>
+      </div>
+
+      {error && (
+        <div className="mt-4 rounded-[16px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="text-sm text-[#6a6055]">Limited availability for this event. Choose your access and continue.</div>
+        <button
+          type="button"
+          onClick={continueToGuestDetails}
+          disabled={!selectedTicket || selectedTicket.available_quantity <= 0}
+          className="rounded-full bg-[#141414] px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:opacity-92 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Continue
+        </button>
+      </div>
+    </>
+  );
+
+  const renderStepTwo = () => (
+    <>
+      <div className="mt-5">
+        <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8b7c6d]">Step 2</div>
+        <h3 className="mt-2 text-[28px] font-black uppercase tracking-[-0.05em] text-[#171717] lg:text-[30px]">
+          Guest Details
+        </h3>
+        <p className="mt-2 max-w-[680px] text-[15px] leading-6 text-[#5f564d]">
+          Tell us who this access is for, then review your request before submitting.
+        </p>
+      </div>
+
+      <div className="mt-5 rounded-[22px] border border-[#dfd2c0] bg-white px-4 py-4">
+        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#efe4d6] pb-4">
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8b7c6d]">Selected Access</div>
+            <div className="mt-2 text-[24px] font-black uppercase tracking-[-0.04em] text-[#171717]">
+              {selectedTicketLabel}
+            </div>
+          </div>
+          <div className="text-left sm:text-right">
+            <div className="text-[24px] font-black text-[#171717]">{formatTicketPrice(selectedTicketPrice)}</div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8b7c6d]">Starting</div>
+          </div>
+        </div>
+    </>
+  );
 
   if (success) {
     return (
