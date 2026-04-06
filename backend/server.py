@@ -867,25 +867,37 @@ def build_visit_campaign_label(visit: dict) -> str:
     return 'Direct'
 
 
+def build_visit_ip_label(visit: dict) -> str:
+    ip_value = clean_text(visit.get('ip_address'))
+    return ip_value or 'Unknown IP'
+
+
+def build_visit_device_label(visit: dict) -> str:
+    device_label = clean_text(visit.get('device_type')) or 'Unknown device'
+    language_label = clean_text(visit.get('language')) or 'Unknown language'
+    return f"{device_label} | {language_label}"
+
+
+def build_visit_referrer_label(visit: dict) -> str:
+    return clean_text(visit.get('referrer_domain')) or clean_text(visit.get('referrer')) or 'Direct'
+
+
 def build_whatsapp_click_alert_text(visit: dict) -> str:
     created_at = format_datetime_label(visit.get('created_at'))
     source = clean_text(visit.get('source')) or 'Direct'
     path = normalize_public_path(visit.get('path'))
     location_label = build_visit_location_label(visit)
-    device_label = clean_text(visit.get('device_type')) or 'Unknown device'
-    language_label = clean_text(visit.get('language')) or 'Unknown language'
+    ip_label = build_visit_ip_label(visit)
+    device_label = build_visit_device_label(visit)
     campaign_label = build_visit_campaign_label(visit)
-    referrer_label = clean_text(visit.get('referrer_domain')) or clean_text(visit.get('referrer')) or 'Direct'
+    referrer_label = build_visit_referrer_label(visit)
 
     return (
         "New Bruno Mars Tour site visit alert\n"
-        f"Source: {source}\n"
-        f"Page: {path}\n"
-        f"Time: {created_at}\n"
-        f"Location: {location_label}\n"
-        f"Device: {device_label} | {language_label}\n"
-        f"Campaign: {campaign_label}\n"
-        f"Referrer: {referrer_label}"
+        f"Source | Page: {source} | {path}\n"
+        f"Location | IP: {location_label} | {ip_label}\n"
+        f"Device | Time: {device_label} | {created_at}\n"
+        f"Campaign | Referrer: {campaign_label} | {referrer_label}"
     )
 
 
@@ -894,9 +906,11 @@ def build_whatsapp_click_alert_template_payload(visit: dict) -> dict:
         clean_text(visit.get('source')) or 'Direct',
         normalize_public_path(visit.get('path')),
         build_visit_location_label(visit),
-        clean_text(visit.get('device_type')) or 'Unknown device',
+        build_visit_ip_label(visit),
+        build_visit_device_label(visit),
         format_datetime_label(visit.get('created_at')),
         build_visit_campaign_label(visit),
+        build_visit_referrer_label(visit),
     ]
     return {
         "messaging_product": "whatsapp",

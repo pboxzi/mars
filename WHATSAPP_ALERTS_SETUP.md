@@ -106,6 +106,52 @@ WHATSAPP_ALERT_TEXT_FALLBACK=
 
 After that, the backend will send template-based alerts instead of session-based plain text alerts.
 
+### Recommended template to create in Meta
+
+Use this exact configuration:
+
+- Template name: `site_visit_alert_v1`
+- Category: `Utility`
+- Language: `English (US)`
+
+Body:
+
+```text
+New Bruno Mars Tour site visit alert
+Source | Page: {{1}} | {{2}}
+Location | IP: {{3}} | {{4}}
+Device | Time: {{5}} | {{6}}
+Campaign | Referrer: {{7}} | {{8}}
+```
+
+### Sample values for Meta approval
+
+Use sample values like:
+
+- `Instagram`
+- `/tour`
+- `Lagos, NG`
+- `102.89.45.10`
+- `Mobile | en-US`
+- `April 06, 2026 at 02:43 PM UTC`
+- `facebook / paid / launch`
+- `l.facebook.com`
+
+### Important variable order
+
+The backend currently sends the template body values in this order:
+
+1. Source
+2. Page path
+3. Location
+4. IP address
+5. Device and language
+6. Time
+7. Campaign
+8. Referrer
+
+That order comes from the current template payload builder in [server.py](C:/Mars/mars/backend/server.py).
+
 ## How the code is wired
 
 The backend alert sender is implemented in:
