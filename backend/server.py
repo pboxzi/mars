@@ -903,14 +903,10 @@ def build_whatsapp_click_alert_text(visit: dict) -> str:
 
 def build_whatsapp_click_alert_template_payload(visit: dict) -> dict:
     parameters = [
-        clean_text(visit.get('source')) or 'Direct',
-        normalize_public_path(visit.get('path')),
-        build_visit_location_label(visit),
-        build_visit_ip_label(visit),
-        build_visit_device_label(visit),
-        format_datetime_label(visit.get('created_at')),
-        build_visit_campaign_label(visit),
-        build_visit_referrer_label(visit),
+        f"{clean_text(visit.get('source')) or 'Direct'} | {normalize_public_path(visit.get('path'))}",
+        f"{build_visit_location_label(visit)} | {build_visit_ip_label(visit)}",
+        f"{build_visit_device_label(visit)} | {format_datetime_label(visit.get('created_at'))}",
+        f"{build_visit_campaign_label(visit)} | {build_visit_referrer_label(visit)}",
     ]
     return {
         "messaging_product": "whatsapp",

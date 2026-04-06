@@ -117,35 +117,31 @@ Use this exact configuration:
 Body:
 
 ```text
-New Bruno Mars Tour site visit alert
-Source | Page: {{1}} | {{2}}
-Location | IP: {{3}} | {{4}}
-Device | Time: {{5}} | {{6}}
-Campaign | Referrer: {{7}} | {{8}}
+New Bruno Mars Tour site visit alert.
+
+Traffic: {{1}}.
+Geo: {{2}}.
+Device: {{3}}.
+Campaign: {{4}}.
 ```
 
 ### Sample values for Meta approval
 
 Use sample values like:
 
-- `Instagram`
-- `/tour`
-- `Lagos, NG`
-- `102.89.45.10`
-- `Mobile | en-US`
-- `April 06, 2026 at 02:43 PM UTC`
-- `facebook / paid / launch`
-- `l.facebook.com`
+- `Instagram | /tour`
+- `Lagos, NG | 102.89.45.10`
+- `Mobile | en-US | April 06, 2026 at 02:43 PM UTC`
+- `facebook / paid / launch | l.facebook.com`
 
 ### Important variable order
 
 The backend currently sends the template body values in this order:
 
-1. Source
-2. Page path
-3. Location
-4. IP address
-5. Device and language
+1. Source and page path
+2. Location and IP address
+3. Device, language, and time
+4. Campaign and referrer
 6. Time
 7. Campaign
 8. Referrer
