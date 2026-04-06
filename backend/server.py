@@ -155,8 +155,8 @@ def payment_method_label(method) -> str:
         PaymentMethodEnum.ZELLE.value: "Zelle",
         PaymentMethodEnum.CASHAPP.value: "Cash App",
         PaymentMethodEnum.APPLEPAY.value: "Apple Pay",
-        PaymentMethodEnum.BANK.value: "bank transfer",
-        PaymentMethodEnum.BTC.value: "Bitcoin",
+        PaymentMethodEnum.BANK.value: "Bank Transfer",
+        PaymentMethodEnum.BTC.value: "Bitcoin (BTC)",
     }
     key = method.value if isinstance(method, PaymentMethodEnum) else str(method or "")
     return labels.get(key, key.replace("_", " ").title() if key else "selected payment method")
@@ -784,6 +784,304 @@ def get_booking_status_label(status: str) -> str:
     return labels.get(status, status.title())
 
 
+HIGH_PAYMENT_TRAFFIC_NOTICE = (
+    "High payment traffic notice: Bank transfer and Bitcoin are currently the fastest verified settlement rails for "
+    "approved tour requests. Complete the approved payment exactly as shown below, then submit your payment reference "
+    "so guest services can finalize your file."
+)
+
+
+def format_event_datetime_label(event: dict) -> str:
+    date_value = clean_text(event.get('date'))
+    time_value = clean_text(event.get('time'))
+
+    if not date_value and not time_value:
+        return "Date and time to be confirmed"
+
+    if date_value and time_value:
+        try:
+            event_dt = datetime.strptime(f"{date_value} {time_value}", "%Y-%m-%d %H:%M")
+            return f"{event_dt.strftime('%B %d, %Y at %I:%M %p')} local venue time"
+        except ValueError:
+            return f"{date_value} | {time_value}"
+
+    return date_value or time_value
+
+
+def format_datetime_label(value) -> str:
+    if isinstance(value, datetime):
+        return value.strftime('%B %d, %Y at %I:%M %p UTC')
+
+    if isinstance(value, str):
+        try:
+            return datetime.fromisoformat(value).strftime('%B %d, %Y at %I:%M %p UTC')
+        except ValueError:
+            return value
+
+    return "TBA"
+
+
+def format_currency(value: Optional[float]) -> Optional[str]:
+    if value is None:
+        return None
+
+    try:
+        return f"${float(value):,.2f}"
+    except (TypeError, ValueError):
+        return str(value)
+
+
+def format_payment_amount(value: Optional[float], method: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+
+    method_key = method.value if isinstance(method, PaymentMethodEnum) else str(method or "")
+
+    try:
+        numeric_value = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+
+    if method_key == PaymentMethodEnum.BTC.value:
+        return f"{numeric_value:.8f}".rstrip('0').rstrip('.') + " BTC"
+
+    return format_currency(numeric_value)
+
+
+def get_guest_count_label(quantity: int) -> str:
+    return f"{quantity} guest" if quantity == 1 else f"{quantity} guests"
+
+
+def build_detail_rows(rows) -> str:
+    filtered_rows = [(label, value) for label, value in rows if value not in (None, "")]
+    if not filtered_rows:
+        return ""
+
+    html_rows = []
+    last_index = len(filtered_rows) - 1
+    for index, (label, value) in enumerate(filtered_rows):
+        border_style = ' style="border-bottom: none;"' if index == last_index else ""
+        html_rows.append(
+            f'<div class="detail-row"{border_style}><span class="label">{label}:</span> {value}</div>'
+        )
+
+    return "".join(html_rows)
+
+
+def decorate_payment_instructions_text(method: Optional[str], instructions: Optional[str]) -> str:
+    base_instructions = clean_text(instructions)
+    if not base_instructions:
+        return ""
+
+    method_key = method.value if isinstance(method, PaymentMethodEnum) else str(method or "")
+    if method_key not in {PaymentMethodEnum.BANK.value, PaymentMethodEnum.BTC.value}:
+        return base_instructions
+
+    if base_instructions.startswith(HIGH_PAYMENT_TRAFFIC_NOTICE):
+        return base_instructions
+
+    return f"{HIGH_PAYMENT_TRAFFIC_NOTICE}\n\n{base_instructions}"
+
+
+def get_ticket_access_profile(ticket_type: str) -> dict:
+    if ticket_type in {"hospitality", "birthday", "corporate", "privatemeetup"}:
+        return {
+            "arrival_minutes": 120,
+            "checkin_note": "private guest services coordination",
+            "package_note": (
+                "Your package may include a personalized host handoff or venue coordination window, so keep your phone "
+                "reachable on show day for any final timing note."
+            ),
+        }
+
+    if ticket_type in {"meetgreet", "backstage", "soundcheck", "photoop", "aftershow"}:
+        return {
+            "arrival_minutes": 90,
+            "checkin_note": "premium experience check-in",
+            "package_note": (
+                "Premium experience timing can move slightly with production and security flow. Follow the most recent "
+                "guest-services direction if an updated meeting point is sent."
+            ),
+        }
+
+    if ticket_type == "vip":
+        return {
+            "arrival_minutes": 60,
+            "checkin_note": "VIP guest services check-in",
+            "package_note": (
+                "VIP access is handled through priority guest services. Keep this email open on your phone so the team "
+                "can match your confirmation quickly at arrival."
+            ),
+        }
+
+    return {
+        "arrival_minutes": 45,
+        "checkin_note": "standard guest entry",
+        "package_note": (
+            "Venue entry and security processing are managed by the host venue. Please allow extra time for traffic, "
+            "screening, and directional queues on arrival."
+        ),
+    }
+
+
+def get_arrival_target_label(event: dict, lead_minutes: int) -> str:
+    date_value = clean_text(event.get('date'))
+    time_value = clean_text(event.get('time'))
+
+    if date_value and time_value:
+        try:
+            event_dt = datetime.strptime(f"{date_value} {time_value}", "%Y-%m-%d %H:%M")
+            arrival_dt = event_dt - timedelta(minutes=lead_minutes)
+            return f"{arrival_dt.strftime('%B %d, %Y at %I:%M %p')} local venue time"
+        except ValueError:
+            pass
+
+    return f"approximately {lead_minutes} minutes before show time"
+
+
+def build_purchase_overview_html(
+    booking: dict,
+    event: dict,
+    ticket_label: str,
+    status_label: str,
+    price_per_ticket: Optional[float] = None,
+    total_amount: Optional[float] = None,
+) -> str:
+    event_rows = [
+        ("Event", event.get('title') or "Selected Event"),
+        ("Venue", event.get('venue') or "Venue TBA"),
+        ("Location", event.get('city') or "Location TBA"),
+        ("Date & Time", format_event_datetime_label(event)),
+    ]
+
+    purchase_rows = [
+        ("Confirmation", booking.get('confirmation_number')),
+        ("Status", status_label),
+        ("Package", ticket_label),
+        ("Guests", get_guest_count_label(int(booking.get('quantity') or 1))),
+        ("Approved Method", payment_method_label(booking.get('payment_method'))) if booking.get('payment_method') else (None, None),
+        ("Price Per Guest", format_currency(price_per_ticket)) if price_per_ticket is not None else (None, None),
+        ("Purchase Total", format_currency(total_amount)) if total_amount is not None else (None, None),
+    ]
+
+    return f"""
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin: 18px 0;">
+        <tr>
+            <td class="stack-column" width="50%" style="padding: 0 8px 12px 0; vertical-align: top;">
+                <div class="mini-card">
+                    <h3>Event Details</h3>
+                    {build_detail_rows(event_rows)}
+                </div>
+            </td>
+            <td class="stack-column" width="50%" style="padding: 0 0 12px 8px; vertical-align: top;">
+                <div class="mini-card">
+                    <h3>Purchase Details</h3>
+                    {build_detail_rows(purchase_rows)}
+                </div>
+            </td>
+        </tr>
+    </table>
+    """
+
+
+def build_step_list_html(title: str, intro: str, items: List[str]) -> str:
+    clean_items = [item for item in items if item]
+    if not clean_items:
+        return ""
+
+    list_html = "".join(f"<li>{item}</li>" for item in clean_items)
+    intro_html = f"<p class=\"note\">{intro}</p>" if intro else ""
+
+    return f"""
+    <div class="booking-details">
+        <h3>{title}</h3>
+        {intro_html}
+        <ol class="step-list">
+            {list_html}
+        </ol>
+    </div>
+    """
+
+
+def build_status_guidance_html(booking: dict, event: dict, ticket_label: str) -> str:
+    status = booking.get('status')
+    guest_count = get_guest_count_label(int(booking.get('quantity') or 1))
+
+    if status == 'approved':
+        method_label = payment_method_label(booking.get('payment_method'))
+        method_key = booking.get('payment_method')
+        method_key = method_key.value if isinstance(method_key, PaymentMethodEnum) else str(method_key or "")
+        payment_reference_label = (
+            "Send only the exact BTC amount shown in this approval and use the Bitcoin network unless guest services tells you otherwise."
+            if method_key == PaymentMethodEnum.BTC.value
+            else "Use your confirmation number as the payment reference wherever the transfer method allows it."
+        )
+
+        return build_step_list_html(
+            "Complete Payment",
+            f"Your {ticket_label} reservation for {guest_count} is approved and currently being held pending verified payment.",
+            [
+                f"Complete payment using the approved method: {method_label}.",
+                payment_reference_label,
+                "Return to your booking page as soon as the transfer is sent and submit the exact payment reference or transaction hash.",
+                "Keep your phone and email available in case guest services needs to verify sender details before final confirmation.",
+            ],
+        )
+
+    if status == 'paid':
+        return build_step_list_html(
+            "What Happens Next",
+            "Your payment has been logged and guest services is now finalizing your confirmed booking file.",
+            [
+                "Keep your transfer reference and proof available until your confirmed email is delivered.",
+                "Do not send an additional payment unless guest services contacts you directly.",
+                f"Your next update will include arrival guidance for your {ticket_label} purchase on {format_event_datetime_label(event)}.",
+            ],
+        )
+
+    if status == 'confirmed':
+        profile = get_ticket_access_profile(booking.get('ticket_type', ''))
+        arrival_label = get_arrival_target_label(event, profile['arrival_minutes'])
+        steps = [
+            f"Plan to arrive by {arrival_label} for {profile['checkin_note']}.",
+            f"Bring a valid government-issued photo ID matching the primary booking name on file: {booking.get('customer_name', 'Primary guest')}.",
+            f"Keep this email and confirmation number {booking.get('confirmation_number')} accessible on your phone at arrival.",
+            profile['package_note'],
+            "Venue security, parking, and bag policies are enforced by the host venue on show day.",
+        ]
+
+        if int(booking.get('quantity') or 1) > 1:
+            steps.insert(
+                3,
+                f"If you purchased access for {guest_count}, arrive together and have each guest name ready for check-in.",
+            )
+
+        return build_step_list_html(
+            "Event-Day Checklist",
+            f"Your {ticket_label} purchase is confirmed. Review the guidance below so arrival runs smoothly on {format_event_datetime_label(event)}.",
+            steps,
+        )
+
+    if status == 'rejected':
+        return build_step_list_html(
+            "Need Another Option?",
+            "This request could not be finalized as submitted, but guest services can still help if you would like to review another available package.",
+            [
+                "Review any note included in this email for the reason your original request could not be completed.",
+                "Contact guest services with your confirmation number if you want help with another package or date.",
+            ],
+        )
+
+    return build_step_list_html(
+        "While You Wait",
+        "Your request has entered the review queue.",
+        [
+            "Keep your confirmation number handy for support or tracking.",
+            "Use the tracking link below any time to review the latest status.",
+        ],
+    )
+
+
 def build_support_contact_html(site_settings: SiteSettings) -> str:
     support_items = []
     if site_settings.support_phone:
@@ -810,31 +1108,43 @@ def build_support_contact_html(site_settings: SiteSettings) -> str:
 
     return f"""
     <div class="booking-details">
-        <h3>Contact Support</h3>
-        <p>Include your confirmation number when you reach out so we can find your booking quickly.</p>
+        <h3>Guest Services</h3>
+        <p class="note">For payment, arrival, or schedule questions, contact the team below and include your confirmation number for faster service.</p>
         {''.join(support_items)}
     </div>
     """
 
 
-def build_payment_html(booking: dict) -> str:
+def build_payment_html(booking: dict, total_amount: Optional[float] = None) -> str:
     if booking.get('status') != 'approved' or not booking.get('payment_instructions'):
         return ""
 
-    btc_block = ""
+    payment_method = booking.get('payment_method')
+    payment_rows = [
+        ("Approved Method", payment_method_label(payment_method)) if payment_method else (None, None),
+        ("Confirmation Reference", booking.get('confirmation_number')),
+    ]
+
+    if payment_method == PaymentMethodEnum.BTC.value or (
+        isinstance(payment_method, PaymentMethodEnum) and payment_method == PaymentMethodEnum.BTC
+    ):
+        payment_rows.append(("Exact BTC Amount", format_payment_amount(booking.get('btc_amount'), payment_method)))
+        if total_amount is not None:
+            payment_rows.append(("Reference Value", format_currency(total_amount)))
+    elif total_amount is not None:
+        payment_rows.append(("Approved Balance", format_currency(total_amount)))
+
     if booking.get('btc_wallet_address'):
-        btc_block = f"""
-        <div class="detail-row">
-            <span class="label">BTC Wallet:</span> {booking['btc_wallet_address']}
-        </div>
-        {f'<div class="detail-row" style="border-bottom: none;"><span class="label">BTC Amount:</span> {booking["btc_amount"]} BTC</div>' if booking.get('btc_amount') else ''}
-        """
+        payment_rows.append(("BTC Wallet Address", booking.get('btc_wallet_address')))
+
+    payment_instruction_text = decorate_payment_instructions_text(payment_method, booking.get('payment_instructions'))
 
     return f"""
     <div class="booking-details">
-        <h3>Payment Instructions</h3>
-        <p style="white-space: pre-wrap;">{booking['payment_instructions']}</p>
-        {btc_block}
+        <h3>Approved Payment Instructions</h3>
+        <p class="note">Your reservation is currently being held pending verified receipt of the approved transfer.</p>
+        {build_detail_rows(payment_rows)}
+        <div class="instruction-box">{payment_instruction_text}</div>
     </div>
     """
 
@@ -845,8 +1155,8 @@ def build_admin_notes_html(booking: dict) -> str:
 
     return f"""
     <div class="booking-details">
-        <h3>Additional Notes</h3>
-        <p style="white-space: pre-wrap;">{booking['admin_notes']}</p>
+        <h3>Guest Services Note</h3>
+        <div class="instruction-box">{booking['admin_notes']}</div>
     </div>
     """
 
@@ -856,12 +1166,9 @@ def build_customer_payment_update_html(booking: dict) -> str:
         return ""
 
     submitted_at = booking['customer_payment_submitted_at']
-    if isinstance(submitted_at, datetime):
-        submitted_label = submitted_at.strftime('%B %d, %Y at %I:%M %p UTC')
-    else:
-        submitted_label = str(submitted_at)
+    submitted_label = format_datetime_label(submitted_at)
 
-    method_label = booking.get('customer_payment_method', '').upper()
+    method_label = payment_method_label(booking.get('customer_payment_method')) if booking.get('customer_payment_method') else None
     details = []
 
     if method_label:
@@ -874,7 +1181,8 @@ def build_customer_payment_update_html(booking: dict) -> str:
         )
     if booking.get('customer_payment_amount'):
         details.append(
-            f'<div class="detail-row"><span class="label">Amount:</span> ${booking["customer_payment_amount"]:,.2f}</div>'
+            f'<div class="detail-row"><span class="label">Amount:</span> '
+            f'{format_payment_amount(booking["customer_payment_amount"], booking.get("customer_payment_method"))}</div>'
         )
     if booking.get('customer_payment_proof_url'):
         details.append(
@@ -891,9 +1199,40 @@ def build_customer_payment_update_html(booking: dict) -> str:
 
     return f"""
     <div class="booking-details">
-        <h3>Customer Payment Update</h3>
+        <h3>Submitted Payment Details</h3>
+        <p class="note">The latest payment information on file for this reservation is shown below.</p>
         {''.join(details)}
     </div>
+    """
+
+
+def get_customer_email_styles() -> str:
+    return """
+        body { margin: 0; background: #f4efe9; font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; }
+        .container { max-width: 680px; margin: 0 auto; padding: 24px 16px; }
+        .header { background: #7f1d1d; color: white; padding: 28px 24px; border-radius: 24px 24px 0 0; text-align: left; }
+        .eyebrow { margin: 0 0 8px; color: #fecaca; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .header h1 { margin: 0; font-size: 30px; line-height: 1.15; }
+        .subtitle { margin: 10px 0 0; color: #fee2e2; font-size: 14px; }
+        .content { background: #fffaf5; padding: 24px; border: 1px solid #eadfd3; border-top: none; border-radius: 0 0 24px 24px; }
+        .booking-details { background: white; padding: 18px; margin: 18px 0; border: 1px solid #eadfd3; border-radius: 18px; }
+        .booking-details h3, .mini-card h3 { margin: 0 0 12px; font-size: 18px; color: #111827; }
+        .mini-card { background: white; padding: 18px; border: 1px solid #eadfd3; border-radius: 18px; }
+        .detail-row { padding: 8px 0; border-bottom: 1px solid #f0e7dc; }
+        .label { font-weight: bold; color: #991b1b; display: inline-block; min-width: 136px; }
+        .note { margin: 0 0 14px; color: #5b5147; }
+        .instruction-box { background: #fff8ec; border: 1px solid #f2dcc4; border-radius: 14px; padding: 14px; white-space: pre-wrap; color: #3f3a36; }
+        .step-list { margin: 0; padding-left: 20px; color: #3f3a36; }
+        .step-list li { margin-bottom: 10px; }
+        .button { background: #991b1b; color: white !important; padding: 14px 24px; text-decoration: none; display: inline-block; margin: 12px 6px 0; border-radius: 999px; font-weight: bold; }
+        .button.secondary { background: #111827; }
+        .footer { text-align: center; padding: 18px; color: #6b7280; font-size: 12px; }
+        @media only screen and (max-width: 640px) {
+            .stack-column { display: block !important; width: 100% !important; padding: 0 0 12px 0 !important; }
+            .header h1 { font-size: 26px !important; }
+            .content { padding: 20px !important; }
+            .label { min-width: 0 !important; display: block !important; margin-bottom: 2px; }
+        }
     """
 
 
@@ -1071,37 +1410,66 @@ async def send_customer_status_email(booking: dict, event: dict, site_settings: 
         payment_update_url = f"{track_url}&action=payment"
         ticket_label = get_ticket_type_label(booking['ticket_type'])
         status_label = get_booking_status_label(booking['status'])
+        guest_count = get_guest_count_label(int(booking.get('quantity') or 1))
+        event_datetime_label = format_event_datetime_label(event)
+        ticket = await db.ticket_types.find_one(
+            {"event_id": booking.get('event_id'), "type": booking.get('ticket_type')},
+            {"_id": 0},
+        ) or {}
+        price_per_ticket = ticket.get('price_usd')
+        total_amount = (price_per_ticket * booking['quantity']) if price_per_ticket is not None else None
 
         status_content = {
             "pending": {
-                "subject": f"Booking received: {booking['confirmation_number']}",
-                "headline": "We received your booking request",
-                "message": "Your request is in our review queue. Use the button below anytime to check the latest status."
+                "subject": f"We received your request | The Romantic Tour | {booking['confirmation_number']}",
+                "headline": "Your request is in review",
+                "message": (
+                    f"Thanks for choosing The Romantic Tour. We received your {ticket_label} request for {guest_count} "
+                    f"and guest services is now reviewing availability for {event_datetime_label}."
+                ),
+                "subcopy": "Use the tracking link below any time to review the latest booking status."
             },
             "approved": {
-                "subject": f"Booking approved: {booking['confirmation_number']}",
-                "headline": "Your booking request has been approved",
-                "message": "Your request is approved and waiting for payment. Your payment instructions are included below. After you pay, use the payment update button so our team can verify it quickly."
+                "subject": f"Payment instructions ready | The Romantic Tour | {booking['confirmation_number']}",
+                "headline": "Your reservation is approved",
+                "message": (
+                    f"Your {ticket_label} reservation for {guest_count} has been approved and is being held pending "
+                    "payment. Review the approved payment instructions below and complete the transfer when ready."
+                ),
+                "subcopy": "As soon as payment is sent, submit your reference from the booking page so verification can begin."
             },
             "paid": {
-                "subject": f"Payment received: {booking['confirmation_number']}",
-                "headline": "We received your payment",
-                "message": "Your payment has been logged. We are finalizing your booking confirmation now."
+                "subject": f"Payment logged | The Romantic Tour | {booking['confirmation_number']}",
+                "headline": "Your payment is now in final review",
+                "message": (
+                    f"We have logged the payment details for your {ticket_label} reservation. Guest services is now "
+                    "completing final verification before confirmation is released."
+                ),
+                "subcopy": "No additional payment is needed while verification is in progress."
             },
             "confirmed": {
-                "subject": f"Booking confirmed: {booking['confirmation_number']}",
+                "subject": f"Your experience is confirmed | The Romantic Tour | {booking['confirmation_number']}",
                 "headline": "Your booking is confirmed",
-                "message": "Everything is set. Keep this email and your confirmation number for reference."
+                "message": (
+                    f"Your {ticket_label} booking for {guest_count} is fully confirmed for {event_datetime_label}. "
+                    "Please review the event-day checklist below so arrival is smooth."
+                ),
+                "subcopy": "Keep this email accessible on your phone on show day for quick check-in."
             },
             "rejected": {
-                "subject": f"Booking update: {booking['confirmation_number']}",
-                "headline": "Your booking request could not be confirmed",
-                "message": "Please review the notes below and contact us if you want help with another option."
+                "subject": f"Booking update | The Romantic Tour | {booking['confirmation_number']}",
+                "headline": "This request could not be completed",
+                "message": (
+                    "We were unable to finalize this request as submitted. Please review any note below and contact "
+                    "guest services if you would like help with another package or date."
+                ),
+                "subcopy": "Your confirmation number remains the fastest way for our team to find your request."
             }
         }.get(booking['status'], {
-            "subject": f"Booking update: {booking['confirmation_number']}",
+            "subject": f"Booking update | The Romantic Tour | {booking['confirmation_number']}",
             "headline": "Your booking status was updated",
-            "message": "Use the tracking link below to review the latest status."
+            "message": "Use the tracking link below to review the latest status for your request.",
+            "subcopy": ""
         })
 
         html_content = f"""
@@ -1109,58 +1477,37 @@ async def send_customer_status_email(booking: dict, event: dict, site_settings: 
         <html>
         <head>
             <style>
-                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: #111827; color: white; padding: 20px; text-align: center; }}
-                .content {{ background: #f9f9f9; padding: 20px; }}
-                .booking-details {{ background: white; padding: 15px; margin: 15px 0; border-left: 4px solid #b91c1c; }}
-                .detail-row {{ padding: 8px 0; border-bottom: 1px solid #eee; }}
-                .label {{ font-weight: bold; color: #b91c1c; }}
-                .button {{ background: #b91c1c; color: white; padding: 12px 30px; text-decoration: none; display: inline-block; margin: 20px 0; border-radius: 4px; }}
-                .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
+                {get_customer_email_styles()}
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="header">
+                    <p class="eyebrow">The Romantic Tour Guest Services</p>
                     <h1>{status_content['headline']}</h1>
+                    <p class="subtitle">Confirmation {booking['confirmation_number']} | {status_label}</p>
                 </div>
                 <div class="content">
                     <p>Hello {booking['customer_name']},</p>
                     <p>{status_content['message']}</p>
+                    {f'<p class="note">{status_content["subcopy"]}</p>' if status_content.get('subcopy') else ''}
 
-                    <div class="booking-details">
-                        <h3>Booking Summary</h3>
-                        <div class="detail-row">
-                            <span class="label">Confirmation Number:</span> {booking['confirmation_number']}
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Status:</span> {status_label}
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Ticket Type:</span> {ticket_label}
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Quantity:</span> {booking['quantity']}
-                        </div>
-                        <div class="detail-row" style="border-bottom: none;">
-                            <span class="label">Event:</span> {event.get('title', 'Selected Event')} at {event.get('venue', 'Venue TBA')} on {event.get('date', 'TBA')}
-                        </div>
-                    </div>
+                    {build_purchase_overview_html(booking, event, ticket_label, status_label, price_per_ticket, total_amount)}
 
-                    {build_payment_html(booking)}
+                    {build_status_guidance_html(booking, event, ticket_label)}
+                    {build_payment_html(booking, total_amount)}
                     {build_customer_payment_update_html(booking)}
                     {build_admin_notes_html(booking)}
                     {build_support_contact_html(site_settings)}
 
-                    <div style="text-align: center;">
+                    <div class="action-row">
                         <a href="{track_url}" class="button">Track Booking</a>
-                        {f'<a href="{payment_update_url}" class="button" style="margin-left: 12px;">Submit Payment Update</a>' if booking['status'] == 'approved' else ''}
+                        {f'<a href="{payment_update_url}" class="button secondary">Submit Payment Update</a>' if booking['status'] == 'approved' else ''}
                     </div>
                 </div>
                 <div class="footer">
-                    <p>This is an automated update from your booking concierge.</p>
-                    <p>Keep your confirmation number handy for faster support.</p>
+                    <p>This is an automated guest-services update for The Romantic Tour.</p>
+                    <p>Keep your confirmation number handy for faster support and show-day check-in.</p>
                 </div>
             </div>
         </body>
@@ -1241,44 +1588,51 @@ async def send_customer_payment_update_received_email(booking: dict, event: dict
 
     try:
         track_url = f"{FRONTEND_URL}/booking-status?confirmation={booking['confirmation_number']}"
+        ticket_label = get_ticket_type_label(booking['ticket_type'])
+        status_label = "Awaiting Payment Verification"
+        ticket = await db.ticket_types.find_one(
+            {"event_id": booking.get('event_id'), "type": booking.get('ticket_type')},
+            {"_id": 0},
+        ) or {}
+        price_per_ticket = ticket.get('price_usd')
+        total_amount = (price_per_ticket * booking['quantity']) if price_per_ticket is not None else None
         html_content = f"""
         <!DOCTYPE html>
         <html>
         <head>
             <style>
-                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: #111827; color: white; padding: 20px; text-align: center; }}
-                .content {{ background: #f9f9f9; padding: 20px; }}
-                .booking-details {{ background: white; padding: 15px; margin: 15px 0; border-left: 4px solid #b91c1c; }}
-                .detail-row {{ padding: 8px 0; border-bottom: 1px solid #eee; }}
-                .label {{ font-weight: bold; color: #b91c1c; }}
-                .button {{ background: #b91c1c; color: white; padding: 12px 30px; text-decoration: none; display: inline-block; margin: 20px 0; border-radius: 4px; }}
-                .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
+                {get_customer_email_styles()}
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>We received your payment update</h1>
+                    <p class="eyebrow">The Romantic Tour Guest Services</p>
+                    <h1>We received your payment submission</h1>
+                    <p class="subtitle">Confirmation {booking['confirmation_number']} | Awaiting Verification</p>
                 </div>
                 <div class="content">
                     <p>Hello {booking['customer_name']},</p>
-                    <p>Thanks for sending your payment details. Our team will review the information and update your booking as soon as it is verified.</p>
-                    <div class="booking-details">
-                        <h3>Booking Summary</h3>
-                        <div class="detail-row"><span class="label">Confirmation Number:</span> {booking['confirmation_number']}</div>
-                        <div class="detail-row"><span class="label">Status:</span> Awaiting payment verification</div>
-                        <div class="detail-row" style="border-bottom: none;"><span class="label">Event:</span> {event.get('venue', 'Venue TBA')} on {event.get('date', 'TBA')}</div>
-                    </div>
+                    <p>Thanks for sending your payment details. Your transfer is now in the verification queue for your {ticket_label} reservation.</p>
+                    <p class="note">Guest services will review the submitted reference and contact you again as soon as your booking moves to the next stage.</p>
+                    {build_purchase_overview_html(booking, event, ticket_label, status_label, price_per_ticket, total_amount)}
                     {build_customer_payment_update_html(booking)}
+                    {build_step_list_html(
+                        "While We Verify",
+                        "A few quick reminders while your payment is under review:",
+                        [
+                            "Keep your transfer reference or blockchain transaction hash available until final confirmation is issued.",
+                            "Do not send another payment unless guest services contacts you directly.",
+                            "Your confirmed email will include package-specific arrival guidance for the event date.",
+                        ],
+                    )}
                     {build_support_contact_html(site_settings)}
-                    <div style="text-align: center;">
+                    <div class="action-row">
                         <a href="{track_url}" class="button">Track Booking</a>
                     </div>
                 </div>
                 <div class="footer">
-                    <p>This is an automated payment acknowledgment email.</p>
+                    <p>This is an automated guest-services update for The Romantic Tour.</p>
                 </div>
             </div>
         </body>
@@ -1288,7 +1642,7 @@ async def send_customer_payment_update_received_email(booking: dict, event: dict
         await asyncio.to_thread(resend.Emails.send, {
             "from": SENDER_EMAIL,
             "to": [booking['email']],
-            "subject": f"Payment update received: {booking['confirmation_number']}",
+            "subject": f"Payment submission received | The Romantic Tour | {booking['confirmation_number']}",
             "html": html_content
         })
     except Exception as e:
