@@ -590,43 +590,45 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
 
   const renderStepThree = () => (
     <>
-      <div className="mt-4">
+      <div className="mt-5">
         <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8b7c6d]">Step 3</div>
-        <h3 className="mt-1.5 text-[24px] font-black uppercase tracking-[-0.05em] text-[#171717] lg:text-[26px]">
+        <h3 className="mt-2 text-[28px] font-black uppercase tracking-[-0.05em] text-[#171717] lg:text-[30px]">
           Review & Submit
         </h3>
-        <p className="mt-1.5 max-w-[640px] text-[14px] leading-5 text-[#5f564d]">
+        <p className="mt-2 max-w-[680px] text-[15px] leading-6 text-[#5f564d]">
           Confirm your selection and guest details, then send your premium access request.
         </p>
       </div>
 
-      <div className="mt-4 rounded-[20px] border border-[#dfd2c0] bg-white px-4 py-3.5">
-        <div className="grid gap-3 border-b border-[#efe4d6] pb-3 sm:grid-cols-[1.2fr_0.8fr]">
+      <div className="mt-5 rounded-[22px] border border-[#dfd2c0] bg-white px-4 py-4">
+        <div className="grid gap-4 border-b border-[#efe4d6] pb-4 sm:grid-cols-2">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8b7c6d]">Access</div>
-            <div className="mt-1.5 text-[21px] font-black uppercase tracking-[-0.04em] text-[#171717]">
+            <div className="mt-2 text-[24px] font-black uppercase tracking-[-0.04em] text-[#171717]">
               {selectedTicketLabel}
             </div>
-            <div className="mt-1.5 text-[13px] leading-5 text-[#5f564d]">{selectedTicketDescription}</div>
+            <div className="mt-2 text-sm leading-6 text-[#5f564d]">{selectedTicketDescription}</div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-[16px] bg-[#faf4eb] px-3 py-2.5">
-              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8b7c6d]">Price</div>
-              <div className="mt-1 text-[15px] font-black text-[#171717]">{formatTicketPrice(selectedTicketPrice)}</div>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-start justify-between gap-4">
+              <span className="text-[#6a6055]">Price</span>
+              <span className="font-bold text-[#171717]">{formatTicketPrice(selectedTicketPrice)}</span>
             </div>
-            <div className="rounded-[16px] bg-[#faf4eb] px-3 py-2.5">
-              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8b7c6d]">Qty</div>
-              <div className="mt-1 text-[15px] font-black text-[#171717]">{formData.quantity}</div>
+            <div className="flex items-start justify-between gap-4">
+              <span className="text-[#6a6055]">Quantity</span>
+              <span className="font-bold text-[#171717]">
+                {formData.quantity} {formData.quantity === 1 ? quantityUnitLabel.slice(0, -1) : quantityUnitLabel}
+              </span>
             </div>
-            <div className="rounded-[16px] bg-[#faf4eb] px-3 py-2.5">
-              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8b7c6d]">Total</div>
-              <div className="mt-1 text-[18px] font-black text-[#171717]">{formatTicketPrice(subtotal)}</div>
+            <div className="flex items-start justify-between gap-4">
+              <span className="text-[#6a6055]">Total</span>
+              <span className="text-[24px] font-black text-[#171717]">{formatTicketPrice(subtotal)}</span>
             </div>
           </div>
         </div>
 
-        <div className="mt-3 grid gap-2 text-[13px] text-[#5f564d] sm:grid-cols-2">
+        <div className="mt-4 grid gap-2 text-sm text-[#5f564d] sm:grid-cols-2">
           <div>
             <span className="font-bold text-[#171717]">Guest:</span> {formData.customer_name}
           </div>
@@ -634,7 +636,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
             <span className="font-bold text-[#171717]">Email:</span> {formData.email}
           </div>
           <div>
-            <span className="font-bold text-[#171717]">Contact:</span> Mobile on file
+            <span className="font-bold text-[#171717]">Phone:</span> {formData.phone}
           </div>
           {formData.message?.trim() && (
             <div className="sm:col-span-2">
@@ -643,7 +645,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
           )}
         </div>
 
-        <div className="mt-4 rounded-[18px] bg-[#f5ecdf] px-4 py-2.5 text-[13px] leading-5 text-[#5f564d]">
+        <div className="mt-5 rounded-[18px] bg-[#f5ecdf] px-4 py-3 text-sm leading-6 text-[#5f564d]">
           Your request is reviewed first. Payment instructions are only sent after your premium access request is approved.
         </div>
 
@@ -658,7 +660,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
           aria-hidden="true"
         />
 
-        <div className="mt-4">
+        <div className="mt-5">
           <TurnstileField
             token={captchaToken}
             onTokenChange={(nextToken) => {
@@ -679,10 +681,10 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
           </div>
         )}
 
-        <div className="mt-3 text-[12px] leading-5 text-[#7a6e62]">Guest Services: {guestServicesLine}</div>
+        {contactLine && <div className="mt-4 text-sm leading-6 text-[#6a6055]">Questions? {contactLine}</div>}
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
           onClick={() => setBookingStep(2)}
@@ -753,9 +755,9 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-[120] overflow-y-auto bg-black/80 px-3 py-3 backdrop-blur-[2px]" onClick={onClose}>
+    <div className="fixed inset-0 z-[120] overflow-y-auto bg-black/80 px-3 py-4 backdrop-blur-[2px]" onClick={onClose}>
       <div
-        className="relative mx-auto max-h-[94vh] max-w-[1240px] overflow-hidden rounded-[30px] border border-[#d9ccb9] bg-[#f7efe2] text-[#171717] shadow-[0_32px_96px_rgba(0,0,0,0.36)]"
+        className="relative mx-auto max-w-[1280px] overflow-hidden rounded-[30px] border border-[#d9ccb9] bg-[#f7efe2] text-[#171717] shadow-[0_32px_96px_rgba(0,0,0,0.36)]"
         onClick={(clickEvent) => clickEvent.stopPropagation()}
         data-testid="booking-modal"
       >
@@ -769,31 +771,31 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
         </button>
 
         <form onSubmit={handleSubmit}>
-          <div className="grid lg:grid-cols-[0.74fr_1.26fr]">
-            <div className="flex min-h-[320px] flex-col overflow-hidden bg-[#17110e] lg:min-h-[760px]">
-              <div className="relative h-[250px] border-b border-white/10 bg-[radial-gradient(circle_at_top,#532018_0%,#241613_55%,#17110e_100%)] sm:h-[290px] lg:h-[310px]">
+          <div className="grid lg:grid-cols-[0.78fr_1.22fr]">
+            <div className="flex min-h-[380px] flex-col overflow-hidden bg-[#17110e] lg:min-h-[820px]">
+              <div className="relative h-[290px] border-b border-white/10 bg-[radial-gradient(circle_at_top,#532018_0%,#241613_55%,#17110e_100%)] sm:h-[340px] lg:h-[370px]">
                 <img
                   src={event?.image_url}
                   alt="Bruno Mars"
-                  className="absolute inset-0 h-full w-full object-contain object-center p-4 sm:p-5 lg:p-5"
+                  className="absolute inset-0 h-full w-full object-contain object-center p-4 sm:p-6 lg:p-7"
                 />
                 <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#17110e] via-[#17110e]/45 to-transparent" />
               </div>
 
-              <div className="flex flex-1 flex-col justify-between p-5 text-white sm:p-6 lg:p-7">
+              <div className="flex flex-1 flex-col justify-between p-6 text-white sm:p-8 lg:p-10">
                 <div>
                   <div className="inline-flex rounded-full border border-white/18 bg-white/8 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#f0c98d] backdrop-blur-sm">
                     Official Bruno Mars Premium Access
                   </div>
 
-                  <div className="mt-5">
+                  <div className="mt-8">
                     <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#f0c98d]">
                       Selected Event
                     </div>
-                    <h2 className="mt-2.5 text-[34px] font-black uppercase leading-none tracking-[-0.06em] text-white sm:text-[42px]">
+                    <h2 className="mt-3 text-[40px] font-black uppercase leading-none tracking-[-0.06em] text-white sm:text-[52px]">
                       Bruno Mars
                     </h2>
-                    <p className="mt-3 max-w-[400px] text-[13px] leading-6 text-white/78">
+                    <p className="mt-4 max-w-[440px] text-sm leading-7 text-white/78">
                       {formattedEventDate} {formattedEventTime ? `| ${formattedEventTime}` : ''}
                       <br />
                       {event?.venue}, {event?.city}
@@ -801,23 +803,23 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                   </div>
                 </div>
 
-                <div className="mt-5">
+                <div className="mt-8">
                   <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#f0c98d]">
                     Featured Tier
                   </div>
-                  <div className="mt-2.5 rounded-[22px] border border-white/16 bg-white/10 p-4 backdrop-blur-md">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="mt-3 rounded-[24px] border border-white/16 bg-white/10 p-5 backdrop-blur-md">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="max-w-[430px]">
-                        <div className="text-[24px] font-black uppercase leading-[0.96] text-white">
+                        <div className="text-[28px] font-black uppercase leading-[0.96] text-white">
                           {selectedTicketLabel}
                         </div>
-                        <p className="mt-2 text-[13px] leading-6 text-white/78">
+                        <p className="mt-3 text-sm leading-7 text-white/78">
                           {selectedTicketDescription}
                         </p>
                       </div>
 
                       <div className="text-left sm:text-right">
-                        <div className="text-[24px] font-black text-white">
+                        <div className="text-[28px] font-black text-white">
                           {formatTicketPrice(selectedTicketPrice)}
                         </div>
                         <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/58">
@@ -827,12 +829,12 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                     </div>
                   </div>
 
-                  <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
-                    <div className="rounded-[16px] border border-white/14 bg-white/8 px-3.5 py-3">
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-[18px] border border-white/14 bg-white/8 px-4 py-4">
                       <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/58">
                         Availability
                       </div>
-                      <div className="mt-1.5 text-[20px] font-black text-white">
+                      <div className="mt-2 text-[24px] font-black text-white">
                         {selectedTicket?.available_quantity ?? 0}
                       </div>
                       <div className="text-xs uppercase tracking-[0.12em] text-white/58">
@@ -840,11 +842,11 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                       </div>
                     </div>
 
-                    <div className="rounded-[16px] border border-white/14 bg-white/8 px-3.5 py-3">
+                    <div className="rounded-[18px] border border-white/14 bg-white/8 px-4 py-4">
                       <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/58">
                         Request Total
                       </div>
-                      <div className="mt-1.5 text-[20px] font-black text-white">
+                      <div className="mt-2 text-[24px] font-black text-white">
                         {formatTicketPrice(subtotal)}
                       </div>
                       <div className="text-xs uppercase tracking-[0.12em] text-white/58">
@@ -856,7 +858,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
               </div>
             </div>
 
-            <div className="bg-[#fcfaf6] px-5 pb-4 pt-12 lg:max-h-[760px] lg:overflow-y-auto lg:px-6 lg:pb-5 lg:pt-6">
+            <div className="bg-[#fcfaf6] px-5 pb-6 pt-16 lg:max-h-[820px] lg:overflow-y-auto lg:px-7 lg:pb-8 lg:pt-12">
               {renderStepIndicators()}
               {bookingStep === 1 && renderStepOne()}
               {bookingStep === 2 && renderStepTwo()}
