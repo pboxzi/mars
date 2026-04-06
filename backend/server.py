@@ -81,6 +81,17 @@ SUPPORT_PHONE = os.environ.get('SUPPORT_PHONE', '')
 SUPPORT_WHATSAPP = os.environ.get('SUPPORT_WHATSAPP', '')
 SUPPORT_INSTAGRAM = os.environ.get('SUPPORT_INSTAGRAM', '')
 SUPPORT_HOURS = os.environ.get('SUPPORT_HOURS', '')
+WHATSAPP_ACCESS_TOKEN = os.environ.get('WHATSAPP_ACCESS_TOKEN', '').strip()
+WHATSAPP_PHONE_NUMBER_ID = os.environ.get('WHATSAPP_PHONE_NUMBER_ID', '').strip()
+WHATSAPP_WABA_ID = os.environ.get('WHATSAPP_WABA_ID', '').strip()
+WHATSAPP_ALERT_TO_NUMBER = os.environ.get('WHATSAPP_ALERT_TO_NUMBER', '').strip()
+WHATSAPP_ALERT_TEMPLATE_NAME = os.environ.get('WHATSAPP_ALERT_TEMPLATE_NAME', '').strip()
+WHATSAPP_ALERT_TEMPLATE_LANGUAGE = os.environ.get('WHATSAPP_ALERT_TEMPLATE_LANGUAGE', 'en_US').strip() or 'en_US'
+WHATSAPP_ALERT_TEXT_FALLBACK = os.environ.get('WHATSAPP_ALERT_TEXT_FALLBACK', '').strip().lower() in (
+    '1',
+    'true',
+    'yes',
+)
 TURNSTILE_SITE_KEY = os.environ.get('TURNSTILE_SITE_KEY', '').strip()
 TURNSTILE_SECRET_KEY = os.environ.get('TURNSTILE_SECRET_KEY', '').strip()
 TURNSTILE_INCLUDE_REMOTEIP = os.environ.get('TURNSTILE_INCLUDE_REMOTEIP', '').strip().lower() in (
@@ -109,6 +120,13 @@ if (TURNSTILE_SITE_KEY and not TURNSTILE_SECRET_KEY) or (TURNSTILE_SECRET_KEY an
     )
 elif DISABLE_TURNSTILE_VERIFICATION and (TURNSTILE_SITE_KEY or TURNSTILE_SECRET_KEY):
     logger.warning("Turnstile keys are configured but verification is disabled (DISABLE_TURNSTILE_VERIFICATION).")
+
+whatsapp_env_values = [WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_ALERT_TO_NUMBER]
+if any(whatsapp_env_values) and not all(whatsapp_env_values):
+    logger.warning(
+        "WhatsApp click alerts are partially configured. Set WHATSAPP_ACCESS_TOKEN, "
+        "WHATSAPP_PHONE_NUMBER_ID, and WHATSAPP_ALERT_TO_NUMBER together."
+    )
 
 # Security
 security = HTTPBearer()
@@ -809,6 +827,140 @@ def build_public_visit_document(payload: PublicVisitCreate, request: Request) ->
     document['created_at'] = visit.created_at.isoformat()
     document['read_at'] = None
     return document
+
+
+def whatsapp_alert_configured() -> bool:
+    return bool(WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID and WHATSAPP_ALERT_TO_NUMBER)
+
+
+def normalize_phone_digits(value: Optional[str]) -> str:
+    return ''.join(character for character in clean_text(value) if character.isdigit())
+
+
+def build_visit_location_label(visit: dict) -> str:
+    parts = [visit.get('location_city'), visit.get('location_region'), visit.get('location_country')]
+    filtered_parts = [clean_text(part) for part in parts if clean_text(part)]
+    if filtered_parts:
+        return ', '.join(filtered_parts)
+
+    timezone_value = clean_text(visit.get('timezone'))
+    if timezone_value:
+        return timezone_value
+
+    return 'Location unavailable'
+
+
+def build_visit_campaign_label(visit: dict) -> str:
+    campaign_parts = [
+        clean_text(visit.get('utm_source')),
+        clean_text(visit.get('utm_medium')),
+        clean_text(visit.get('utm_campaign')),
+    ]
+    filtered_parts = [value for value in campaign_parts if value]
+    if filtered_parts:
+        return ' / '.join(filtered_parts)
+
+    referrer_domain = clean_text(visit.get('referrer_domain'))
+    if referrer_domain:
+        return referrer_domain
+
+    return 'Direct'
+
+
+def build_whatsapp_click_alert_text(visit: dict) -> str:
+    created_at = format_datetime_label(visit.get('created_at'))
+    source = clean_text(visit.get('source')) or 'Direct'
+    path = normalize_public_path(visit.get('path'))
+    location_label = build_visit_location_label(visit)
+    device_label = clean_text(visit.get('device_type')) or 'Unknown device'
+    language_label = clean_text(visit.get('language')) or 'Unknown language'
+    campaign_label = build_visit_campaign_label(visit)
+    referrer_label = clean_text(visit.get('referrer_domain')) or clean_text(visit.get('referrer')) or 'Direct'
+
+    return (
+        "New Bruno Mars Tour site visit alert\n"
+        f"Source: {source}\n"
+        f"Page: {path}\n"
+        f"Time: {created_at}\n"
+        f"Location: {location_label}\n"
+        f"Device: {device_label} | {language_label}\n"
+        f"Campaign: {campaign_label}\n"
+        f"Referrer: {referrer_label}"
+    )
+
+
+def build_whatsapp_click_alert_template_payload(visit: dict) -> dict:
+    parameters = [
+        clean_text(visit.get('source')) or 'Direct',
+        normalize_public_path(visit.get('path')),
+        build_visit_location_label(visit),
+        clean_text(visit.get('device_type')) or 'Unknown device',
+        format_datetime_label(visit.get('created_at')),
+        build_visit_campaign_label(visit),
+    ]
+    return {
+        "messaging_product": "whatsapp",
+        "to": normalize_phone_digits(WHATSAPP_ALERT_TO_NUMBER),
+        "type": "template",
+        "template": {
+            "name": WHATSAPP_ALERT_TEMPLATE_NAME,
+            "language": {"code": WHATSAPP_ALERT_TEMPLATE_LANGUAGE},
+            "components": [
+                {
+                    "type": "body",
+                    "parameters": [{"type": "text", "text": parameter[:1024] or "-"} for parameter in parameters],
+                }
+            ],
+        },
+    }
+
+
+def build_whatsapp_click_alert_text_payload(visit: dict) -> dict:
+    return {
+        "messaging_product": "whatsapp",
+        "to": normalize_phone_digits(WHATSAPP_ALERT_TO_NUMBER),
+        "type": "text",
+        "text": {
+            "preview_url": False,
+            "body": build_whatsapp_click_alert_text(visit)[:4096],
+        },
+    }
+
+
+async def send_whatsapp_click_alert(visit: dict) -> None:
+    if not whatsapp_alert_configured():
+        return
+
+    destination_number = normalize_phone_digits(WHATSAPP_ALERT_TO_NUMBER)
+    if not destination_number:
+        logger.warning("WhatsApp click alerts are configured with an invalid destination number.")
+        return
+
+    if WHATSAPP_ALERT_TEMPLATE_NAME:
+        payload = build_whatsapp_click_alert_template_payload(visit)
+    elif WHATSAPP_ALERT_TEXT_FALLBACK:
+        payload = build_whatsapp_click_alert_text_payload(visit)
+    else:
+        logger.info(
+            "Skipping WhatsApp click alert because no template is configured. "
+            "Set WHATSAPP_ALERT_TEMPLATE_NAME or enable WHATSAPP_ALERT_TEXT_FALLBACK for session-based testing."
+        )
+        return
+
+    url = (
+        f"https://graph.facebook.com/{os.environ.get('META_GRAPH_VERSION', 'v23.0').strip() or 'v23.0'}"
+        f"/{WHATSAPP_PHONE_NUMBER_ID}/messages"
+    )
+    headers = {
+        "Authorization": f"Bearer {WHATSAPP_ACCESS_TOKEN}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        response = await asyncio.to_thread(requests.post, url, headers=headers, json=payload, timeout=10)
+        response.raise_for_status()
+    except Exception as exc:
+        logger.warning("WhatsApp click alert failed: %s", exc)
 
 
 def get_turnstile_remote_ip(request: Request) -> Optional[str]:
@@ -2175,6 +2327,7 @@ async def record_public_visit(payload: PublicVisitCreate, request: Request):
 
     document = build_public_visit_document(payload, request)
     await db.public_visit_notifications.insert_one(document)
+    asyncio.create_task(send_whatsapp_click_alert(document))
     return {"status": "recorded", "id": document["id"]}
 
 
