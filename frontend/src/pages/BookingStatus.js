@@ -3,7 +3,8 @@ import axios from 'axios';
 import { Search, CheckCircle, Clock, XCircle, DollarSign, Receipt } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import SupportContactCard from '../components/SupportContactCard';
-import TurnstileField, { isTurnstileEnabled } from '../components/TurnstileField';
+import TurnstileField from '../components/TurnstileField';
+import useTurnstileConfig from '../hooks/useTurnstileConfig';
 import useSupportSettings from '../hooks/useSupportSettings';
 import { trackPaymentUpdateSubmitted } from '../utils/adTracking';
 import { getTicketTierLabel } from '../utils/ticketTiers';
@@ -36,6 +37,7 @@ const BookingStatus = () => {
   const [captchaError, setCaptchaError] = useState('');
   const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
   const { supportSettings } = useSupportSettings();
+  const { isTurnstileEnabled, isLoadingTurnstileConfig } = useTurnstileConfig();
 
   const paymentActionRequested = searchParams.get('action') === 'payment';
 
@@ -91,6 +93,11 @@ const BookingStatus = () => {
     setPaymentUpdateError('');
     setPaymentUpdateSuccess('');
     setCaptchaError('');
+
+    if (isLoadingTurnstileConfig) {
+      setCaptchaError('Security check is loading. Please wait a moment and try again.');
+      return;
+    }
 
     if (isTurnstileEnabled && !captchaToken) {
       setCaptchaError('Please complete the security check.');
@@ -480,11 +487,13 @@ const BookingStatus = () => {
 
                     <button
                       type="submit"
-                      disabled={paymentUpdateLoading}
+                      disabled={paymentUpdateLoading || isLoadingTurnstileConfig}
                       className="w-full rounded-[18px] bg-[#171717] py-3 font-bold text-white transition-all hover:opacity-90 disabled:opacity-50"
                     >
                       {paymentUpdateLoading
                         ? 'Sending Update...'
+                        : isLoadingTurnstileConfig
+                          ? 'Loading Security Check...'
                         : booking.customer_payment_submitted_at
                           ? 'Resend Payment Update'
                           : 'Submit Payment Update'}

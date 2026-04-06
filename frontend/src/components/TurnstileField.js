@@ -1,7 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-
-export const TURNSTILE_SITE_KEY = (process.env.REACT_APP_TURNSTILE_SITE_KEY || '').trim();
-export const isTurnstileEnabled = Boolean(TURNSTILE_SITE_KEY);
+import useTurnstileConfig from '../hooks/useTurnstileConfig';
 
 const TURNSTILE_SCRIPT_ID = 'bruno-turnstile-script';
 const TURNSTILE_SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
@@ -9,7 +7,7 @@ const TURNSTILE_SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api
 let turnstileLoader;
 
 const loadTurnstileScript = () => {
-  if (!isTurnstileEnabled || typeof window === 'undefined') {
+  if (typeof window === 'undefined') {
     return Promise.resolve(null);
   }
 
@@ -64,13 +62,14 @@ const TurnstileField = ({ token, onTokenChange, resetSignal = 0, error = '' }) =
   const widgetIdRef = useRef(null);
   const tokenChangeRef = useRef(onTokenChange);
   const [loadError, setLoadError] = useState('');
+  const { siteKey, isTurnstileEnabled, isLoadingTurnstileConfig } = useTurnstileConfig();
 
   useEffect(() => {
     tokenChangeRef.current = onTokenChange;
   }, [onTokenChange]);
 
   useLayoutEffect(() => {
-    if (!isTurnstileEnabled || !containerRef.current) {
+    if (!isTurnstileEnabled || !siteKey || !containerRef.current) {
       return undefined;
     }
 
@@ -83,7 +82,7 @@ const TurnstileField = ({ token, onTokenChange, resetSignal = 0, error = '' }) =
         }
 
         widgetIdRef.current = turnstile.render(containerRef.current, {
-          sitekey: TURNSTILE_SITE_KEY,
+          sitekey: siteKey,
           theme: 'light',
           callback: (nextToken) => {
             setLoadError('');
@@ -107,7 +106,7 @@ const TurnstileField = ({ token, onTokenChange, resetSignal = 0, error = '' }) =
         widgetIdRef.current = null;
       }
     };
-  }, []);
+  }, [isTurnstileEnabled, siteKey]);
 
   useEffect(() => {
     if (!isTurnstileEnabled || widgetIdRef.current === null || !window.turnstile) {
@@ -116,7 +115,18 @@ const TurnstileField = ({ token, onTokenChange, resetSignal = 0, error = '' }) =
 
     window.turnstile.reset(widgetIdRef.current);
     tokenChangeRef.current('');
-  }, [resetSignal]);
+  }, [isTurnstileEnabled, resetSignal]);
+
+  if (isLoadingTurnstileConfig && !siteKey) {
+    return (
+      <div className="mt-4 space-y-2">
+        <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#6a6055]">Security Check</div>
+        <div className="rounded-[18px] border border-[#ddcfbe] bg-white px-3 py-3">
+          <p className="text-xs text-[#6a6055]">Loading security check...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isTurnstileEnabled) {
     return null;

@@ -47,7 +47,11 @@ If you want real fan emails, verify your domain and use a sender like:
    - `RESEND_API_KEY`
    - `SENDER_EMAIL`
    - `ADMIN_EMAIL`
-4. After deploy, open:
+4. Optional Cloudflare Turnstile protection:
+   - Add both `TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` on the backend.
+   - If only one is set, Turnstile stays off so public forms do not get stuck half-configured.
+   - The frontend will read the live site key from the backend automatically.
+5. After deploy, open:
    - `https://your-backend.onrender.com/api/health`
 
 Expected result:
@@ -120,12 +124,17 @@ Optional support info:
 - `SUPPORT_WHATSAPP`
 - `SUPPORT_INSTAGRAM`
 - `SUPPORT_HOURS`
+- `TURNSTILE_SITE_KEY`
+- `TURNSTILE_SECRET_KEY`
 
 ## Required frontend env vars
 Use [frontend/.env.example](frontend/.env.example) as the template.
 
 Required:
 - `REACT_APP_BACKEND_URL`
+
+Optional fallback:
+- `REACT_APP_TURNSTILE_SITE_KEY`
 
 ## Free-tier warnings
 - Render free instances sleep after idle time, so the first request can be slow.

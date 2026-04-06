@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Minus, Plus, X } from 'lucide-react';
-import TurnstileField, { isTurnstileEnabled } from './TurnstileField';
+import TurnstileField from './TurnstileField';
+import useTurnstileConfig from '../hooks/useTurnstileConfig';
 import useSupportSettings from '../hooks/useSupportSettings';
 import { trackBookingSubmitted } from '../utils/adTracking';
 import {
@@ -82,6 +83,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
   const [captchaError, setCaptchaError] = useState('');
   const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
   const { supportSettings } = useSupportSettings();
+  const { isTurnstileEnabled, isLoadingTurnstileConfig } = useTurnstileConfig();
 
   const fetchTickets = useCallback(async () => {
     if (!event) {
@@ -178,6 +180,11 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
   const handleSubmit = async (submitEvent) => {
     submitEvent.preventDefault();
     setCaptchaError('');
+
+    if (isLoadingTurnstileConfig) {
+      setCaptchaError('Security check is loading. Please wait a moment and try again.');
+      return;
+    }
 
     if (isTurnstileEnabled && !captchaToken) {
       setCaptchaError('Please complete the security check.');
@@ -604,10 +611,14 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
 
                   <button
                     type="submit"
-                    disabled={loading || !selectedTicket || selectedTicket.available_quantity <= 0}
+                    disabled={loading || isLoadingTurnstileConfig || !selectedTicket || selectedTicket.available_quantity <= 0}
                     className="mt-5 w-full rounded-full bg-[#141414] px-6 py-3.5 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:opacity-92 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {loading ? 'Submitting...' : 'Submit Premium Request'}
+                    {loading
+                      ? 'Submitting...'
+                      : isLoadingTurnstileConfig
+                        ? 'Loading Security Check...'
+                        : 'Submit Premium Request'}
                   </button>
                 </div>
               </div>

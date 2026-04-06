@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
-import TurnstileField, { isTurnstileEnabled } from '../components/TurnstileField';
+import TurnstileField from '../components/TurnstileField';
+import useTurnstileConfig from '../hooks/useTurnstileConfig';
 import { trackSubscribeSubmitted } from '../utils/adTracking';
 import { subscribeEmail } from '../utils/subscribe';
 
@@ -14,11 +15,17 @@ const SubscribePage = () => {
   const [captchaToken, setCaptchaToken] = useState('');
   const [captchaError, setCaptchaError] = useState('');
   const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
+  const { isTurnstileEnabled, isLoadingTurnstileConfig } = useTurnstileConfig();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setCaptchaError('');
+
+    if (isLoadingTurnstileConfig) {
+      setCaptchaError('Security check is loading. Please wait a moment and try again.');
+      return;
+    }
 
     if (isTurnstileEnabled && !captchaToken) {
       setCaptchaError('Please complete the security check.');
@@ -188,8 +195,8 @@ const SubscribePage = () => {
             resetSignal={captchaResetSignal}
             error={captchaError}
           />
-          <button type="submit" className="subscribe-button" disabled={loading}>
-            {loading ? 'Submitting...' : 'Subscribe'}
+          <button type="submit" className="subscribe-button" disabled={loading || isLoadingTurnstileConfig}>
+            {loading ? 'Submitting...' : isLoadingTurnstileConfig ? 'Loading Security Check...' : 'Subscribe'}
           </button>
           
           {submitted && (

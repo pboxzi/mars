@@ -80,6 +80,7 @@ SUPPORT_PHONE = os.environ.get('SUPPORT_PHONE', '')
 SUPPORT_WHATSAPP = os.environ.get('SUPPORT_WHATSAPP', '')
 SUPPORT_INSTAGRAM = os.environ.get('SUPPORT_INSTAGRAM', '')
 SUPPORT_HOURS = os.environ.get('SUPPORT_HOURS', '')
+TURNSTILE_SITE_KEY = os.environ.get('TURNSTILE_SITE_KEY', '').strip()
 TURNSTILE_SECRET_KEY = os.environ.get('TURNSTILE_SECRET_KEY', '').strip()
 TURNSTILE_INCLUDE_REMOTEIP = os.environ.get('TURNSTILE_INCLUDE_REMOTEIP', '').strip().lower() in (
     '1',
@@ -98,6 +99,13 @@ SUBSCRIPTION_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get('SUBSCRIPTION_RATE_L
 PAYMENT_UPDATE_RATE_LIMIT = int(os.environ.get('PAYMENT_UPDATE_RATE_LIMIT', '6'))
 PAYMENT_UPDATE_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get('PAYMENT_UPDATE_RATE_LIMIT_WINDOW_SECONDS', '900'))
 resend.api_key = RESEND_API_KEY
+
+if (TURNSTILE_SITE_KEY and not TURNSTILE_SECRET_KEY) or (TURNSTILE_SECRET_KEY and not TURNSTILE_SITE_KEY):
+    logger.warning(
+        "Turnstile is partially configured. Set both TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY to enable verification."
+    )
+elif DISABLE_TURNSTILE_VERIFICATION and (TURNSTILE_SITE_KEY or TURNSTILE_SECRET_KEY):
+    logger.warning("Turnstile keys are configured but verification is disabled (DISABLE_TURNSTILE_VERIFICATION).")
 
 # Security
 security = HTTPBearer()
@@ -542,13 +550,26 @@ async def enforce_public_rate_limit(request: Request, bucket: str, limit: int, w
         PUBLIC_RATE_LIMITS[rate_key] = recent_hits
 
 
+def turnstile_enabled() -> bool:
+    return bool(TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY and not DISABLE_TURNSTILE_VERIFICATION)
+
+
+def get_public_config() -> dict:
+    enabled = turnstile_enabled()
+    return {
+        "captcha_provider": "turnstile",
+        "captcha_enabled": enabled,
+        "turnstile_site_key": TURNSTILE_SITE_KEY if enabled else "",
+    }
+
+
 async def verify_turnstile_token(token: Optional[str], request: Request) -> None:
-    """Validate Turnstile when a secret key is configured."""
+    """Validate Turnstile when the public and secret keys are both configured."""
     if DISABLE_TURNSTILE_VERIFICATION:
         logger.warning("Turnstile checks are disabled (DISABLE_TURNSTILE_VERIFICATION). Remove in production.")
         return
 
-    if not TURNSTILE_SECRET_KEY:
+    if not turnstile_enabled():
         return
 
     cleaned_token = clean_text(token)
@@ -1324,6 +1345,12 @@ async def get_public_site_settings():
     return await get_site_settings_model()
 
 
+@api_router.get("/public-config", response_model=dict)
+async def get_public_runtime_config():
+    """Get public runtime configuration for browser-only integrations."""
+    return get_public_config()
+
+
 # Newsletter subscribe (public)
 @api_router.post("/subscriptions")
 async def create_subscription(subscription: SubscriptionCreate, request: Request):
@@ -1347,7 +1374,7 @@ async def health_check():
         "db_backend": "mongodb" if mongo_url else "in-memory",
         "db_name": db_name,
         "email_ready": bool(RESEND_API_KEY and SENDER_EMAIL and ADMIN_EMAIL),
-        "captcha_ready": bool(TURNSTILE_SECRET_KEY),
+        "captcha_ready": turnstile_enabled(),
     }
 
 
