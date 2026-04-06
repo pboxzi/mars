@@ -102,6 +102,12 @@ const AdminNotificationCenter = ({ compact = false }) => {
   const fetchFeedRef = useRef(async () => {});
   const knownIdsRef = useRef(new Set());
   const hasLoadedRef = useRef(false);
+  const panelClasses = compact
+    ? 'fixed inset-x-3 top-[4.75rem] z-50 max-h-[calc(100vh-6.5rem)] overflow-hidden rounded-[24px] border border-stone-200 bg-[#fcfaf6] shadow-[0_18px_50px_rgba(48,32,11,0.18)]'
+    : 'absolute right-0 top-full z-50 mt-3 w-[min(94vw,26rem)] overflow-hidden rounded-[24px] border border-stone-200 bg-[#fcfaf6] shadow-[0_18px_50px_rgba(48,32,11,0.18)]';
+  const feedBodyClasses = compact
+    ? 'max-h-[calc(100vh-14rem)] overflow-y-auto px-3.5 py-3.5'
+    : 'max-h-[24rem] overflow-y-auto px-4 py-4';
 
   const markAllRead = async () => {
     const token = localStorage.getItem('admin_token');
@@ -232,9 +238,9 @@ const AdminNotificationCenter = ({ compact = false }) => {
       setIsOpen(false);
     };
 
-    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('pointerdown', handlePointerDown);
     return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('pointerdown', handlePointerDown);
     };
   }, [isOpen]);
 
@@ -281,15 +287,15 @@ const AdminNotificationCenter = ({ compact = false }) => {
       </button>
 
       {isOpen && (
-        <div className={`absolute right-0 top-full z-50 mt-3 overflow-hidden rounded-[24px] border border-stone-200 bg-[#fcfaf6] shadow-[0_18px_50px_rgba(48,32,11,0.18)] ${
-          compact ? 'w-[min(92vw,22rem)]' : 'w-[min(94vw,26rem)]'
-        }`}>
-          <div className="border-b border-stone-200 px-4 py-4">
+        <div className={panelClasses}>
+          <div className={`border-b border-stone-200 ${compact ? 'px-3.5 py-3.5' : 'px-4 py-4'}`}>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.24em] text-[#9d172b]">Live Traffic</p>
-                <h3 className="mt-1 text-lg font-black text-[#151515]">Public Link Visits</h3>
-                <p className="mt-1 text-xs text-stone-500">New landings appear here within a few seconds.</p>
+                <h3 className={`mt-1 font-black text-[#151515] ${compact ? 'text-base' : 'text-lg'}`}>Public Link Visits</h3>
+                <p className="mt-1 text-xs text-stone-500">
+                  {compact ? 'Recent fan visits appear here.' : 'New landings appear here within a few seconds.'}
+                </p>
               </div>
 
               <button
@@ -303,7 +309,7 @@ const AdminNotificationCenter = ({ compact = false }) => {
             </div>
 
             {permission === 'default' && (
-              <div className="mt-4 rounded-2xl border border-[#9d172b]/15 bg-[#9d172b]/5 p-3">
+              <div className={`mt-4 rounded-2xl border border-[#9d172b]/15 bg-[#9d172b]/5 ${compact ? 'p-2.5' : 'p-3'}`}>
                 <p className="text-sm font-semibold text-[#151515]">Desktop alerts are off</p>
                 <p className="mt-1 text-xs leading-5 text-stone-600">
                   Turn them on if you want the browser to alert you as soon as a new fan opens the public link.
@@ -319,7 +325,7 @@ const AdminNotificationCenter = ({ compact = false }) => {
             )}
 
             {permission === 'denied' && (
-              <div className="mt-4 rounded-2xl border border-stone-200 bg-white p-3">
+              <div className={`mt-4 rounded-2xl border border-stone-200 bg-white ${compact ? 'p-2.5' : 'p-3'}`}>
                 <p className="text-sm font-semibold text-[#151515]">Desktop alerts are blocked</p>
                 <p className="mt-1 text-xs leading-5 text-stone-600">
                   Browser notifications are blocked for this admin session. You can still watch live visits here from the bell.
@@ -328,7 +334,7 @@ const AdminNotificationCenter = ({ compact = false }) => {
             )}
           </div>
 
-          <div className="max-h-[24rem] overflow-y-auto px-4 py-4">
+          <div className={feedBodyClasses}>
             {loading ? (
               <p className="text-sm text-stone-500">Loading live visits...</p>
             ) : error ? (
@@ -343,43 +349,45 @@ const AdminNotificationCenter = ({ compact = false }) => {
                   return (
                     <div
                       key={visit.id}
-                      className={`rounded-2xl border p-3 ${
+                      className={`rounded-2xl border ${compact ? 'p-2.5' : 'p-3'} ${
                         visit.read_at ? 'border-stone-200 bg-white' : 'border-[#9d172b]/20 bg-[#9d172b]/5'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
+                      <div className={`gap-2.5 ${compact ? 'flex flex-col' : 'flex items-start justify-between'}`}>
+                        <div className="min-w-0">
                           <p className="text-sm font-semibold text-[#151515]">
-                            {visit.source || 'Direct'} opened <span className="font-mono">{visit.path}</span>
+                            {visit.source || 'Direct'} opened <span className="font-mono break-all">{visit.path}</span>
                           </p>
-                          <p className="mt-1 text-xs text-stone-500">{visit.page_title || visit.page_url || 'Public page visit'}</p>
+                          <p className="mt-1 text-xs text-stone-500 break-words">
+                            {visit.page_title || visit.page_url || 'Public page visit'}
+                          </p>
                         </div>
                         <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.2em] text-stone-400">
                           {formatRelativeTime(visit.created_at)}
                         </span>
                       </div>
 
-                      <div className="mt-3 grid gap-2 text-xs text-stone-600">
+                      <div className={`mt-3 grid gap-2 text-xs text-stone-600 ${compact ? '' : ''}`}>
                         <div className="flex items-center gap-2">
                           <MapPin className="h-3.5 w-3.5 shrink-0 text-[#9d172b]" />
-                          <span>{formatLocation(visit)}</span>
+                          <span className="break-words">{formatLocation(visit)}</span>
                         </div>
 
                         <div className="flex items-center gap-2">
                           <Globe className="h-3.5 w-3.5 shrink-0 text-[#9d172b]" />
-                          <span>{formatReferrer(visit)}</span>
+                          <span className="break-words">{formatReferrer(visit)}</span>
                         </div>
 
                         <div className="flex items-center gap-2">
                           <DeviceIcon className="h-3.5 w-3.5 shrink-0 text-[#9d172b]" />
-                          <span>
+                          <span className="break-words">
                             {visit.device_type || 'Device unavailable'}
                             {visit.language ? ` | ${visit.language}` : ''}
                           </span>
                         </div>
 
                         {(visit.utm_source || visit.utm_campaign) && (
-                          <div className="text-xs text-stone-500">
+                          <div className="text-xs text-stone-500 break-words">
                             Campaign: {[visit.utm_source, visit.utm_campaign].filter(Boolean).join(' / ')}
                           </div>
                         )}
