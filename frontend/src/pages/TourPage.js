@@ -20,34 +20,34 @@ const FEATURED_ACCESS_KEYS = ['vip', 'meetgreet', 'soundcheck', 'hospitality'];
 
 const benefitCards = [
   {
-    title: 'Priority Arrival',
-    body: 'Premium access requests are handled with guest-service review, smoother arrival flow, and clear next-step communication.'
+    title: 'Arrive Better',
+    body: 'Start the night with a smoother premium-entry experience and a more elevated arrival flow.'
   },
   {
-    title: 'Curated Access',
-    body: 'Choose from featured VIP experiences designed for private entry, upgraded hospitality, and standout show-night access.'
+    title: 'Choose Your Night',
+    body: 'Pick the experience that fits your plans, from VIP access to hosted premium hospitality.'
   },
   {
-    title: 'Trackable Request',
-    body: 'Every request receives a confirmation number, payment instructions after review, and a booking-status page you can return to.'
+    title: 'Stay In Control',
+    body: 'Your request comes with a confirmation number and a clear path to follow from start to finish.'
   }
 ];
 
 const requestSteps = [
   {
     step: '01',
-    title: 'Choose Access',
-    body: 'Review the featured premium options below and select the experience that matches your plans.'
+    title: 'Choose Your Experience',
+    body: 'Start with the featured premium options and pick the access level that fits your night.'
   },
   {
     step: '02',
-    title: 'Send Request',
-    body: 'Submit your guest details and preferred show date. Our team reviews the request before payment is confirmed.'
+    title: 'Enter Your Details',
+    body: 'Complete the short form with your guest details and preferred date so your access request can be prepared.'
   },
   {
     step: '03',
-    title: 'Complete Confirmation',
-    body: 'Once approved, you receive the payment details, submit your reference, and track the booking until final confirmation.'
+    title: 'Continue To Confirmation',
+    body: 'Once the request is accepted, you receive the next steps and can track the booking through confirmation.'
   }
 ];
 
@@ -666,16 +666,16 @@ const TourPage = () => {
           <section className="tour-sales-hero tour-sales-section">
             <div className="tour-sales-copy">
               <div className="tour-sales-kicker">The Romantic Tour Premium Access</div>
-              <h1>Request Premium Access</h1>
+              <h1>Choose How You Want To Experience The Night</h1>
               <p>
-                Submit a premium access request for select Bruno Mars tour dates. This page is built for VIP entry,
-                curated hospitality, guest-service review, and trackable confirmation after approval.
+                From VIP arrival to private hosted access, select the experience that fits your night and continue into
+                the premium access flow for your preferred Bruno Mars date.
               </p>
 
               <div className="tour-sales-trust">
-                <span>Request Review Before Payment</span>
-                <span>Confirmation Number Tracking</span>
-                <span>Guest Support Follow-Up</span>
+                <span>VIP Entry Options</span>
+                <span>Hosted Premium Access</span>
+                <span>Trackable Confirmation</span>
               </div>
 
               <div className="tour-sales-actions">
@@ -696,7 +696,7 @@ const TourPage = () => {
               <div className="tour-hero-card-body">
                 {headlineEvent ? (
                   <>
-                    <div className="tour-hero-card-label">Now Reviewing Requests For</div>
+                    <div className="tour-hero-card-label">Now Open For</div>
                     <h2>{headlineEvent.city}</h2>
 
                     <div className="tour-hero-card-meta">
@@ -707,8 +707,8 @@ const TourPage = () => {
                     </div>
 
                     <div className="tour-hero-card-note">
-                      Request first. Approval comes before payment. Once approved, you receive the payment details and can
-                      track the booking until final confirmation.
+                      Choose your preferred access, continue with your request, and keep your confirmation number ready
+                      for the next step.
                     </div>
 
                     <button
@@ -716,7 +716,7 @@ const TourPage = () => {
                       className="tour-request-button tour-hero-card-cta"
                       onClick={() => openRequest(headlineEvent, 'vip')}
                     >
-                      Start VIP Request
+                      Get Premium Access
                     </button>
                   </>
                 ) : (
@@ -737,10 +737,10 @@ const TourPage = () => {
           <section className="tour-sales-section">
             <div className="tour-section-heading">
               <div className="tour-sales-kicker">Why Continue</div>
-              <h2>Clearer Value Before You Request</h2>
+              <h2>Make The Night Feel Bigger</h2>
               <p>
-                Premium buyers need certainty before they share their details. This flow is structured to show the
-                value, explain the process, and make the next step feel straightforward.
+                Premium access should feel exciting, simple, and worth continuing. These options are designed to give
+                the night more comfort, more access, and a more elevated feel from the start.
               </p>
             </div>
 
@@ -757,10 +757,10 @@ const TourPage = () => {
           <section id="access-options" className="tour-sales-section">
             <div className="tour-section-heading">
               <div className="tour-sales-kicker">Featured Access</div>
-              <h2>Choose A Premium Entry Point</h2>
+              <h2>Choose Your Experience</h2>
               <p>
-                Start with the featured access levels below. If you need something more private or higher-touch, more
-                options are available once you open the request flow.
+                Start with the featured access levels below. If you want something more private or more hosted, you can
+                continue to additional options inside the premium access flow.
               </p>
             </div>
 
@@ -780,7 +780,7 @@ const TourPage = () => {
                     disabled={!headlineEvent}
                     onClick={() => openRequest(headlineEvent, tier.type)}
                   >
-                    {headlineEvent ? 'Request Access' : 'Tour Dates Loading'}
+                    {headlineEvent ? 'Choose This Access' : 'Tour Dates Loading'}
                   </button>
                 </div>
               ))}
@@ -790,9 +790,9 @@ const TourPage = () => {
           <section className="tour-sales-section">
             <div className="tour-section-heading">
               <div className="tour-sales-kicker">What Happens Next</div>
-              <h2>Simple Request Flow</h2>
+              <h2>Simple Next Steps</h2>
               <p>
-                The premium-access process is handled in a few clear steps so you know what comes next before committing.
+                The process is simple: choose your experience, enter your details, and continue with your confirmation.
               </p>
             </div>
 
@@ -810,9 +810,9 @@ const TourPage = () => {
           <section id="tour-dates" className="tour-sales-section">
             <div className="tour-section-heading">
               <div className="tour-sales-kicker">Choose Your Show</div>
-              <h2>Tour Dates Open For Review</h2>
+              <h2>Pick Your Show Date</h2>
               <p>
-                Pick the city you want, then continue into the premium request form for that date.
+                Choose the city you want, then continue into the premium access flow for that show.
               </p>
             </div>
 
@@ -849,7 +849,7 @@ const TourPage = () => {
                       onClick={() => openRequest(event, 'vip')}
                       data-testid={`request-access-button-${event.id}`}
                     >
-                      Request Access
+                      Choose Date
                     </button>
                   </div>
                 ))}
@@ -860,9 +860,9 @@ const TourPage = () => {
           <section className="tour-sales-section">
             <div className="tour-support-card">
               <div>
-                <h3>Need Booking Help?</h3>
+                <h3>Need Help Choosing?</h3>
                 <p>
-                  Use your confirmation number to track a request, follow up on payment, or speak with guest support.
+                  Speak with guest support if you need help choosing the right access level or following your confirmation.
                   {contactLine ? ` ${contactLine}` : ''}
                   {supportSettings.support_hours ? ` Response hours: ${supportSettings.support_hours}.` : ''}
                 </p>
@@ -878,7 +878,7 @@ const TourPage = () => {
                     className="tour-sales-action-primary"
                     onClick={() => openRequest(headlineEvent, 'vip')}
                   >
-                    Request Premium Access
+                    Continue To Access
                   </button>
                 ) : null}
               </div>

@@ -248,10 +248,10 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
         >
           <div className="text-center">
             <CheckCircle className="mx-auto mb-4 h-14 w-14 text-[#9d172b]" />
-            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8c7f72]">Access Request</div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8c7f72]">Premium Access</div>
             <h2 className="mt-3 text-[34px] font-black uppercase tracking-[-0.05em]">Request Submitted</h2>
             <p className="mt-3 text-sm leading-7 text-[#5f564d]">
-              Your premium access request has been received. Use your confirmation number to track approval and payment steps.
+              Your premium access request has been received. Keep your confirmation number ready for the next step.
             </p>
 
             <div className="mt-6 rounded-[22px] border border-[#dfd2c0] bg-white px-5 py-4">
@@ -321,7 +321,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
               <div className="flex flex-1 flex-col justify-between p-6 text-white sm:p-8 lg:p-10">
                 <div>
                   <div className="inline-flex rounded-full border border-white/18 bg-white/8 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#f0c98d] backdrop-blur-sm">
-                    Premium Access Request
+                    Premium Access
                   </div>
 
                   <div className="mt-8">
@@ -403,7 +403,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                   Choose Premium Access
                 </h3>
                 <p className="mt-2 max-w-[680px] text-[15px] leading-6 text-[#5f564d]">
-                  Start with the featured access levels below. If you need celebration, corporate, or more private arrangements, open the private request section underneath.
+                  Choose the premium experience that fits your night. Featured access is shown first, with more private options available below.
                 </p>
               </div>
 
@@ -453,8 +453,8 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                       </div>
 
                       <div className="mt-3 flex items-center justify-between gap-4 border-t border-[#efe4d6] pt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8b7c6d]">
-                        <span>{isSoldOut ? 'Currently unavailable' : `${ticket.available_quantity} request slots left`}</span>
-                        <span>Reviewed before payment</span>
+                        <span>{isSoldOut ? 'Currently unavailable' : `${ticket.available_quantity} spots left`}</span>
+                        <span>{ticket.available_quantity <= 10 ? 'Highly limited' : 'Popular choice'}</span>
                       </div>
                     </button>
                   );
@@ -469,7 +469,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                         Private & Hosted Requests
                       </div>
                       <p className="mt-1 text-sm leading-6 text-[#5f564d]">
-                        For celebration packages, corporate hosting, backstage requests, or more private arrangements.
+                        For celebration plans, corporate hosting, backstage requests, or more private premium experiences.
                       </p>
                     </div>
 
@@ -529,8 +529,8 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                             </div>
 
                             <div className="mt-3 flex items-center justify-between gap-4 border-t border-[#efe4d6] pt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[#8b7c6d]">
-                              <span>{isSoldOut ? 'Currently unavailable' : `${ticket.available_quantity} request slots left`}</span>
-                              <span>Private review</span>
+                              <span>{isSoldOut ? 'Currently unavailable' : `${ticket.available_quantity} spots left`}</span>
+                              <span>Private access</span>
                             </div>
                           </button>
                         );
@@ -608,13 +608,13 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                   </div>
 
                   <div className="mt-4 rounded-[18px] border border-[#e6d7c4] bg-white px-4 py-3.5 text-sm leading-6 text-[#5e544a]">
-                    No payment is requested at this stage. Approval comes first, then payment instructions are sent for the selected access level.
+                    Continue with your details below and keep your confirmation number once submitted.
                   </div>
                 </div>
 
                 <div className="rounded-[22px] border border-[#dfd2c0] bg-white px-4 py-4">
                   <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8b7c6d]">
-                    Guest Details
+                    Continue Your Access
                   </div>
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -712,15 +712,15 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
                   )}
 
                   <button
-                    type="submit"
-                    disabled={loading || isLoadingTurnstileConfig || !selectedTicket || selectedTicket.available_quantity <= 0}
-                    className="mt-5 w-full rounded-full bg-[#141414] px-6 py-3.5 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:opacity-92 disabled:cursor-not-allowed disabled:opacity-50"
+                        type="submit"
+                        disabled={loading || isLoadingTurnstileConfig || !selectedTicket || selectedTicket.available_quantity <= 0}
+                        className="mt-5 w-full rounded-full bg-[#141414] px-6 py-3.5 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:opacity-92 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {loading
                       ? 'Submitting...'
                       : isLoadingTurnstileConfig
                         ? 'Loading Security Check...'
-                        : 'Submit Access Request'}
+                        : 'Continue Premium Access'}
                   </button>
                 </div>
               </div>
