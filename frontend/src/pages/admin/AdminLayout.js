@@ -127,10 +127,10 @@ const AdminLayout = ({ children }) => {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="hidden h-11 items-center gap-2 rounded-full border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-700 shadow-sm transition hover:bg-stone-50 sm:inline-flex lg:hidden"
+                    className="inline-flex h-11 items-center gap-2 rounded-full border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-700 shadow-sm transition hover:bg-stone-50 lg:hidden"
                   >
                     <LogOut className="h-4 w-4" />
-                    Logout
+                    <span className="hidden sm:inline">Logout</span>
                   </button>
                 </div>
               </div>
