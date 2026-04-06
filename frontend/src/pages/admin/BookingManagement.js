@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { CheckCircle, DollarSign, Eye, FileText, X, XCircle } from 'lucide-react';
+import { CheckCircle, DollarSign, Eye, FileText, Trash2, X, XCircle } from 'lucide-react';
 import { getTicketTierLabel } from '../../utils/ticketTiers';
 import {
   createDefaultPaymentSettings,
@@ -60,6 +60,7 @@ const BookingManagement = () => {
   const [approvalData, setApprovalData] = useState(() => createApprovalData());
   const [rejectReason, setRejectReason] = useState('');
   const [manualTransactionId, setManualTransactionId] = useState('');
+  const [deletingBookingId, setDeletingBookingId] = useState('');
 
   useEffect(() => {
     fetchBookings();
@@ -247,6 +248,35 @@ const BookingManagement = () => {
     }
   };
 
+  const handleDeleteBooking = async (booking) => {
+    const confirmed = window.confirm(
+      `Delete booking ${booking.confirmation_number} for ${booking.customer_name}? This action cannot be undone.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingBookingId(booking.id);
+
+    try {
+      const token = localStorage.getItem('admin_token');
+      await axios.delete(`${API}/admin/bookings/${booking.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      await fetchBookings();
+      if (selectedBooking?.id === booking.id) {
+        closeBookingDetails();
+      }
+      alert('Deleted');
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      alert(error.response?.data?.detail || 'Delete failed');
+    } finally {
+      setDeletingBookingId('');
+    }
+  };
+
   const filteredBookings = filterStatus === 'all' 
     ? bookings 
     : bookings.filter(b => b.status === filterStatus);
@@ -344,15 +374,27 @@ const BookingManagement = () => {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => openBookingDetails(booking)}
-                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#151515] px-4 py-3 text-sm font-semibold text-white"
-                  data-testid={`view-booking-${booking.id}`}
-                >
-                  <Eye className="h-4 w-4" />
-                  Open Booking
-                </button>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => openBookingDetails(booking)}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#151515] px-4 py-3 text-sm font-semibold text-white"
+                    data-testid={`view-booking-${booking.id}`}
+                  >
+                    <Eye className="h-4 w-4" />
+                    Open
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteBooking(booking)}
+                    disabled={deletingBookingId === booking.id}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    data-testid={`delete-booking-${booking.id}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    {deletingBookingId === booking.id ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
               </div>
             ))}
           </div>

@@ -147,7 +147,7 @@ const AdminDashboard = () => {
         ))}
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(20rem,0.95fr)]">
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(18rem,0.85fr)]">
         <div className="rounded-[28px] border border-stone-200 bg-white shadow-[0_12px_30px_rgba(48,32,11,0.05)]">
           <div className="flex items-center justify-between gap-3 border-b border-stone-200 px-5 py-4 sm:px-6">
             <div>
@@ -238,43 +238,6 @@ const AdminDashboard = () => {
         </div>
 
         <aside className="space-y-4">
-          <div className="rounded-[28px] border border-stone-200 bg-white p-5 shadow-[0_12px_30px_rgba(48,32,11,0.05)]">
-            <div className="flex items-start gap-3">
-              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#9d172b]/10 text-[#9d172b]">
-                <RotateCcw className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.22em] text-[#9d172b]">Launch Tool</p>
-                <h2 className="mt-1 text-xl font-black text-[#151515]">Clear Test Data</h2>
-                <p className="mt-2 text-sm leading-6 text-stone-600">
-                  Use this only before real traffic if your current records were created during internal testing.
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleResetLaunchData}
-              disabled={isResettingLaunchData}
-              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#151515] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <RotateCcw className={`h-4 w-4 ${isResettingLaunchData ? 'animate-spin' : ''}`} />
-              {isResettingLaunchData ? 'Clearing Data...' : 'Clear Test Data'}
-            </button>
-
-            {resetMessage && (
-              <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-                {resetMessage}
-              </div>
-            )}
-
-            {resetError && (
-              <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
-                {resetError}
-              </div>
-            )}
-          </div>
-
           <div className="rounded-[28px] border border-stone-200 bg-white p-5 shadow-[0_12px_30px_rgba(48,32,11,0.05)]">
             <div className="flex items-start gap-3">
               <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#151515] text-white">
