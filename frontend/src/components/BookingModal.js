@@ -178,6 +178,10 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
   ]
     .filter(Boolean)
     .join(' | ');
+  const guestServicesLine =
+    supportSettings.support_email ||
+    supportSettings.support_instagram ||
+    'Guest Services follows up after your request is reviewed.';
 
   const updateQuantity = (nextValue) => {
     const safeMaximum = maxQuantity > 0 ? maxQuantity : 1;
@@ -281,7 +285,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
   };
 
   const renderStepIndicators = () => (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-1.5">
       {[
         { id: 1, label: 'Choose Access' },
         { id: 2, label: 'Guest Details' },
@@ -293,7 +297,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
         return (
           <div
             key={step.id}
-            className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[11px] font-bold uppercase tracking-[0.16em] ${
+            className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] ${
               isActive
                 ? 'border-[#9d172b] bg-[#fff2e7] text-[#9d172b]'
                 : isComplete
@@ -302,7 +306,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
             }`}
           >
             <span
-              className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${
+              className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] ${
                 isActive ? 'bg-[#9d172b] text-white' : isComplete ? 'bg-[#171717] text-white' : 'bg-[#efe4d6] text-[#8b7c6d]'
               }`}
             >
@@ -317,17 +321,17 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
 
   const renderStepOne = () => (
     <>
-      <div className="mt-5">
+      <div className="mt-4">
         <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8b7c6d]">Step 1</div>
-        <h3 className="mt-2 text-[28px] font-black uppercase tracking-[-0.05em] text-[#171717] lg:text-[30px]">
+        <h3 className="mt-1.5 text-[24px] font-black uppercase tracking-[-0.05em] text-[#171717] lg:text-[26px]">
           Choose Your Access
         </h3>
-        <p className="mt-2 max-w-[680px] text-[15px] leading-6 text-[#5f564d]">
+        <p className="mt-1.5 max-w-[640px] text-[14px] leading-5 text-[#5f564d]">
           Pick the experience that fits your night, then continue with your guest details.
         </p>
       </div>
 
-      <div className="mt-5 grid gap-3 xl:grid-cols-3">
+      <div className="mt-4 grid gap-2.5 xl:grid-cols-3">
         {featuredAccessTickets.map((ticket) => {
           const isSelected = formData.ticket_type === ticket.type;
           const isSoldOut = ticket.available_quantity <= 0;
@@ -338,17 +342,17 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
               type="button"
               disabled={isSoldOut}
               onClick={() => selectAccessTier(ticket)}
-              className={`rounded-[22px] border px-4 py-4 text-left transition ${
+              className={`rounded-[20px] border px-4 py-3.5 text-left transition ${
                 isSelected
                   ? 'border-[#9d172b] bg-[#fff5ea] shadow-[0_10px_30px_rgba(157,23,43,0.08)]'
                   : 'border-[#e3d6c5] bg-white hover:border-[#b89f82] hover:shadow-[0_8px_18px_rgba(0,0,0,0.05)]'
               } ${isSoldOut ? 'cursor-not-allowed opacity-40' : ''}`}
             >
-              <div className="text-[18px] font-black uppercase text-[#171717]">{getTicketTierLabel(ticket.type)}</div>
-              <div className="mt-2 text-[14px] leading-6 text-[#5f564d]">{getTicketTierDescription(ticket.type)}</div>
-              <div className="mt-4 flex items-end justify-between gap-3">
+              <div className="text-[17px] font-black uppercase text-[#171717]">{getTicketTierLabel(ticket.type)}</div>
+              <div className="mt-1.5 text-[13px] leading-5 text-[#5f564d]">{getTicketTierDescription(ticket.type)}</div>
+              <div className="mt-3 flex items-end justify-between gap-3">
                 <div>
-                  <div className="text-[24px] font-black text-[#171717]">
+                  <div className="text-[22px] font-black text-[#171717]">
                     {formatTicketPrice(getDisplayTicketPrice(ticket))}
                   </div>
                   <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8b7c6d]">Starting</div>
@@ -410,17 +414,17 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
         </div>
       )}
 
-      <div className="mt-6 rounded-[22px] border border-[#dfd2c0] bg-white px-4 py-4">
+      <div className="mt-4 rounded-[20px] border border-[#dfd2c0] bg-white px-4 py-3.5">
         <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8b7c6d]">Selected Experience</div>
-        <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mt-2.5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-[540px]">
-            <div className="text-[26px] font-black uppercase tracking-[-0.04em] text-[#171717]">
+            <div className="text-[22px] font-black uppercase tracking-[-0.04em] text-[#171717]">
               {selectedTicketLabel}
             </div>
-            <p className="mt-2 text-[15px] leading-6 text-[#5f564d]">{selectedTicketDescription}</p>
+            <p className="mt-1.5 text-[14px] leading-5 text-[#5f564d]">{selectedTicketDescription}</p>
           </div>
           <div className="text-left sm:text-right">
-            <div className="text-[28px] font-black text-[#171717]">{formatTicketPrice(selectedTicketPrice)}</div>
+            <div className="text-[24px] font-black text-[#171717]">{formatTicketPrice(selectedTicketPrice)}</div>
             <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#8b7c6d]">Starting</div>
           </div>
         </div>
@@ -432,8 +436,8 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
         </div>
       )}
 
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="text-sm text-[#6a6055]">Limited availability for this event. Choose your access and continue.</div>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="text-[13px] text-[#6a6055]">Limited availability. Choose your access and continue.</div>
         <button
           type="button"
           onClick={continueToGuestDetails}
@@ -448,33 +452,33 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
 
   const renderStepTwo = () => (
     <>
-      <div className="mt-5">
+      <div className="mt-4">
         <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8b7c6d]">Step 2</div>
-        <h3 className="mt-2 text-[28px] font-black uppercase tracking-[-0.05em] text-[#171717] lg:text-[30px]">
+        <h3 className="mt-1.5 text-[24px] font-black uppercase tracking-[-0.05em] text-[#171717] lg:text-[26px]">
           Guest Details
         </h3>
-        <p className="mt-2 max-w-[680px] text-[15px] leading-6 text-[#5f564d]">
+        <p className="mt-1.5 max-w-[640px] text-[14px] leading-5 text-[#5f564d]">
           Tell us who this access is for, then review your request before submitting.
         </p>
       </div>
 
-      <div className="mt-5 rounded-[22px] border border-[#dfd2c0] bg-white px-4 py-4">
-        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#efe4d6] pb-4">
+      <div className="mt-4 rounded-[20px] border border-[#dfd2c0] bg-white px-4 py-3.5">
+        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#efe4d6] pb-3">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8b7c6d]">Selected Access</div>
-            <div className="mt-2 text-[24px] font-black uppercase tracking-[-0.04em] text-[#171717]">
+            <div className="mt-1.5 text-[21px] font-black uppercase tracking-[-0.04em] text-[#171717]">
               {selectedTicketLabel}
             </div>
           </div>
           <div className="text-left sm:text-right">
-            <div className="text-[24px] font-black text-[#171717]">{formatTicketPrice(selectedTicketPrice)}</div>
+            <div className="text-[21px] font-black text-[#171717]">{formatTicketPrice(selectedTicketPrice)}</div>
             <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8b7c6d]">Starting</div>
           </div>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-3">
           <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8b7c6d]">Quantity</div>
-          <div className="mt-2.5 flex flex-wrap items-center justify-between gap-4">
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
             <div className="inline-flex items-center rounded-full border border-[#dacdbd] bg-[#faf4eb] p-1">
               <button
                 type="button"
@@ -505,15 +509,15 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
               </button>
             </div>
 
-            <div className="text-sm font-medium text-[#6a6055]">
+            <div className="text-[13px] font-medium text-[#6a6055]">
               Up to {maxQuantity || 0} {quantityUnitLabel.toLowerCase()} for this access
             </div>
           </div>
         </div>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
           <div>
-            <label className="mb-2 block text-sm font-bold uppercase tracking-[0.06em] text-[#171717]">Name</label>
+            <label className="mb-1.5 block text-[12px] font-bold uppercase tracking-[0.06em] text-[#171717]">Name</label>
             <input
               type="text"
               name="customer_name"
@@ -525,7 +529,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-bold uppercase tracking-[0.06em] text-[#171717]">Email</label>
+            <label className="mb-1.5 block text-[12px] font-bold uppercase tracking-[0.06em] text-[#171717]">Email</label>
             <input
               type="email"
               name="email"
@@ -537,8 +541,8 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
           </div>
         </div>
 
-        <div className="mt-3.5">
-          <label className="mb-2 block text-sm font-bold uppercase tracking-[0.06em] text-[#171717]">Phone</label>
+        <div className="mt-2.5">
+          <label className="mb-1.5 block text-[12px] font-bold uppercase tracking-[0.06em] text-[#171717]">Phone</label>
           <input
             type="tel"
             name="phone"
@@ -549,13 +553,13 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
           />
         </div>
 
-        <div className="mt-3.5">
-          <label className="mb-2 block text-sm font-bold uppercase tracking-[0.06em] text-[#171717]">Message</label>
+        <div className="mt-2.5">
+          <label className="mb-1.5 block text-[12px] font-bold uppercase tracking-[0.06em] text-[#171717]">Message</label>
           <textarea
             name="message"
             value={formData.message}
             onChange={handleChange}
-            rows="3"
+            rows="2"
             className="w-full rounded-[16px] border border-[#ddcfbe] bg-[#fffdf9] px-4 py-3 outline-none transition focus:border-[#9d172b]"
             placeholder="Guest names, celebration details, seating preference, or special request."
           />
@@ -568,7 +572,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
         </div>
       )}
 
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
           onClick={() => setBookingStep(1)}
