@@ -441,15 +441,27 @@ const BookingManagement = () => {
                     </td>
                     <td className="px-6 py-4 text-sm text-stone-500">{formatDate(booking.request_date)}</td>
                     <td className="px-6 py-4">
-                      <button
-                        type="button"
-                        onClick={() => openBookingDetails(booking)}
-                        className="inline-flex items-center gap-2 rounded-full bg-[#151515] px-4 py-2 text-sm font-semibold text-white"
-                        data-testid={`view-booking-${booking.id}`}
-                      >
-                        <Eye className="h-4 w-4" />
-                        Open
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openBookingDetails(booking)}
+                          className="inline-flex items-center gap-2 rounded-full bg-[#151515] px-4 py-2 text-sm font-semibold text-white"
+                          data-testid={`view-booking-${booking.id}`}
+                        >
+                          <Eye className="h-4 w-4" />
+                          Open
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteBooking(booking)}
+                          disabled={deletingBookingId === booking.id}
+                          className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                          data-testid={`delete-booking-${booking.id}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          {deletingBookingId === booking.id ? 'Deleting...' : 'Delete'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -788,6 +800,18 @@ const BookingManagement = () => {
                 </button>
               </div>
             )}
+
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={() => handleDeleteBooking(selectedBooking)}
+                disabled={deletingBookingId === selectedBooking.id}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Trash2 className="h-4 w-4" />
+                {deletingBookingId === selectedBooking.id ? 'Deleting Booking...' : 'Delete Booking'}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -2800,6 +2800,42 @@ async def restore_booking_snapshot(
     return booking_data
 
 
+@api_router.delete("/admin/bookings/{booking_id}", response_model=dict)
+async def delete_booking(
+    booking_id: str,
+    admin: dict = Depends(get_current_admin)
+):
+    """Delete a booking and release reserved inventory when needed."""
+    booking = await db.booking_requests.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    if booking.get('inventory_reserved'):
+        ticket = await db.ticket_types.find_one(
+            {"event_id": booking['event_id'], "type": booking['ticket_type']},
+            {"_id": 0}
+        )
+        if ticket:
+            restored_quantity = min(
+                ticket['total_quantity'],
+                ticket['available_quantity'] + booking['quantity']
+            )
+            await db.ticket_types.update_one(
+                {"event_id": booking['event_id'], "type": booking['ticket_type']},
+                {"$set": {"available_quantity": restored_quantity}}
+            )
+
+    result = await db.booking_requests.delete_one({"id": booking_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    return {
+        "status": "deleted",
+        "id": booking_id,
+        "confirmation_number": booking.get("confirmation_number")
+    }
+
+
 @api_router.put("/admin/bookings/{booking_id}/approve", response_model=BookingRequest)
 async def approve_booking(
     booking_id: str,
