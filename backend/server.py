@@ -117,6 +117,13 @@ app = FastAPI()
 api_router = APIRouter(prefix="/api")
 PUBLIC_RATE_LIMITS: Dict[str, List[float]] = {}
 PUBLIC_RATE_LIMIT_LOCK = asyncio.Lock()
+BTC_PRICE_CACHE = {
+    "btc_to_usd": None,
+    "timestamp": None,
+    "source": None,
+    "is_live": False,
+}
+BTC_PRICE_CACHE_TTL_SECONDS = 120
 
 
 # ==================== ENUMS ====================
@@ -401,6 +408,8 @@ class BTCPrice(BaseModel):
     usd_to_btc: float
     btc_to_usd: float
     timestamp: datetime
+    source: Optional[str] = None
+    is_live: bool = True
 
 
 # ==================== HELPER FUNCTIONS ====================
@@ -445,19 +454,97 @@ async def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(
     return admin
 
 
-def get_btc_price() -> float:
-    """Get current BTC/USD price from CoinGecko API"""
-    try:
-        response = requests.get(
-            'https://api.coingecko.com/api/v3/simple/price',
-            params={'ids': 'bitcoin', 'vs_currencies': 'usd'},
-            timeout=5
-        )
-        response.raise_for_status()
-        return response.json()['bitcoin']['usd']
-    except Exception as e:
-        logger.error(f"Error fetching BTC price: {e}")
-        return 50000.0  # Fallback price
+def get_btc_price_snapshot(force_refresh: bool = False) -> dict:
+    """Get a live BTC/USD quote with caching and multi-provider fallback."""
+    now = datetime.now(timezone.utc)
+    cached_timestamp = BTC_PRICE_CACHE.get("timestamp")
+
+    if (
+        not force_refresh
+        and BTC_PRICE_CACHE.get("btc_to_usd")
+        and isinstance(cached_timestamp, datetime)
+        and (now - cached_timestamp).total_seconds() < BTC_PRICE_CACHE_TTL_SECONDS
+    ):
+        return {
+            "usd_to_btc": 1 / BTC_PRICE_CACHE["btc_to_usd"],
+            "btc_to_usd": BTC_PRICE_CACHE["btc_to_usd"],
+            "timestamp": cached_timestamp,
+            "source": BTC_PRICE_CACHE.get("source"),
+            "is_live": BTC_PRICE_CACHE.get("is_live", False),
+        }
+
+    providers = [
+        (
+            "CoinGecko",
+            "https://api.coingecko.com/api/v3/simple/price",
+            {"ids": "bitcoin", "vs_currencies": "usd"},
+            lambda payload: float(payload["bitcoin"]["usd"]),
+        ),
+        (
+            "Coinbase",
+            "https://api.coinbase.com/v2/prices/BTC-USD/spot",
+            {},
+            lambda payload: float(payload["data"]["amount"]),
+        ),
+        (
+            "Kraken",
+            "https://api.kraken.com/0/public/Ticker",
+            {"pair": "XBTUSD"},
+            lambda payload: float(next(iter(payload["result"].values()))["c"][0]),
+        ),
+    ]
+
+    for source_name, url, params, extractor in providers:
+        try:
+            response = requests.get(url, params=params, timeout=5)
+            response.raise_for_status()
+            btc_to_usd = extractor(response.json())
+            BTC_PRICE_CACHE.update({
+                "btc_to_usd": btc_to_usd,
+                "timestamp": now,
+                "source": source_name,
+                "is_live": True,
+            })
+            return {
+                "usd_to_btc": 1 / btc_to_usd,
+                "btc_to_usd": btc_to_usd,
+                "timestamp": now,
+                "source": source_name,
+                "is_live": True,
+            }
+        except Exception as exc:
+            logger.warning("BTC price lookup failed via %s: %s", source_name, exc)
+
+    if BTC_PRICE_CACHE.get("btc_to_usd"):
+        logger.warning("Using cached BTC price because all live providers failed.")
+        return {
+            "usd_to_btc": 1 / BTC_PRICE_CACHE["btc_to_usd"],
+            "btc_to_usd": BTC_PRICE_CACHE["btc_to_usd"],
+            "timestamp": BTC_PRICE_CACHE.get("timestamp") or now,
+            "source": f'{BTC_PRICE_CACHE.get("source") or "cache"} (cached)',
+            "is_live": False,
+        }
+
+    fallback_price = 50000.0
+    logger.error("BTC live price unavailable. Falling back to static reference price.")
+    BTC_PRICE_CACHE.update({
+        "btc_to_usd": fallback_price,
+        "timestamp": now,
+        "source": "Fallback reference",
+        "is_live": False,
+    })
+    return {
+        "usd_to_btc": 1 / fallback_price,
+        "btc_to_usd": fallback_price,
+        "timestamp": now,
+        "source": "Fallback reference",
+        "is_live": False,
+    }
+
+
+def get_btc_price(force_refresh: bool = False) -> float:
+    """Return the BTC/USD reference rate."""
+    return get_btc_price_snapshot(force_refresh=force_refresh)["btc_to_usd"]
 
 
 def clean_text(value: Optional[str]) -> str:
@@ -785,9 +872,9 @@ def get_booking_status_label(status: str) -> str:
 
 
 HIGH_PAYMENT_TRAFFIC_NOTICE = (
-    "High payment traffic notice: Bank transfer and Bitcoin are currently the fastest verified settlement rails for "
-    "approved tour requests. Complete the approved payment exactly as shown below, then submit your payment reference "
-    "so guest services can finalize your file."
+    "High payment traffic notice: Bank transfer and Bitcoin are currently the fastest payment routes for approved "
+    "tour requests. Complete the approved payment exactly as shown below, then submit your payment reference so guest "
+    "services can finish verification."
 )
 
 
@@ -1012,30 +1099,29 @@ def build_status_guidance_html(booking: dict, event: dict, ticket_label: str) ->
         method_key = booking.get('payment_method')
         method_key = method_key.value if isinstance(method_key, PaymentMethodEnum) else str(method_key or "")
         payment_reference_label = (
-            "Send only the exact BTC amount shown in this approval and use the Bitcoin network unless guest services tells you otherwise."
+            "Send only the exact BTC amount shown in this approval and use the Bitcoin network only."
             if method_key == PaymentMethodEnum.BTC.value
-            else "Use your confirmation number as the payment reference wherever the transfer method allows it."
+            else "Use your confirmation number as the transfer reference wherever your bank allows it."
         )
 
         return build_step_list_html(
-            "Complete Payment",
-            f"Your {ticket_label} reservation for {guest_count} is approved and currently being held pending verified payment.",
+            "Next Steps",
+            f"Your {ticket_label} reservation for {guest_count} is approved and waiting for verified payment.",
             [
                 f"Complete payment using the approved method: {method_label}.",
                 payment_reference_label,
-                "Return to your booking page as soon as the transfer is sent and submit the exact payment reference or transaction hash.",
-                "Keep your phone and email available in case guest services needs to verify sender details before final confirmation.",
+                "Return to your booking page right after payment and submit the exact transfer reference or transaction hash.",
             ],
         )
 
     if status == 'paid':
         return build_step_list_html(
             "What Happens Next",
-            "Your payment has been logged and guest services is now finalizing your confirmed booking file.",
+            "Your payment has been logged and guest services is now completing final verification.",
             [
-                "Keep your transfer reference and proof available until your confirmed email is delivered.",
-                "Do not send an additional payment unless guest services contacts you directly.",
-                f"Your next update will include arrival guidance for your {ticket_label} purchase on {format_event_datetime_label(event)}.",
+                "Keep your transfer reference available until the confirmed email is delivered.",
+                "Do not send another payment unless guest services contacts you directly.",
+                "Your next email will include your final arrival guidance.",
             ],
         )
 
@@ -1047,7 +1133,6 @@ def build_status_guidance_html(booking: dict, event: dict, ticket_label: str) ->
             f"Bring a valid government-issued photo ID matching the primary booking name on file: {booking.get('customer_name', 'Primary guest')}.",
             f"Keep this email and confirmation number {booking.get('confirmation_number')} accessible on your phone at arrival.",
             profile['package_note'],
-            "Venue security, parking, and bag policies are enforced by the host venue on show day.",
         ]
 
         if int(booking.get('quantity') or 1) > 1:
@@ -1058,7 +1143,7 @@ def build_status_guidance_html(booking: dict, event: dict, ticket_label: str) ->
 
         return build_step_list_html(
             "Event-Day Checklist",
-            f"Your {ticket_label} purchase is confirmed. Review the guidance below so arrival runs smoothly on {format_event_datetime_label(event)}.",
+            f"Your {ticket_label} purchase is confirmed. Review the guide below for a smooth arrival on {format_event_datetime_label(event)}.",
             steps,
         )
 
@@ -1131,6 +1216,12 @@ def build_payment_html(booking: dict, total_amount: Optional[float] = None) -> s
         payment_rows.append(("Exact BTC Amount", format_payment_amount(booking.get('btc_amount'), payment_method)))
         if total_amount is not None:
             payment_rows.append(("Reference Value", format_currency(total_amount)))
+        if total_amount is not None and booking.get('btc_amount'):
+            try:
+                locked_rate = float(total_amount) / float(booking.get('btc_amount'))
+                payment_rows.append(("Locked Rate At Approval", f"{format_currency(locked_rate)} / BTC"))
+            except (TypeError, ValueError, ZeroDivisionError):
+                pass
     elif total_amount is not None:
         payment_rows.append(("Approved Balance", format_currency(total_amount)))
 
@@ -1142,7 +1233,7 @@ def build_payment_html(booking: dict, total_amount: Optional[float] = None) -> s
     return f"""
     <div class="booking-details">
         <h3>Approved Payment Instructions</h3>
-        <p class="note">Your reservation is currently being held pending verified receipt of the approved transfer.</p>
+        <p class="note">Your reservation is on hold until the approved payment is verified.</p>
         {build_detail_rows(payment_rows)}
         <div class="instruction-box">{payment_instruction_text}</div>
     </div>
@@ -1206,34 +1297,94 @@ def build_customer_payment_update_html(booking: dict) -> str:
     """
 
 
-def get_customer_email_styles() -> str:
-    return """
-        body { margin: 0; background: #f4efe9; font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; }
-        .container { max-width: 680px; margin: 0 auto; padding: 24px 16px; }
-        .header { background: #7f1d1d; color: white; padding: 28px 24px; border-radius: 24px 24px 0 0; text-align: left; }
-        .eyebrow { margin: 0 0 8px; color: #fecaca; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; }
-        .header h1 { margin: 0; font-size: 30px; line-height: 1.15; }
-        .subtitle { margin: 10px 0 0; color: #fee2e2; font-size: 14px; }
-        .content { background: #fffaf5; padding: 24px; border: 1px solid #eadfd3; border-top: none; border-radius: 0 0 24px 24px; }
-        .booking-details { background: white; padding: 18px; margin: 18px 0; border: 1px solid #eadfd3; border-radius: 18px; }
-        .booking-details h3, .mini-card h3 { margin: 0 0 12px; font-size: 18px; color: #111827; }
-        .mini-card { background: white; padding: 18px; border: 1px solid #eadfd3; border-radius: 18px; }
-        .detail-row { padding: 8px 0; border-bottom: 1px solid #f0e7dc; }
-        .label { font-weight: bold; color: #991b1b; display: inline-block; min-width: 136px; }
-        .note { margin: 0 0 14px; color: #5b5147; }
-        .instruction-box { background: #fff8ec; border: 1px solid #f2dcc4; border-radius: 14px; padding: 14px; white-space: pre-wrap; color: #3f3a36; }
-        .step-list { margin: 0; padding-left: 20px; color: #3f3a36; }
-        .step-list li { margin-bottom: 10px; }
-        .button { background: #991b1b; color: white !important; padding: 14px 24px; text-decoration: none; display: inline-block; margin: 12px 6px 0; border-radius: 999px; font-weight: bold; }
-        .button.secondary { background: #111827; }
-        .footer { text-align: center; padding: 18px; color: #6b7280; font-size: 12px; }
-        @media only screen and (max-width: 640px) {
-            .stack-column { display: block !important; width: 100% !important; padding: 0 0 12px 0 !important; }
-            .header h1 { font-size: 26px !important; }
-            .content { padding: 20px !important; }
-            .label { min-width: 0 !important; display: block !important; margin-bottom: 2px; }
-        }
+def get_customer_email_styles(theme: dict) -> str:
+    return f"""
+        body {{ margin: 0; background: #f4efe9; font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; }}
+        .container {{ max-width: 680px; margin: 0 auto; padding: 24px 16px; }}
+        .header {{ background: {theme['header_background']}; color: white; padding: 28px 24px; border-radius: 24px 24px 0 0; text-align: left; }}
+        .eyebrow {{ margin: 0 0 8px; color: {theme['eyebrow_color']}; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; }}
+        .header h1 {{ margin: 0; font-size: 30px; line-height: 1.15; }}
+        .subtitle {{ margin: 10px 0 0; color: {theme['subtitle_color']}; font-size: 14px; }}
+        .content {{ background: #fffaf5; padding: 24px; border: 1px solid #eadfd3; border-top: none; border-radius: 0 0 24px 24px; }}
+        .booking-details {{ background: white; padding: 18px; margin: 18px 0; border: 1px solid #eadfd3; border-radius: 18px; }}
+        .booking-details h3, .mini-card h3 {{ margin: 0 0 12px; font-size: 18px; color: #111827; }}
+        .mini-card {{ background: white; padding: 18px; border: 1px solid #eadfd3; border-radius: 18px; }}
+        .detail-row {{ padding: 8px 0; border-bottom: 1px solid #f0e7dc; }}
+        .label {{ font-weight: bold; color: {theme['label_color']}; display: inline-block; min-width: 136px; }}
+        .note {{ margin: 0 0 14px; color: #5b5147; }}
+        .instruction-box {{ background: #fff8ec; border: 1px solid #f2dcc4; border-radius: 14px; padding: 14px; white-space: pre-wrap; color: #3f3a36; }}
+        .step-list {{ margin: 0; padding-left: 20px; color: #3f3a36; }}
+        .step-list li {{ margin-bottom: 10px; }}
+        .button {{ background: {theme['button_background']}; color: white !important; padding: 14px 24px; text-decoration: none; display: inline-block; margin: 12px 6px 0; border-radius: 999px; font-weight: bold; }}
+        .button.secondary {{ background: {theme['button_secondary']}; }}
+        .footer {{ text-align: center; padding: 18px; color: #6b7280; font-size: 12px; }}
+        @media only screen and (max-width: 640px) {{
+            .stack-column {{ display: block !important; width: 100% !important; padding: 0 0 12px 0 !important; }}
+            .header h1 {{ font-size: 26px !important; }}
+            .content {{ padding: 20px !important; }}
+            .label {{ min-width: 0 !important; display: block !important; margin-bottom: 2px; }}
+        }}
     """
+
+
+def get_customer_email_theme(status: str) -> dict:
+    themes = {
+        "pending": {
+            "eyebrow": "Request Received",
+            "header_background": "#1f2937",
+            "eyebrow_color": "#cbd5e1",
+            "subtitle_color": "#e5e7eb",
+            "label_color": "#334155",
+            "button_background": "#1f2937",
+            "button_secondary": "#7f1d1d",
+        },
+        "approved": {
+            "eyebrow": "Approved | Payment Required",
+            "header_background": "#7f1d1d",
+            "eyebrow_color": "#fecaca",
+            "subtitle_color": "#fee2e2",
+            "label_color": "#991b1b",
+            "button_background": "#991b1b",
+            "button_secondary": "#111827",
+        },
+        "paid": {
+            "eyebrow": "Payment Review",
+            "header_background": "#92400e",
+            "eyebrow_color": "#fde68a",
+            "subtitle_color": "#fef3c7",
+            "label_color": "#92400e",
+            "button_background": "#92400e",
+            "button_secondary": "#111827",
+        },
+        "confirmed": {
+            "eyebrow": "Confirmed | Event Day Guide",
+            "header_background": "#166534",
+            "eyebrow_color": "#bbf7d0",
+            "subtitle_color": "#dcfce7",
+            "label_color": "#166534",
+            "button_background": "#166534",
+            "button_secondary": "#111827",
+        },
+        "rejected": {
+            "eyebrow": "Booking Update",
+            "header_background": "#4b5563",
+            "eyebrow_color": "#e5e7eb",
+            "subtitle_color": "#f3f4f6",
+            "label_color": "#4b5563",
+            "button_background": "#4b5563",
+            "button_secondary": "#111827",
+        },
+        "payment-update": {
+            "eyebrow": "Payment Submission Received",
+            "header_background": "#1d4ed8",
+            "eyebrow_color": "#bfdbfe",
+            "subtitle_color": "#dbeafe",
+            "label_color": "#1d4ed8",
+            "button_background": "#1d4ed8",
+            "button_secondary": "#111827",
+        },
+    }
+    return themes.get(status, themes["approved"])
 
 
 # ==================== EMAIL NOTIFICATIONS ====================
@@ -1410,6 +1561,7 @@ async def send_customer_status_email(booking: dict, event: dict, site_settings: 
         payment_update_url = f"{track_url}&action=payment"
         ticket_label = get_ticket_type_label(booking['ticket_type'])
         status_label = get_booking_status_label(booking['status'])
+        theme = get_customer_email_theme(booking['status'])
         guest_count = get_guest_count_label(int(booking.get('quantity') or 1))
         event_datetime_label = format_event_datetime_label(event)
         ticket = await db.ticket_types.find_one(
@@ -1430,7 +1582,7 @@ async def send_customer_status_email(booking: dict, event: dict, site_settings: 
                 "subcopy": "Use the tracking link below any time to review the latest booking status."
             },
             "approved": {
-                "subject": f"Payment instructions ready | The Romantic Tour | {booking['confirmation_number']}",
+                "subject": f"Approved | Payment steps inside | The Romantic Tour | {booking['confirmation_number']}",
                 "headline": "Your reservation is approved",
                 "message": (
                     f"Your {ticket_label} reservation for {guest_count} has been approved and is being held pending "
@@ -1439,7 +1591,7 @@ async def send_customer_status_email(booking: dict, event: dict, site_settings: 
                 "subcopy": "As soon as payment is sent, submit your reference from the booking page so verification can begin."
             },
             "paid": {
-                "subject": f"Payment logged | The Romantic Tour | {booking['confirmation_number']}",
+                "subject": f"Payment under review | The Romantic Tour | {booking['confirmation_number']}",
                 "headline": "Your payment is now in final review",
                 "message": (
                     f"We have logged the payment details for your {ticket_label} reservation. Guest services is now "
@@ -1448,7 +1600,7 @@ async def send_customer_status_email(booking: dict, event: dict, site_settings: 
                 "subcopy": "No additional payment is needed while verification is in progress."
             },
             "confirmed": {
-                "subject": f"Your experience is confirmed | The Romantic Tour | {booking['confirmation_number']}",
+                "subject": f"Confirmed | Arrival guide inside | The Romantic Tour | {booking['confirmation_number']}",
                 "headline": "Your booking is confirmed",
                 "message": (
                     f"Your {ticket_label} booking for {guest_count} is fully confirmed for {event_datetime_label}. "
@@ -1477,13 +1629,13 @@ async def send_customer_status_email(booking: dict, event: dict, site_settings: 
         <html>
         <head>
             <style>
-                {get_customer_email_styles()}
+                {get_customer_email_styles(theme)}
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="header">
-                    <p class="eyebrow">The Romantic Tour Guest Services</p>
+                    <p class="eyebrow">{theme['eyebrow']}</p>
                     <h1>{status_content['headline']}</h1>
                     <p class="subtitle">Confirmation {booking['confirmation_number']} | {status_label}</p>
                 </div>
@@ -1588,6 +1740,7 @@ async def send_customer_payment_update_received_email(booking: dict, event: dict
 
     try:
         track_url = f"{FRONTEND_URL}/booking-status?confirmation={booking['confirmation_number']}"
+        theme = get_customer_email_theme("payment-update")
         ticket_label = get_ticket_type_label(booking['ticket_type'])
         status_label = "Awaiting Payment Verification"
         ticket = await db.ticket_types.find_one(
@@ -1601,13 +1754,13 @@ async def send_customer_payment_update_received_email(booking: dict, event: dict
         <html>
         <head>
             <style>
-                {get_customer_email_styles()}
+                {get_customer_email_styles(theme)}
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="header">
-                    <p class="eyebrow">The Romantic Tour Guest Services</p>
+                    <p class="eyebrow">{theme['eyebrow']}</p>
                     <h1>We received your payment submission</h1>
                     <p class="subtitle">Confirmation {booking['confirmation_number']} | Awaiting Verification</p>
                 </div>
@@ -1642,7 +1795,7 @@ async def send_customer_payment_update_received_email(booking: dict, event: dict
         await asyncio.to_thread(resend.Emails.send, {
             "from": SENDER_EMAIL,
             "to": [booking['email']],
-            "subject": f"Payment submission received | The Romantic Tour | {booking['confirmation_number']}",
+            "subject": f"Payment submitted | Review in progress | The Romantic Tour | {booking['confirmation_number']}",
             "html": html_content
         })
     except Exception as e:
@@ -1660,12 +1813,8 @@ async def root():
 @api_router.get("/btc-price", response_model=BTCPrice)
 async def get_btc_price_endpoint():
     """Get current BTC/USD conversion rate"""
-    btc_price = get_btc_price()
-    return BTCPrice(
-        usd_to_btc=1 / btc_price,
-        btc_to_usd=btc_price,
-        timestamp=datetime.now(timezone.utc)
-    )
+    snapshot = get_btc_price_snapshot()
+    return BTCPrice(**snapshot)
 
 
 # Get all active events (public)

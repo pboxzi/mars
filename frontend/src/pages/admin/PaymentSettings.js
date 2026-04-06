@@ -10,11 +10,17 @@ import {
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+const emptyBtcQuote = {
+  price: 0,
+  source: '',
+  timestamp: '',
+  isLive: false
+};
 
 const PaymentSettings = () => {
   const [settings, setSettings] = useState(createDefaultPaymentSettings);
   const [loading, setLoading] = useState(false);
-  const [btcPrice, setBtcPrice] = useState(0);
+  const [btcQuote, setBtcQuote] = useState(emptyBtcQuote);
   const [supportSettings, setSupportSettings] = useState(emptySupportSettings);
 
   useEffect(() => {
@@ -47,9 +53,15 @@ const PaymentSettings = () => {
   const fetchBtcPrice = async () => {
     try {
       const response = await axios.get(`${API}/btc-price`);
-      setBtcPrice(response.data.btc_to_usd);
+      setBtcQuote({
+        price: response.data.btc_to_usd || 0,
+        source: response.data.source || '',
+        timestamp: response.data.timestamp || '',
+        isLive: Boolean(response.data.is_live)
+      });
     } catch (error) {
       console.error('Error fetching BTC price:', error);
+      setBtcQuote(emptyBtcQuote);
     }
   };
 
@@ -141,6 +153,7 @@ const PaymentSettings = () => {
     ...method,
     ...paymentMethodMeta[method.key]
   }));
+  const btcQuoteUpdatedLabel = btcQuote.timestamp ? new Date(btcQuote.timestamp).toLocaleString() : '';
 
   return (
     <div data-testid="payment-settings">
@@ -151,8 +164,14 @@ const PaymentSettings = () => {
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <Bitcoin className="w-12 h-12 text-orange-500" />
           <div>
-            <p className="text-stone-500 text-sm">BTC price</p>
-            <p className="text-3xl font-bold">${btcPrice.toFixed(2)} USD</p>
+            <p className="text-stone-500 text-sm">Live BTC reference</p>
+            <p className="text-3xl font-bold">{btcQuote.price ? `$${btcQuote.price.toFixed(2)} USD` : 'Loading...'}</p>
+            <p className="text-sm text-stone-500 mt-1">
+              {btcQuote.source ? `${btcQuote.source}${btcQuote.isLive ? '' : ' (last known quote)'}` : 'Waiting for quote'}
+            </p>
+            {btcQuoteUpdatedLabel ? (
+              <p className="text-xs text-stone-500 mt-1">Updated {btcQuoteUpdatedLabel}</p>
+            ) : null}
           </div>
         </div>
       </div>
@@ -160,8 +179,8 @@ const PaymentSettings = () => {
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-5 mb-8">
         <h2 className="text-lg font-bold text-stone-900 mb-2">High-Volume Mode</h2>
         <p className="text-sm text-stone-600">
-          Bank Transfer and Bitcoin are the preferred customer-facing settlement rails while payment traffic is high.
-          Keep alternate methods updated here only if your team plans to reopen them for approvals.
+          Bank Transfer and Bitcoin should be the first options shown to guests while payment traffic is high. Keep the
+          other methods updated only if your team plans to use them again.
         </p>
       </div>
 

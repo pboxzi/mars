@@ -12,7 +12,7 @@ export const PAYMENT_INSTRUCTION_TEMPLATES = {
 };
 
 export const HIGH_VOLUME_PAYMENT_NOTICE =
-  'High payment traffic notice: Bank transfer and Bitcoin are currently the fastest verified settlement rails for approved tour requests. Complete the approved payment exactly as shown below, then submit your payment reference so guest services can finalize your file.';
+  'High payment traffic notice: Bank transfer and Bitcoin are currently the fastest payment routes for approved tour requests. Complete the approved payment exactly as shown below, then submit your payment reference so guest services can finish verification.';
 
 export const PAYMENT_METHOD_OPTIONS = {
   zelle: { key: 'zelle', label: 'Zelle' },

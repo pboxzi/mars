@@ -12,6 +12,12 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 const defaultPaymentSettings = createDefaultPaymentSettings();
+const emptyBtcQuote = {
+  price: 0,
+  source: '',
+  timestamp: '',
+  isLive: false
+};
 
 const createApprovalData = (
   method = getDefaultLivePaymentMethod(),
@@ -33,7 +39,8 @@ const BookingManagement = () => {
   const [bookings, setBookings] = useState([]);
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedBooking, setSelectedBooking] = useState(null);
-  const [btcPrice, setBtcPrice] = useState(50000);
+  const [btcQuote, setBtcQuote] = useState(emptyBtcQuote);
+  const [selectedTicketPrice, setSelectedTicketPrice] = useState(null);
   const [paymentSettings, setPaymentSettings] = useState(defaultPaymentSettings);
   const [approvalData, setApprovalData] = useState(() => createApprovalData());
 
@@ -58,11 +65,47 @@ const BookingManagement = () => {
   const fetchBtcPrice = async () => {
     try {
       const response = await axios.get(`${API}/btc-price`);
-      setBtcPrice(response.data.btc_to_usd);
+      setBtcQuote({
+        price: response.data.btc_to_usd || 0,
+        source: response.data.source || '',
+        timestamp: response.data.timestamp || '',
+        isLive: Boolean(response.data.is_live)
+      });
     } catch (error) {
       console.error('Error fetching BTC price:', error);
+      setBtcQuote(emptyBtcQuote);
     }
   };
+
+  useEffect(() => {
+    let ignore = false;
+
+    const fetchSelectedTicketPrice = async () => {
+      if (!selectedBooking) {
+        setSelectedTicketPrice(null);
+        return;
+      }
+
+      try {
+        const response = await axios.get(`${API}/events/${selectedBooking.event_id}`);
+        const matchedTicket = response.data.tickets?.find((ticket) => ticket.type === selectedBooking.ticket_type);
+        if (!ignore) {
+          setSelectedTicketPrice(matchedTicket?.price_usd ?? null);
+        }
+      } catch (error) {
+        console.error('Error fetching selected ticket price:', error);
+        if (!ignore) {
+          setSelectedTicketPrice(null);
+        }
+      }
+    };
+
+    fetchSelectedTicketPrice();
+
+    return () => {
+      ignore = true;
+    };
+  }, [selectedBooking]);
 
   const fetchPaymentSettings = async () => {
     try {
@@ -94,8 +137,19 @@ const BookingManagement = () => {
 
   const closeBookingDetails = () => {
     setSelectedBooking(null);
+    setSelectedTicketPrice(null);
     setApprovalData(createApprovalData(getDefaultLivePaymentMethod(), paymentSettings));
   };
+
+  const btcQuoteUpdatedLabel = btcQuote.timestamp ? new Date(btcQuote.timestamp).toLocaleString() : '';
+  const selectedBookingTotal =
+    selectedBooking && selectedTicketPrice
+      ? selectedTicketPrice * selectedBooking.quantity
+      : null;
+  const liveBtcEstimate =
+    approvalData.payment_method === 'btc' && selectedBookingTotal && btcQuote.price
+      ? selectedBookingTotal / btcQuote.price
+      : null;
 
   const handleApprove = async (bookingId) => {
     try {
@@ -393,9 +447,8 @@ const BookingManagement = () => {
                 <h3 className="text-xl font-bold mb-4">Approve</h3>
                 <div className="space-y-4">
                   <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                    High-volume mode is active. Bank transfer and Bitcoin should be used as the main customer-facing
-                    payment rails while traffic stays elevated. Keep alternate methods on standby unless operations has
-                    cleared them.
+                    High traffic note: use Bank Transfer or Bitcoin first for new approvals. Keep the other options only
+                    if your team is ready to use them.
                   </div>
                   <div>
                     <label className="block mb-2">Payment Method</label>
@@ -452,7 +505,26 @@ const BookingManagement = () => {
                           className="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3"
                           placeholder="Leave blank to auto-calculate"
                         />
-                        <p className="text-sm text-stone-500 mt-1">BTC: ${btcPrice.toFixed(2)}</p>
+                        <p className="text-sm text-stone-500 mt-1">
+                          Live BTC reference: {btcQuote.price ? `$${btcQuote.price.toFixed(2)} / BTC` : 'Loading...'}
+                          {btcQuote.source ? ` from ${btcQuote.source}` : ''}
+                        </p>
+                        {liveBtcEstimate ? (
+                          <p className="text-sm text-stone-500 mt-1">
+                            If left blank, this booking will lock at about {liveBtcEstimate.toFixed(8)} BTC based on the
+                            current live quote.
+                          </p>
+                        ) : null}
+                        {btcQuoteUpdatedLabel ? (
+                          <p className="text-xs text-stone-400 mt-1">
+                            {btcQuote.isLive ? 'Updated' : 'Last known quote'} {btcQuoteUpdatedLabel}
+                          </p>
+                        ) : null}
+                        {!btcQuote.isLive && btcQuote.price ? (
+                          <p className="text-xs text-amber-700 mt-1">
+                            Live BTC feed is temporarily unavailable, so the last known reference is being shown.
+                          </p>
+                        ) : null}
                       </div>
                     </>
                   )}
