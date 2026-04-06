@@ -5,10 +5,8 @@ import {
   ArrowRight,
   Calendar,
   CheckCircle,
-  Clock,
   CreditCard,
   FileText,
-  RotateCcw,
   TrendingUp,
 } from 'lucide-react';
 import { getTicketTierLabel } from '../../utils/ticketTiers';
@@ -48,9 +46,6 @@ const statStyles = {
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isResettingLaunchData, setIsResettingLaunchData] = useState(false);
-  const [resetMessage, setResetMessage] = useState('');
-  const [resetError, setResetError] = useState('');
 
   useEffect(() => {
     fetchDashboardStats();
@@ -67,42 +62,6 @@ const AdminDashboard = () => {
       console.error('Error fetching dashboard stats:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleResetLaunchData = async () => {
-    const confirmed = window.confirm(
-      'This will clear all test bookings, subscribers, and live visit alerts, and reset ticket availability. Your admin login, event setup, payment settings, and support details will stay intact. Continue?'
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setIsResettingLaunchData(true);
-    setResetMessage('');
-    setResetError('');
-
-    try {
-      const token = localStorage.getItem('admin_token');
-      const response = await axios.post(
-        `${API}/admin/cleanup-launch-data`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      const summary = response.data;
-      setResetMessage(
-        `Launch data cleared. Removed ${summary.deleted_bookings} bookings, ${summary.deleted_subscriptions} subscribers, ${summary.deleted_public_visits} visit alerts, and reset ${summary.reset_ticket_types} ticket inventories.`
-      );
-      await fetchDashboardStats();
-    } catch (error) {
-      console.error('Error clearing launch data:', error);
-      setResetError(error.response?.data?.detail || 'Unable to clear launch data right now.');
-    } finally {
-      setIsResettingLaunchData(false);
     }
   };
 

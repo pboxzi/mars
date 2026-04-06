@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Calendar,
@@ -15,29 +15,21 @@ const navItems = [
     path: '/admin-secret/dashboard',
     icon: LayoutDashboard,
     label: 'Dashboard',
-    eyebrow: 'Overview',
-    description: 'Track requests, revenue, and what needs action next.',
   },
   {
     path: '/admin-secret/bookings',
     icon: FileText,
     label: 'Bookings',
-    eyebrow: 'Requests',
-    description: 'Review guest files, approve bookings, and confirm payments.',
   },
   {
     path: '/admin-secret/events',
     icon: Calendar,
     label: 'Events',
-    eyebrow: 'Schedule',
-    description: 'Manage dates, venues, ticket tiers, and availability.',
   },
   {
     path: '/admin-secret/payment-settings',
     icon: CreditCard,
     label: 'Payments',
-    eyebrow: 'Operations',
-    description: 'Keep payment instructions and support details current.',
   },
 ];
 
@@ -52,11 +44,6 @@ const AdminLayout = ({ children }) => {
       navigate('/admin-secret');
     }
   }, [navigate]);
-
-  const activeItem = useMemo(
-    () => navItems.find((item) => item.path === location.pathname) || navItems[0],
-    [location.pathname]
-  );
 
   const isActive = (path) => location.pathname === path;
 
@@ -115,11 +102,15 @@ const AdminLayout = ({ children }) => {
         <div className="min-w-0">
           <header className="sticky top-0 z-20 border-b border-stone-200 bg-[#fbf8f2]/95 backdrop-blur">
             <div className="mx-auto max-w-[1380px] px-4 pb-4 pt-[max(env(safe-area-inset-top),1rem)] sm:px-6 lg:px-8">
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-[10px] uppercase tracking-[0.26em] text-[#9d172b]">{activeItem.eyebrow}</p>
-                  <h2 className="mt-2 truncate text-2xl font-black text-[#151515] sm:text-3xl">{activeItem.label}</h2>
-                  <p className="mt-1 max-w-2xl text-sm leading-6 text-stone-500">{activeItem.description}</p>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[#9d172b]/15 bg-[#9d172b]/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#9d172b]">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    Admin Workspace
+                  </div>
+                  {adminEmail && (
+                    <p className="mt-2 truncate text-sm text-stone-500 lg:hidden">{adminEmail}</p>
+                  )}
                 </div>
 
                 <div className="flex shrink-0 items-center gap-3">
