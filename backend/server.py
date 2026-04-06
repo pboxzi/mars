@@ -18,6 +18,7 @@ import jwt
 from datetime import datetime, timezone, timedelta
 import requests
 from enum import Enum
+from urllib.parse import urlparse
 from official_tour_schedule import (
     DEFAULT_TICKET_SETUP,
     OFFICIAL_TOUR_DESCRIPTION,
@@ -98,6 +99,8 @@ SUBSCRIPTION_RATE_LIMIT = int(os.environ.get('SUBSCRIPTION_RATE_LIMIT', '6'))
 SUBSCRIPTION_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get('SUBSCRIPTION_RATE_LIMIT_WINDOW_SECONDS', '900'))
 PAYMENT_UPDATE_RATE_LIMIT = int(os.environ.get('PAYMENT_UPDATE_RATE_LIMIT', '6'))
 PAYMENT_UPDATE_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get('PAYMENT_UPDATE_RATE_LIMIT_WINDOW_SECONDS', '900'))
+PUBLIC_VISIT_RATE_LIMIT = int(os.environ.get('PUBLIC_VISIT_RATE_LIMIT', '20'))
+PUBLIC_VISIT_RATE_LIMIT_WINDOW_SECONDS = int(os.environ.get('PUBLIC_VISIT_RATE_LIMIT_WINDOW_SECONDS', '300'))
 resend.api_key = RESEND_API_KEY
 
 if (TURNSTILE_SITE_KEY and not TURNSTILE_SECRET_KEY) or (TURNSTILE_SECRET_KEY and not TURNSTILE_SITE_KEY):
@@ -391,6 +394,21 @@ class SubscriptionCreate(BaseModel):
     website: Optional[str] = None
 
 
+class PublicVisitCreate(BaseModel):
+    path: str
+    page_title: Optional[str] = None
+    page_url: Optional[str] = None
+    referrer: Optional[str] = None
+    timezone: Optional[str] = None
+    language: Optional[str] = None
+    utm_source: Optional[str] = None
+    utm_medium: Optional[str] = None
+    utm_campaign: Optional[str] = None
+    utm_content: Optional[str] = None
+    fbclid: Optional[str] = None
+    gclid: Optional[str] = None
+
+
 # Dashboard Stats Model
 class DashboardStats(BaseModel):
     total_requests: int
@@ -410,6 +428,37 @@ class BTCPrice(BaseModel):
     timestamp: datetime
     source: Optional[str] = None
     is_live: bool = True
+
+
+class PublicVisitNotification(BaseModel):
+    id: str
+    type: str
+    path: str
+    page_title: Optional[str] = None
+    page_url: Optional[str] = None
+    referrer: Optional[str] = None
+    referrer_domain: Optional[str] = None
+    source: Optional[str] = None
+    timezone: Optional[str] = None
+    language: Optional[str] = None
+    utm_source: Optional[str] = None
+    utm_medium: Optional[str] = None
+    utm_campaign: Optional[str] = None
+    utm_content: Optional[str] = None
+    click_id: Optional[str] = None
+    location_city: Optional[str] = None
+    location_region: Optional[str] = None
+    location_country: Optional[str] = None
+    ip_address: Optional[str] = None
+    device_type: Optional[str] = None
+    user_agent: Optional[str] = None
+    created_at: datetime
+    read_at: Optional[datetime] = None
+
+
+class PublicVisitNotificationFeed(BaseModel):
+    unread_count: int
+    notifications: List[PublicVisitNotification]
 
 
 # ==================== HELPER FUNCTIONS ====================
@@ -598,6 +647,161 @@ def get_client_ip(request: Request) -> str:
         return cf
 
     return request.client.host if request.client else 'unknown'
+
+
+PUBLIC_SOURCE_MAP = {
+    'instagram.com': 'Instagram',
+    'l.instagram.com': 'Instagram',
+    'facebook.com': 'Facebook',
+    'm.facebook.com': 'Facebook',
+    'lm.facebook.com': 'Facebook',
+    'l.facebook.com': 'Facebook',
+    'messenger.com': 'Messenger',
+    'm.me': 'Messenger',
+    'tiktok.com': 'TikTok',
+    't.co': 'X',
+    'twitter.com': 'X',
+    'x.com': 'X',
+    'whatsapp.com': 'WhatsApp',
+    'wa.me': 'WhatsApp',
+    'google.com': 'Google',
+    'google.': 'Google',
+    'youtube.com': 'YouTube',
+}
+
+
+def parse_referrer_domain(url: Optional[str]) -> Optional[str]:
+    cleaned = clean_text(url)
+    if not cleaned:
+        return None
+
+    parsed = urlparse(cleaned)
+    domain = clean_text(parsed.netloc).lower()
+    if domain.startswith('www.'):
+        domain = domain[4:]
+    return domain or None
+
+
+def infer_public_source(
+    referrer: Optional[str],
+    utm_source: Optional[str],
+    fbclid: Optional[str],
+    gclid: Optional[str],
+) -> str:
+    explicit_source = clean_text(utm_source)
+    if explicit_source:
+        return explicit_source.replace('-', ' ').replace('_', ' ').title()
+
+    if clean_text(fbclid):
+        return 'Facebook / Instagram'
+
+    if clean_text(gclid):
+        return 'Google'
+
+    referrer_domain = parse_referrer_domain(referrer)
+    if referrer_domain:
+        for candidate, label in PUBLIC_SOURCE_MAP.items():
+            if candidate in referrer_domain:
+                return label
+
+        return referrer_domain
+
+    return 'Direct'
+
+
+def detect_device_type(user_agent: Optional[str]) -> str:
+    normalized = clean_text(user_agent).lower()
+    if not normalized:
+        return 'Unknown device'
+
+    if 'ipad' in normalized or 'tablet' in normalized:
+        return 'Tablet'
+    if 'mobile' in normalized or 'iphone' in normalized or 'android' in normalized:
+        return 'Mobile'
+    return 'Desktop'
+
+
+def get_geo_details(request: Request) -> dict:
+    city = (
+        clean_text(request.headers.get('x-vercel-ip-city'))
+        or clean_text(request.headers.get('cf-ipcity'))
+        or clean_text(request.headers.get('x-city'))
+    )
+    region = (
+        clean_text(request.headers.get('x-vercel-ip-country-region'))
+        or clean_text(request.headers.get('cf-region'))
+        or clean_text(request.headers.get('x-region'))
+    )
+    country = (
+        clean_text(request.headers.get('x-vercel-ip-country'))
+        or clean_text(request.headers.get('cf-ipcountry'))
+        or clean_text(request.headers.get('x-country'))
+    )
+    return {
+        'location_city': city or None,
+        'location_region': region or None,
+        'location_country': country or None,
+    }
+
+
+PUBLIC_VISIT_DATE_FIELDS = ['created_at', 'read_at']
+
+
+def normalize_public_visit_datetime_fields(notification: Optional[dict]) -> Optional[dict]:
+    if not notification:
+        return notification
+
+    for field_name in PUBLIC_VISIT_DATE_FIELDS:
+        if notification.get(field_name) and isinstance(notification[field_name], str):
+            notification[field_name] = datetime.fromisoformat(notification[field_name])
+
+    return notification
+
+
+def normalize_public_path(path: Optional[str]) -> str:
+    cleaned = clean_text(path)
+    if not cleaned:
+        return '/'
+    if not cleaned.startswith('/'):
+        return f'/{cleaned}'
+    return cleaned
+
+
+def build_public_visit_document(payload: PublicVisitCreate, request: Request) -> dict:
+    path = normalize_public_path(payload.path)
+    referrer = clean_text(payload.referrer) or None
+    user_agent = clean_text(request.headers.get('user-agent')) or None
+    click_id = clean_text(payload.fbclid) or clean_text(payload.gclid) or None
+    geo = get_geo_details(request)
+    visit = PublicVisitNotification(
+        id=str(uuid.uuid4()),
+        type='public_link_visit',
+        path=path,
+        page_title=clean_text(payload.page_title) or None,
+        page_url=clean_text(payload.page_url) or f'{FRONTEND_URL}{path}',
+        referrer=referrer,
+        referrer_domain=parse_referrer_domain(referrer),
+        source=infer_public_source(referrer, payload.utm_source, payload.fbclid, payload.gclid),
+        timezone=clean_text(payload.timezone) or None,
+        language=clean_text(payload.language) or None,
+        utm_source=clean_text(payload.utm_source) or None,
+        utm_medium=clean_text(payload.utm_medium) or None,
+        utm_campaign=clean_text(payload.utm_campaign) or None,
+        utm_content=clean_text(payload.utm_content) or None,
+        click_id=click_id,
+        location_city=geo.get('location_city'),
+        location_region=geo.get('location_region'),
+        location_country=geo.get('location_country'),
+        ip_address=get_client_ip(request),
+        device_type=detect_device_type(user_agent),
+        user_agent=user_agent,
+        created_at=datetime.now(timezone.utc),
+        read_at=None,
+    )
+    document = visit.model_dump()
+    document['created_at'] = visit.created_at.isoformat()
+    document['read_at'] = None
+    return document
 
 
 def get_turnstile_remote_ip(request: Request) -> Optional[str]:
@@ -1914,6 +2118,25 @@ async def get_public_runtime_config():
     return get_public_config()
 
 
+@api_router.post("/public-visits", response_model=dict)
+async def record_public_visit(payload: PublicVisitCreate, request: Request):
+    """Record a public landing click so admins can see live traffic."""
+    await enforce_public_rate_limit(
+        request,
+        "public-visits",
+        PUBLIC_VISIT_RATE_LIMIT,
+        PUBLIC_VISIT_RATE_LIMIT_WINDOW_SECONDS,
+    )
+
+    normalized_path = normalize_public_path(payload.path)
+    if normalized_path.startswith('/admin-secret'):
+        return {"status": "ignored"}
+
+    document = build_public_visit_document(payload, request)
+    await db.public_visit_notifications.insert_one(document)
+    return {"status": "recorded", "id": document["id"]}
+
+
 # Newsletter subscribe (public)
 @api_router.post("/subscriptions")
 async def create_subscription(subscription: SubscriptionCreate, request: Request):
@@ -2160,6 +2383,38 @@ async def get_dashboard_stats(admin: dict = Depends(get_current_admin)):
         total_revenue=total_revenue,
         recent_bookings=recent
     )
+
+
+@api_router.get("/admin/public-visits", response_model=PublicVisitNotificationFeed)
+async def get_admin_public_visit_notifications(
+    limit: int = 20,
+    admin: dict = Depends(get_current_admin),
+):
+    """Return recent public visit notifications for the admin app."""
+    capped_limit = max(1, min(limit, 50))
+    raw_notifications = await db.public_visit_notifications.find({}, {"_id": 0}).sort("created_at", -1).to_list(capped_limit)
+    unread_count = await db.public_visit_notifications.count_documents({"read_at": None})
+
+    notifications = []
+    for notification in raw_notifications:
+        normalize_public_visit_datetime_fields(notification)
+        notifications.append(PublicVisitNotification(**notification))
+
+    return PublicVisitNotificationFeed(
+        unread_count=unread_count,
+        notifications=notifications,
+    )
+
+
+@api_router.post("/admin/public-visits/read", response_model=dict)
+async def mark_admin_public_visit_notifications_read(admin: dict = Depends(get_current_admin)):
+    """Mark the current public visit notifications as seen."""
+    read_at = datetime.now(timezone.utc).isoformat()
+    await db.public_visit_notifications.update_many(
+        {"read_at": None},
+        {"$set": {"read_at": read_at}},
+    )
+    return {"status": "ok", "read_at": read_at}
 
 
 # ==================== EVENT MANAGEMENT (ADMIN) ====================
@@ -2662,6 +2917,12 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_tasks():
     await ensure_official_tour_schedule()
+    try:
+        await db.public_visit_notifications.create_index("created_at")
+        await db.public_visit_notifications.create_index("read_at")
+    except Exception as exc:
+        logger.warning("Unable to create public visit notification indexes: %s", exc)
+
     if not mongo_url:
         logger.warning(
             "MONGO_URL is not configured. Using the in-memory database fallback; "

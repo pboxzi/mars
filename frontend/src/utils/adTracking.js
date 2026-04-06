@@ -6,6 +6,8 @@ const GOOGLE_ADS_PAYMENT_UPDATE_LABEL = (process.env.REACT_APP_GOOGLE_ADS_PAYMEN
 const POSTHOG_KEY = (process.env.REACT_APP_POSTHOG_KEY || '').trim();
 const POSTHOG_HOST = (process.env.REACT_APP_POSTHOG_HOST || 'https://us.i.posthog.com').trim();
 const POSTHOG_ASSET_HOST = POSTHOG_HOST.replace('.i.posthog.com', '-assets.i.posthog.com').replace(/\/+$/, '');
+const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').trim().replace(/\/+$/, '');
+const PUBLIC_VISIT_SESSION_KEY = 'bruno_public_visit_sent';
 
 const hasWindow = typeof window !== 'undefined';
 
@@ -162,6 +164,68 @@ const sendGoogleConversion = (label, payload) => {
 
 const cleanPayload = (payload) =>
   Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== undefined && value !== null && value !== ''));
+
+export const recordPublicVisit = ({ path, title } = {}) => {
+  if (!hasWindow || !BACKEND_URL) {
+    return;
+  }
+
+  const pagePath =
+    path ||
+    (window.location ? `${window.location.pathname}${window.location.search}${window.location.hash}` : '/');
+
+  if (!pagePath || pagePath.startsWith('/admin-secret')) {
+    return;
+  }
+
+  try {
+    if (window.sessionStorage.getItem(PUBLIC_VISIT_SESSION_KEY)) {
+      return;
+    }
+    window.sessionStorage.setItem(PUBLIC_VISIT_SESSION_KEY, pagePath);
+  } catch (error) {
+    console.warn('Unable to persist public visit tracking state:', error);
+  }
+
+  const searchParams = new URLSearchParams(window.location.search);
+  const payload = cleanPayload({
+    path: pagePath,
+    page_title: title || document.title,
+    page_url: window.location.href,
+    referrer: document.referrer || undefined,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    language: navigator.language,
+    utm_source: searchParams.get('utm_source'),
+    utm_medium: searchParams.get('utm_medium'),
+    utm_campaign: searchParams.get('utm_campaign'),
+    utm_content: searchParams.get('utm_content'),
+    fbclid: searchParams.get('fbclid'),
+    gclid: searchParams.get('gclid'),
+  });
+
+  window
+    .fetch(`${BACKEND_URL}/api/public-visits`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Visit tracking failed with status ${response.status}`);
+      }
+    })
+    .catch((error) => {
+      try {
+        window.sessionStorage.removeItem(PUBLIC_VISIT_SESSION_KEY);
+      } catch (storageError) {
+        console.warn('Unable to reset public visit tracking state:', storageError);
+      }
+      console.warn('Unable to record public visit:', error);
+    });
+};
 
 export const trackPageView = ({ path, title } = {}) => {
   loadAdTracking();

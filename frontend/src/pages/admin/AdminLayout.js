@@ -10,6 +10,7 @@ import {
   X
 } from 'lucide-react';
 import AdminInstallPrompt from '../../components/AdminInstallPrompt';
+import AdminNotificationCenter from '../../components/AdminNotificationCenter';
 
 const navItems = [
   { path: '/admin-secret/dashboard', icon: LayoutDashboard, label: 'Dashboard', mobileLabel: 'Home' },
@@ -191,7 +192,12 @@ const AdminLayout = ({ children }) => {
       </div>
 
       <main className="min-w-0 lg:ml-72">
-        <div className="min-h-screen px-4 pb-28 pt-5 sm:px-6 sm:pb-32 sm:pt-6 lg:p-8">{children}</div>
+        <div className="min-h-screen px-4 pb-28 pt-5 sm:px-6 sm:pb-32 sm:pt-6 lg:p-8">
+          <div className="mb-5 flex items-center justify-end sm:mb-6">
+            <AdminNotificationCenter />
+          </div>
+          {children}
+        </div>
       </main>
     </div>
   );
