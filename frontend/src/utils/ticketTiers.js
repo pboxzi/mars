@@ -2,7 +2,7 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'vip',
     label: 'VIP Access',
-    description: 'Priority guest-services review for premium entry, arrival guidance, and a smoother VIP venue-access experience for the selected show.',
+    description: 'Private-entry VIP access with concierge arrival, priority venue handling, and a smoother premium show-night experience.',
     priceUsd: 4500,
     availableQuantity: 72,
     totalQuantity: 72
@@ -10,7 +10,7 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'meetgreet',
     label: 'Meet & Greet',
-    description: 'Meet-and-greet access request with premium check-in handling, guest review, and event-day coordination after approval.',
+    description: 'A rare guest-facing experience with priority escort, premium coordination, and elevated personal attention from arrival onward.',
     priceUsd: 12500,
     availableQuantity: 18,
     totalQuantity: 18
@@ -18,7 +18,7 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'backstage',
     label: 'Backstage Pass',
-    description: 'Backstage access request reviewed for pre-show entry timing, restricted-area handling, and premium guest movement support.',
+    description: 'Limited backstage access before showtime with escorted movement through restricted premium areas and high-touch hosting.',
     priceUsd: 29000,
     availableQuantity: 7,
     totalQuantity: 7
@@ -26,7 +26,7 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'soundcheck',
     label: 'Soundcheck Experience',
-    description: 'Early-entry soundcheck request with pre-show check-in guidance, premium arrival handling, and access review before confirmation.',
+    description: 'Early-entry soundcheck access with VIP check-in, preferred arrival flow, and a more intimate pre-show atmosphere.',
     priceUsd: 7500,
     availableQuantity: 28,
     totalQuantity: 28
@@ -34,7 +34,7 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'photoop',
     label: 'Photo Op Experience',
-    description: 'Photo-op access request with timed guest handling, entry coordination, and confirmation guidance once approved.',
+    description: 'Professionally coordinated photo opportunity with premium handling, priority routing, and a polished keepsake moment.',
     priceUsd: 17500,
     availableQuantity: 12,
     totalQuantity: 12
@@ -42,7 +42,7 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'aftershow',
     label: 'After Show Lounge',
-    description: 'After-show lounge request with hosted post-show entry, premium guest handling, and event-night coordination.',
+    description: 'Invitation to an exclusive post-show lounge setting with refined hospitality, priority hosting, and elevated guest service.',
     priceUsd: 42000,
     availableQuantity: 8,
     totalQuantity: 8
@@ -50,7 +50,7 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'hospitality',
     label: 'Private Table / Hospitality',
-    description: 'Private-table hospitality request with hosted guest handling, premium placement, and coordinated access for your party.',
+    description: 'Luxury table hospitality with premium seating, hosted service, and white-glove attention designed for standout entertaining.',
     priceUsd: 125000,
     availableQuantity: 5,
     totalQuantity: 5
@@ -58,7 +58,7 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'birthday',
     label: 'Birthday / Celebration Package',
-    description: 'Celebration request with guest-count planning, premium handling, and event-day coordination tailored to your occasion.',
+    description: 'Celebration-focused concierge planning with premium access, tailored coordination, and a memorable show-night presentation.',
     priceUsd: 210000,
     availableQuantity: 4,
     totalQuantity: 4
@@ -66,7 +66,7 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'corporate',
     label: 'Corporate Booking',
-    description: 'Corporate-hosting request with multi-guest coordination, premium arrival handling, and concierge review for client entertainment.',
+    description: 'Executive entertainment package built for client hosting, premium access, and seamless VIP coordination from arrival to departure.',
     priceUsd: 425000,
     availableQuantity: 3,
     totalQuantity: 3
@@ -74,7 +74,7 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'privatemeetup',
     label: 'Private Meet-Up Request',
-    description: 'Ultra-limited private request reviewed individually for bespoke access planning and one-to-one guest-services coordination.',
+    description: 'Ultra-limited bespoke access request designed for top-tier guests seeking the highest level of private concierge consideration.',
     priceUsd: 850000,
     availableQuantity: 1,
     totalQuantity: 1
