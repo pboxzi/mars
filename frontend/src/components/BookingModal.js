@@ -471,6 +471,236 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
             <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8b7c6d]">Starting</div>
           </div>
         </div>
+
+        <div className="mt-4">
+          <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8b7c6d]">Quantity</div>
+          <div className="mt-2.5 flex flex-wrap items-center justify-between gap-4">
+            <div className="inline-flex items-center rounded-full border border-[#dacdbd] bg-[#faf4eb] p-1">
+              <button
+                type="button"
+                className="rounded-full p-2 transition hover:bg-black/[0.04]"
+                onClick={() => updateQuantity(Number(formData.quantity) - 1)}
+                disabled={Number(formData.quantity) <= 1}
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+
+              <input
+                type="number"
+                name="quantity"
+                min="1"
+                max={maxQuantity || 10}
+                value={formData.quantity}
+                onChange={handleChange}
+                className="w-14 border-0 bg-transparent text-center text-lg font-black outline-none"
+              />
+
+              <button
+                type="button"
+                className="rounded-full p-2 transition hover:bg-black/[0.04]"
+                onClick={() => updateQuantity(Number(formData.quantity) + 1)}
+                disabled={Number(formData.quantity) >= (maxQuantity || 10)}
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="text-sm font-medium text-[#6a6055]">
+              Up to {maxQuantity || 0} {quantityUnitLabel.toLowerCase()} for this access
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-sm font-bold uppercase tracking-[0.06em] text-[#171717]">Name</label>
+            <input
+              type="text"
+              name="customer_name"
+              value={formData.customer_name}
+              onChange={handleChange}
+              className="w-full rounded-[16px] border border-[#ddcfbe] bg-[#fffdf9] px-4 py-2.5 outline-none transition focus:border-[#9d172b]"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-bold uppercase tracking-[0.06em] text-[#171717]">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full rounded-[16px] border border-[#ddcfbe] bg-[#fffdf9] px-4 py-2.5 outline-none transition focus:border-[#9d172b]"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="mt-3.5">
+          <label className="mb-2 block text-sm font-bold uppercase tracking-[0.06em] text-[#171717]">Phone</label>
+          <input
+            type="tel"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            className="w-full rounded-[16px] border border-[#ddcfbe] bg-[#fffdf9] px-4 py-2.5 outline-none transition focus:border-[#9d172b]"
+            required
+          />
+        </div>
+
+        <div className="mt-3.5">
+          <label className="mb-2 block text-sm font-bold uppercase tracking-[0.06em] text-[#171717]">Message</label>
+          <textarea
+            name="message"
+            value={formData.message}
+            onChange={handleChange}
+            rows="3"
+            className="w-full rounded-[16px] border border-[#ddcfbe] bg-[#fffdf9] px-4 py-3 outline-none transition focus:border-[#9d172b]"
+            placeholder="Guest names, celebration details, seating preference, or special request."
+          />
+        </div>
+      </div>
+
+      {error && (
+        <div className="mt-4 rounded-[16px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => setBookingStep(1)}
+          className="rounded-full border border-[#cdbba2] px-5 py-3 text-sm font-bold uppercase tracking-[0.12em] text-[#171717] transition hover:bg-[#f2ebdf]"
+        >
+          Back
+        </button>
+
+        <button
+          type="button"
+          onClick={continueToReview}
+          className="rounded-full bg-[#141414] px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:opacity-92"
+        >
+          Continue
+        </button>
+      </div>
+    </>
+  );
+
+  const renderStepThree = () => (
+    <>
+      <div className="mt-5">
+        <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#8b7c6d]">Step 3</div>
+        <h3 className="mt-2 text-[28px] font-black uppercase tracking-[-0.05em] text-[#171717] lg:text-[30px]">
+          Review & Submit
+        </h3>
+        <p className="mt-2 max-w-[680px] text-[15px] leading-6 text-[#5f564d]">
+          Confirm your selection and guest details, then send your premium access request.
+        </p>
+      </div>
+
+      <div className="mt-5 rounded-[22px] border border-[#dfd2c0] bg-white px-4 py-4">
+        <div className="grid gap-4 border-b border-[#efe4d6] pb-4 sm:grid-cols-2">
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8b7c6d]">Access</div>
+            <div className="mt-2 text-[24px] font-black uppercase tracking-[-0.04em] text-[#171717]">
+              {selectedTicketLabel}
+            </div>
+            <div className="mt-2 text-sm leading-6 text-[#5f564d]">{selectedTicketDescription}</div>
+          </div>
+
+          <div className="space-y-2 text-sm">
+            <div className="flex items-start justify-between gap-4">
+              <span className="text-[#6a6055]">Price</span>
+              <span className="font-bold text-[#171717]">{formatTicketPrice(selectedTicketPrice)}</span>
+            </div>
+            <div className="flex items-start justify-between gap-4">
+              <span className="text-[#6a6055]">Quantity</span>
+              <span className="font-bold text-[#171717]">
+                {formData.quantity} {formData.quantity === 1 ? quantityUnitLabel.slice(0, -1) : quantityUnitLabel}
+              </span>
+            </div>
+            <div className="flex items-start justify-between gap-4">
+              <span className="text-[#6a6055]">Total</span>
+              <span className="text-[24px] font-black text-[#171717]">{formatTicketPrice(subtotal)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-2 text-sm text-[#5f564d] sm:grid-cols-2">
+          <div>
+            <span className="font-bold text-[#171717]">Guest:</span> {formData.customer_name}
+          </div>
+          <div>
+            <span className="font-bold text-[#171717]">Email:</span> {formData.email}
+          </div>
+          <div>
+            <span className="font-bold text-[#171717]">Phone:</span> {formData.phone}
+          </div>
+          {formData.message?.trim() && (
+            <div className="sm:col-span-2">
+              <span className="font-bold text-[#171717]">Notes:</span> {formData.message}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-5 rounded-[18px] bg-[#f5ecdf] px-4 py-3 text-sm leading-6 text-[#5f564d]">
+          Your request is reviewed first. Payment instructions are only sent after your premium access request is approved.
+        </div>
+
+        <input
+          type="text"
+          name="website"
+          value={formData.website || ''}
+          onChange={handleChange}
+          tabIndex="-1"
+          autoComplete="off"
+          className="hidden"
+          aria-hidden="true"
+        />
+
+        <div className="mt-5">
+          <TurnstileField
+            token={captchaToken}
+            onTokenChange={(nextToken) => {
+              setCaptchaToken(nextToken);
+              if (nextToken) {
+                setCaptchaError('');
+                setError('');
+              }
+            }}
+            resetSignal={captchaResetSignal}
+            error={captchaError}
+          />
+        </div>
+
+        {error && (
+          <div className="mt-3.5 rounded-[16px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        {contactLine && <div className="mt-4 text-sm leading-6 text-[#6a6055]">Questions? {contactLine}</div>}
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => setBookingStep(2)}
+          className="rounded-full border border-[#cdbba2] px-5 py-3 text-sm font-bold uppercase tracking-[0.12em] text-[#171717] transition hover:bg-[#f2ebdf]"
+        >
+          Back
+        </button>
+
+        <button
+          type="submit"
+          disabled={loading || isLoadingTurnstileConfig || !selectedTicket || selectedTicket.available_quantity <= 0}
+          className="rounded-full bg-[#141414] px-6 py-3.5 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:opacity-92 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loading ? 'Submitting...' : isLoadingTurnstileConfig ? 'Loading Security Check...' : 'Submit Premium Request'}
+        </button>
+      </div>
     </>
   );
 
