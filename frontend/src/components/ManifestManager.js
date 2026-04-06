@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 const PUBLIC_URL = process.env.PUBLIC_URL || '';
 const SITE_URL = (process.env.REACT_APP_SITE_URL || '').trim();
 const DEFAULT_DESCRIPTION =
-  'Official Bruno Mars premium access site for The Romantic Tour. Explore tour dates, request VIP bookings, and track your confirmation online.';
+  'Official Bruno Mars The Romantic Tour site. Explore tour dates, request premium access, and track your booking online.';
 const DEFAULT_IMAGE_PATH = `${PUBLIC_URL}/social-preview.png`;
 
 const ensureHeadTag = (selector, createTag) => {
@@ -46,7 +46,7 @@ const buildAbsoluteUrl = (path = '') => {
 const getPageMeta = (pathname) => {
   if (pathname === '/tour') {
     return {
-      title: 'Tour | Bruno Mars',
+      title: 'Bruno Mars | The Romantic Tour',
       description: 'Browse official Bruno Mars tour dates and start a premium access request for upcoming shows.',
       robots: 'index,follow,max-image-preview:large',
     };
@@ -117,7 +117,7 @@ const getPageMeta = (pathname) => {
   }
 
   return {
-    title: 'Bruno Mars | The Romantic Tour VIP Access',
+    title: 'Bruno Mars | The Romantic Tour',
     description: DEFAULT_DESCRIPTION,
     robots: 'index,follow,max-image-preview:large',
   };
