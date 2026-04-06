@@ -76,6 +76,7 @@ This creates the initial admin account using:
    - `frontend`
 3. Add the frontend env var:
    - `REACT_APP_BACKEND_URL=https://your-backend.onrender.com`
+   - `REACT_APP_SITE_URL=https://your-site.vercel.app`
 4. Deploy.
 
 The Vercel config in [frontend/vercel.json](frontend/vercel.json) already handles React route rewrites.
@@ -132,9 +133,15 @@ Use [frontend/.env.example](frontend/.env.example) as the template.
 
 Required:
 - `REACT_APP_BACKEND_URL`
+- `REACT_APP_SITE_URL`
 
 Optional fallback:
 - `REACT_APP_TURNSTILE_SITE_KEY`
+
+## Social-share launch notes
+- The repo now includes a built-in share image at `frontend/public/social-preview.png`.
+- Set `REACT_APP_SITE_URL` to your final public Vercel URL so shared links resolve to the correct canonical site URL in browsers.
+- After each redeploy, re-share the homepage link on Instagram, Facebook, WhatsApp, or X to confirm the preview card updates.
 
 ## Free-tier warnings
 - Render free instances sleep after idle time, so the first request can be slow.
