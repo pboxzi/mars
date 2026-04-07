@@ -164,8 +164,10 @@ const HomePage = () => {
           color: rgba(255, 255, 255, 0.92);
           font-size: 1.02vw;
           line-height: 1.65vw;
-          letter-spacing: -0.01vw;
-          font-weight: 300;
+          letter-spacing: 0.02vw;
+          font-family: Georgia, 'Times New Roman', serif;
+          font-style: italic;
+          font-weight: 400;
           text-align: center;
         }
 
@@ -442,7 +444,7 @@ const HomePage = () => {
             margin-top: 4.4vw;
             font-size: 3.85vw;
             line-height: 5.3vw;
-            letter-spacing: -0.05vw;
+            letter-spacing: 0;
           }
 
           .romantic-landing__button {
