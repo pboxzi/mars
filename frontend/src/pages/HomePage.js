@@ -158,6 +158,17 @@ const HomePage = () => {
           margin: 0 auto;
         }
 
+        .romantic-landing__hero-note {
+          width: min(36vw, 780px);
+          margin: 1.5vw auto 0;
+          color: rgba(255, 255, 255, 0.92);
+          font-size: 1.02vw;
+          line-height: 1.65vw;
+          letter-spacing: -0.01vw;
+          font-weight: 300;
+          text-align: center;
+        }
+
         .romantic-landing__button {
           display: inline-flex;
           align-items: center;
@@ -426,6 +437,14 @@ const HomePage = () => {
             width: 85.57vw;
           }
 
+          .romantic-landing__hero-note {
+            width: 84vw;
+            margin-top: 4.4vw;
+            font-size: 3.85vw;
+            line-height: 5.3vw;
+            letter-spacing: -0.05vw;
+          }
+
           .romantic-landing__button {
             min-width: 38.6vw;
             max-width: 74vw;
@@ -564,6 +583,11 @@ const HomePage = () => {
               src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-04/romtr_hdr.png"
               alt="The Romantic Tour"
             />
+            <p className="romantic-landing__hero-note">
+              Select premium ticket allocations are now open. Enjoy elevated show-night benefits, priority handling,
+              premium placement, and special guest gifts on eligible packages. Click below to view premium ticket
+              options.
+            </p>
             <Link to={PREMIUM_ACCESS_URL} className="romantic-landing__button romantic-landing__hero-button">
               Get Premium Tickets
             </Link>
