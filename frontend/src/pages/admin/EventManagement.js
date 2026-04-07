@@ -299,7 +299,7 @@ const EventManagement = () => {
                 {PREMIUM_TICKET_TIERS.map((tier) => (
                   <div key={tier.type} className="rounded-[20px] border border-stone-200 bg-stone-50 p-3.5">
                     <h4 className="font-bold text-[#151515]">{tier.label}</h4>
-                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div className="mt-3 grid gap-3 sm:grid-cols-3">
                       <div>
                         <label className="mb-1 block text-sm text-stone-500">Price ($)</label>
                         <input
@@ -318,7 +318,22 @@ const EventManagement = () => {
                           onChange={(e) => {
                             const value = parseInt(e.target.value, 10) || 0;
                             handleTicketChange(tier.type, 'total_quantity', value);
-                            handleTicketChange(tier.type, 'available_quantity', value);
+                            if (ticketData[tier.type].available_quantity > value) {
+                              handleTicketChange(tier.type, 'available_quantity', value);
+                            }
+                          }}
+                          className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-sm text-stone-500">Available Now</label>
+                        <input
+                          type="number"
+                          value={ticketData[tier.type].available_quantity}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value, 10) || 0;
+                            const cappedValue = Math.min(value, ticketData[tier.type].total_quantity || 0);
+                            handleTicketChange(tier.type, 'available_quantity', cappedValue);
                           }}
                           className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm"
                         />
