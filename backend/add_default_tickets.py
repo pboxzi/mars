@@ -12,48 +12,48 @@ DB_NAME = os.getenv('DB_NAME', 'bruno_mars_vip')
 DEFAULT_TICKETS = {
     'vip': {
         'price_usd': 4500,
-        'total_quantity': 72,
-        'available_quantity': 72,
-    },
-    'meetgreet': {
-        'price_usd': 12500,
         'total_quantity': 18,
         'available_quantity': 18,
     },
-    'backstage': {
-        'price_usd': 29000,
-        'total_quantity': 7,
-        'available_quantity': 7,
-    },
-    'soundcheck': {
-        'price_usd': 7500,
-        'total_quantity': 28,
-        'available_quantity': 28,
-    },
-    'photoop': {
-        'price_usd': 17500,
-        'total_quantity': 12,
-        'available_quantity': 12,
-    },
-    'aftershow': {
-        'price_usd': 42000,
+    'meetgreet': {
+        'price_usd': 12500,
         'total_quantity': 8,
         'available_quantity': 8,
     },
-    'hospitality': {
-        'price_usd': 125000,
-        'total_quantity': 5,
-        'available_quantity': 5,
-    },
-    'birthday': {
-        'price_usd': 210000,
+    'backstage': {
+        'price_usd': 29000,
         'total_quantity': 4,
         'available_quantity': 4,
     },
-    'corporate': {
-        'price_usd': 425000,
+    'soundcheck': {
+        'price_usd': 7500,
+        'total_quantity': 10,
+        'available_quantity': 10,
+    },
+    'photoop': {
+        'price_usd': 17500,
+        'total_quantity': 6,
+        'available_quantity': 6,
+    },
+    'aftershow': {
+        'price_usd': 42000,
+        'total_quantity': 4,
+        'available_quantity': 4,
+    },
+    'hospitality': {
+        'price_usd': 125000,
         'total_quantity': 3,
         'available_quantity': 3,
+    },
+    'birthday': {
+        'price_usd': 210000,
+        'total_quantity': 2,
+        'available_quantity': 2,
+    },
+    'corporate': {
+        'price_usd': 425000,
+        'total_quantity': 2,
+        'available_quantity': 2,
     },
     'privatemeetup': {
         'price_usd': 850000,
@@ -109,15 +109,15 @@ async def add_default_tickets():
     print(f'Synced {tickets_synced} ticket types across all events')
     print(f'Total tickets in database: {total_tickets}')
     print('\nUpdated pricing defaults:')
-    print('  VIP Access: $4,500 (72 per event)')
-    print('  Meet & Greet: $12,500 (18 per event)')
-    print('  Backstage Pass: $29,000 (7 per event)')
-    print('  Soundcheck Experience: $7,500 (28 per event)')
-    print('  Photo Op Experience: $17,500 (12 per event)')
-    print('  After Show Lounge: $42,000 (8 per event)')
-    print('  Private Table / Hospitality: $125,000 (5 per event)')
-    print('  Birthday / Celebration Package: $210,000 (4 per event)')
-    print('  Corporate Booking: $425,000 (3 per event)')
+    print('  VIP Access: $4,500 (18 per event)')
+    print('  Meet & Greet: $12,500 (8 per event)')
+    print('  Backstage Pass: $29,000 (4 per event)')
+    print('  Soundcheck Experience: $7,500 (10 per event)')
+    print('  Photo Op Experience: $17,500 (6 per event)')
+    print('  After Show Lounge: $42,000 (4 per event)')
+    print('  Private Table / Hospitality: $125,000 (3 per event)')
+    print('  Birthday / Celebration Package: $210,000 (2 per event)')
+    print('  Corporate Booking: $425,000 (2 per event)')
     print('  Private Meet-Up Request: $850,000 (1 per event)')
 
     client.close()

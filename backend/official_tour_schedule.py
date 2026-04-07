@@ -6,15 +6,15 @@ OFFICIAL_TOUR_IMAGE_URL = (
 OFFICIAL_TOUR_DESCRIPTION = "Official Bruno Mars tour date."
 
 DEFAULT_TICKET_SETUP = [
-    {"type": "vip", "price_usd": 4500.0, "available_quantity": 72, "total_quantity": 72},
-    {"type": "meetgreet", "price_usd": 12500.0, "available_quantity": 18, "total_quantity": 18},
-    {"type": "backstage", "price_usd": 29000.0, "available_quantity": 7, "total_quantity": 7},
-    {"type": "soundcheck", "price_usd": 7500.0, "available_quantity": 28, "total_quantity": 28},
-    {"type": "photoop", "price_usd": 17500.0, "available_quantity": 12, "total_quantity": 12},
-    {"type": "aftershow", "price_usd": 42000.0, "available_quantity": 8, "total_quantity": 8},
-    {"type": "hospitality", "price_usd": 125000.0, "available_quantity": 5, "total_quantity": 5},
-    {"type": "birthday", "price_usd": 210000.0, "available_quantity": 4, "total_quantity": 4},
-    {"type": "corporate", "price_usd": 425000.0, "available_quantity": 3, "total_quantity": 3},
+    {"type": "vip", "price_usd": 4500.0, "available_quantity": 18, "total_quantity": 18},
+    {"type": "meetgreet", "price_usd": 12500.0, "available_quantity": 8, "total_quantity": 8},
+    {"type": "backstage", "price_usd": 29000.0, "available_quantity": 4, "total_quantity": 4},
+    {"type": "soundcheck", "price_usd": 7500.0, "available_quantity": 10, "total_quantity": 10},
+    {"type": "photoop", "price_usd": 17500.0, "available_quantity": 6, "total_quantity": 6},
+    {"type": "aftershow", "price_usd": 42000.0, "available_quantity": 4, "total_quantity": 4},
+    {"type": "hospitality", "price_usd": 125000.0, "available_quantity": 3, "total_quantity": 3},
+    {"type": "birthday", "price_usd": 210000.0, "available_quantity": 2, "total_quantity": 2},
+    {"type": "corporate", "price_usd": 425000.0, "available_quantity": 2, "total_quantity": 2},
     {"type": "privatemeetup", "price_usd": 850000.0, "available_quantity": 1, "total_quantity": 1},
 ]
 
