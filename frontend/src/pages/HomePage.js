@@ -586,7 +586,7 @@ const HomePage = () => {
               alt="The Romantic Tour"
             />
             <p className="romantic-landing__hero-note">
-              For more premium ticket options, click the button below to get yours.
+              For more premium ticket options, click the button below to get your premium ticket.
             </p>
             <Link to={PREMIUM_ACCESS_URL} className="romantic-landing__button romantic-landing__hero-button">
               Get Premium Tickets
