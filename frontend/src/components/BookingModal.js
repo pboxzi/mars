@@ -66,7 +66,6 @@ const getDisplayTicketPrice = (ticket) => {
 
 const BookingModal = ({ event, onClose, initialTicketType = null }) => {
   const [bookingStep, setBookingStep] = useState(1);
-  const [showMoreAccessOptions, setShowMoreAccessOptions] = useState(false);
   const [tickets, setTickets] = useState([]);
   const [formData, setFormData] = useState({
     ticket_type: 'vip',
@@ -134,7 +133,6 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
 
   useEffect(() => {
     setBookingStep(1);
-    setShowMoreAccessOptions(false);
     setError('');
     setCaptchaError('');
   }, [event?.id]);
@@ -154,11 +152,6 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
 
   const featuredAccessTickets = useMemo(
     () => orderedTickets.filter((ticket) => ['vip', 'meetgreet', 'backstage'].includes(ticket.type)),
-    [orderedTickets]
-  );
-
-  const extendedAccessTickets = useMemo(
-    () => orderedTickets.filter((ticket) => !['vip', 'meetgreet', 'backstage'].includes(ticket.type)),
     [orderedTickets]
   );
 
@@ -329,8 +322,29 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
           Choose Your Access
         </h3>
         <p className="mt-2 max-w-[680px] text-[15px] leading-6 text-[#5f564d]">
-          Pick the experience that fits your night, then continue with your guest details.
+          Choose from the public premium options below, then continue with your guest details.
         </p>
+      </div>
+
+      <div className="mt-5 rounded-[22px] border border-[#dfd2c0] bg-white px-4 py-4">
+        <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8b7c6d]">How Premium Access Works</div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-[16px] bg-[#faf4eb] px-4 py-3">
+            <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#8b7c6d]">1</div>
+            <div className="mt-1 text-sm font-semibold text-[#171717]">Choose access</div>
+            <div className="mt-1 text-sm leading-6 text-[#5f564d]">Select the option that fits your night and group size.</div>
+          </div>
+          <div className="rounded-[16px] bg-[#faf4eb] px-4 py-3">
+            <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#8b7c6d]">2</div>
+            <div className="mt-1 text-sm font-semibold text-[#171717]">Submit details</div>
+            <div className="mt-1 text-sm leading-6 text-[#5f564d]">Send your guest details so the request can be reviewed.</div>
+          </div>
+          <div className="rounded-[16px] bg-[#faf4eb] px-4 py-3">
+            <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#8b7c6d]">3</div>
+            <div className="mt-1 text-sm font-semibold text-[#171717]">Receive approval</div>
+            <div className="mt-1 text-sm leading-6 text-[#5f564d]">Payment instructions are only sent after your access request is approved.</div>
+          </div>
+        </div>
       </div>
 
       <div className="mt-5 grid gap-3 xl:grid-cols-3">
@@ -368,54 +382,6 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
         })}
       </div>
 
-      {extendedAccessTickets.length > 0 && (
-        <div className="mt-4">
-          <button
-            type="button"
-            onClick={() => setShowMoreAccessOptions((current) => !current)}
-            className="inline-flex items-center rounded-full border border-[#dacdbd] bg-white px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-[#171717] transition hover:bg-[#f5ecdf]"
-          >
-            {showMoreAccessOptions ? 'Hide More Access Options' : 'View More Access Options'}
-          </button>
-        </div>
-      )}
-
-      {showMoreAccessOptions && extendedAccessTickets.length > 0 && (
-        <div className="mt-4 grid gap-2.5">
-          {extendedAccessTickets.map((ticket) => {
-            const isSelected = formData.ticket_type === ticket.type;
-            const isSoldOut = ticket.available_quantity <= 0;
-
-            return (
-              <button
-                key={ticket.type}
-                type="button"
-                disabled={isSoldOut}
-                onClick={() => selectAccessTier(ticket)}
-                className={`rounded-[18px] border px-4 py-3 text-left transition ${
-                  isSelected ? 'border-[#9d172b] bg-[#fff5ea]' : 'border-[#e3d6c5] bg-white hover:border-[#b89f82]'
-                } ${isSoldOut ? 'cursor-not-allowed opacity-40' : ''}`}
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <div className="text-[16px] font-black uppercase text-[#171717]">
-                      {getTicketTierLabel(ticket.type)}
-                    </div>
-                    <div className="mt-1 text-sm leading-6 text-[#5f564d]">{getTicketTierDescription(ticket.type)}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-[18px] font-black text-[#171717]">
-                      {formatTicketPrice(getDisplayTicketPrice(ticket))}
-                    </div>
-                    <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8b7c6d]">Starting</div>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
       <div className="mt-6 rounded-[22px] border border-[#dfd2c0] bg-white px-4 py-4">
         <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8b7c6d]">Selected Experience</div>
         <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -439,7 +405,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
       )}
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="text-sm text-[#6a6055]">Limited availability for this event. Choose your access and continue.</div>
+        <div className="text-sm text-[#6a6055]">Three public premium options are currently available for this event.</div>
         <button
           type="button"
           onClick={continueToGuestDetails}

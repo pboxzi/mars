@@ -2,80 +2,80 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'vip',
     label: 'VIP Access',
-    description: 'Private-entry VIP access with concierge arrival, priority venue handling, and a smoother premium show-night experience.',
-    priceUsd: 4500,
+    description: 'Dedicated VIP check-in, priority entry lane, premium reserved location, and on-site host assistance to your section.',
+    priceUsd: 895,
     availableQuantity: 72,
     totalQuantity: 72
   },
   {
     type: 'meetgreet',
     label: 'Meet & Greet',
-    description: 'A rare guest-facing experience with priority escort, premium coordination, and elevated personal attention from arrival onward.',
-    priceUsd: 12500,
+    description: 'Meet-and-greet moment, professional photo opportunity, premium reserved location, dedicated check-in, and escorted entry.',
+    priceUsd: 1495,
     availableQuantity: 18,
     totalQuantity: 18
   },
   {
     type: 'backstage',
     label: 'Backstage Pass',
-    description: 'Limited backstage access before showtime with escorted movement through restricted premium areas and high-touch hosting.',
-    priceUsd: 29000,
+    description: 'Pre-show backstage access window, guided escort through approved backstage areas, premium reserved location, and priority check-in.',
+    priceUsd: 2495,
     availableQuantity: 7,
     totalQuantity: 7
   },
   {
     type: 'soundcheck',
     label: 'Soundcheck Experience',
-    description: 'Early-entry soundcheck access with VIP check-in, preferred arrival flow, and a more intimate pre-show atmosphere.',
-    priceUsd: 7500,
+    description: 'Early-entry soundcheck viewing, dedicated VIP check-in, premium reserved location, and priority arrival access.',
+    priceUsd: 1195,
     availableQuantity: 28,
     totalQuantity: 28
   },
   {
     type: 'photoop',
     label: 'Photo Op Experience',
-    description: 'Professionally coordinated photo opportunity with premium handling, priority routing, and a polished keepsake moment.',
-    priceUsd: 17500,
+    description: 'Professional photo opportunity, premium reserved location, dedicated check-in, and guided entry support.',
+    priceUsd: 1795,
     availableQuantity: 12,
     totalQuantity: 12
   },
   {
     type: 'aftershow',
     label: 'After Show Lounge',
-    description: 'Invitation to an exclusive post-show lounge setting with refined hospitality, priority hosting, and elevated guest service.',
-    priceUsd: 42000,
+    description: 'Post-show lounge access, premium reserved location, host support, and priority guest handling after the performance.',
+    priceUsd: 2995,
     availableQuantity: 8,
     totalQuantity: 8
   },
   {
     type: 'hospitality',
     label: 'Private Table / Hospitality',
-    description: 'Luxury table hospitality with premium seating, hosted service, and white-glove attention designed for standout entertaining.',
-    priceUsd: 125000,
+    description: 'Private hosted table, premium reserved placement, dedicated guest check-in, and table-side service support.',
+    priceUsd: 6500,
     availableQuantity: 5,
     totalQuantity: 5
   },
   {
     type: 'birthday',
     label: 'Birthday / Celebration Package',
-    description: 'Celebration-focused concierge planning with premium access, tailored coordination, and a memorable show-night presentation.',
-    priceUsd: 210000,
+    description: 'Celebration setup coordination, premium reserved placement, dedicated guest arrival handling, and hosted support for your group.',
+    priceUsd: 9500,
     availableQuantity: 4,
     totalQuantity: 4
   },
   {
     type: 'corporate',
     label: 'Corporate Booking',
-    description: 'Executive entertainment package built for client hosting, premium access, and seamless VIP coordination from arrival to departure.',
-    priceUsd: 425000,
+    description: 'Corporate guest handling, premium reserved placement, dedicated arrival coordination, and hosted support for attending clients or teams.',
+    priceUsd: 12500,
     availableQuantity: 3,
     totalQuantity: 3
   },
   {
     type: 'privatemeetup',
     label: 'Private Meet-Up Request',
-    description: 'Ultra-limited bespoke access request designed for top-tier guests seeking the highest level of private concierge consideration.',
-    priceUsd: 850000,
+    description: 'Private request review for bespoke guest handling, premium reserved placement, and custom coordination subject to approval.',
+    priceUsd: 20000,
     availableQuantity: 1,
     totalQuantity: 1
   }
