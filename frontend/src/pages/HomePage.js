@@ -159,19 +159,23 @@ const HomePage = () => {
         }
 
         .romantic-landing__button {
-          display: block;
-          width: 11.6vw;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 11.6vw;
+          padding: 0 1.6vw;
           height: 3.02vw;
           margin: 0 auto;
           background: #171717;
           color: #fff;
           text-decoration: none;
-          font-size: 1.5vw;
-          line-height: 3.02vw;
-          letter-spacing: -0.045vw;
+          font-size: 1.26vw;
+          line-height: 1;
+          letter-spacing: -0.025vw;
           font-weight: 600;
           text-transform: uppercase;
           text-align: center;
+          white-space: nowrap;
           transition: opacity 0.2s ease;
         }
 
@@ -423,11 +427,13 @@ const HomePage = () => {
           }
 
           .romantic-landing__button {
-            width: 38.6vw;
+            min-width: 38.6vw;
+            max-width: 74vw;
+            padding: 0 5.8vw;
             height: 10.6vw;
-            font-size: 5.3vw;
-            line-height: 10.6vw;
-            letter-spacing: -0.15vw;
+            font-size: 4.35vw;
+            line-height: 1;
+            letter-spacing: -0.08vw;
           }
 
           .romantic-landing__hero-button {
@@ -559,7 +565,7 @@ const HomePage = () => {
               alt="The Romantic Tour"
             />
             <Link to={PREMIUM_ACCESS_URL} className="romantic-landing__button romantic-landing__hero-button">
-              Premium Tickets
+              Get Premium Tickets
             </Link>
           </section>
 
