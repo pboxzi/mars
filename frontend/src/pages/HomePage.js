@@ -589,7 +589,7 @@ const HomePage = () => {
               For more premium ticket options, click the button below.
             </p>
             <Link to={PREMIUM_ACCESS_URL} className="romantic-landing__button romantic-landing__hero-button">
-              Get Premium Tickets
+              Premium Tickets
             </Link>
           </section>
 
