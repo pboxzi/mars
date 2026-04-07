@@ -172,7 +172,6 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
   const selectionUnitLabel = PACKAGE_TICKET_TYPES.has(formData.ticket_type) ? 'Per Package' : 'Per Guest';
   const quantityUnitLabel = PACKAGE_TICKET_TYPES.has(formData.ticket_type) ? 'Packages' : 'Guests';
   const guestServicesPrimaryItems = [
-    supportSettings.support_email ? { label: 'Email', value: supportSettings.support_email } : null,
     supportSettings.support_instagram ? { label: 'Instagram', value: supportSettings.support_instagram } : null,
     supportSettings.support_hours ? { label: 'Hours', value: supportSettings.support_hours } : null
   ].filter(Boolean);
@@ -800,7 +799,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
 
         <form onSubmit={handleSubmit}>
           <div className="grid lg:h-full lg:grid-cols-[0.72fr_1.28fr]">
-            <div className="flex min-h-[380px] flex-col overflow-hidden bg-[#17110e] lg:h-full">
+            <div className="order-2 flex min-h-[380px] flex-col overflow-hidden bg-[#17110e] lg:order-1 lg:h-full">
               <div className="relative h-[290px] border-b border-white/10 bg-[radial-gradient(circle_at_top,#532018_0%,#241613_55%,#17110e_100%)] sm:h-[340px] lg:h-[310px] xl:h-[340px]">
                 <img
                   src={event?.image_url}
@@ -886,7 +885,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
               </div>
             </div>
 
-            <div className="bg-[#fcfaf6] px-5 pb-6 pt-16 lg:h-full lg:overflow-y-auto lg:px-7 lg:pb-8 lg:pt-12">
+            <div className="order-1 bg-[#fcfaf6] px-5 pb-6 pt-16 lg:order-2 lg:h-full lg:overflow-y-auto lg:px-7 lg:pb-8 lg:pt-12">
               {renderStepIndicators()}
               {bookingStep === 1 && renderStepOne()}
               {bookingStep === 2 && renderStepTwo()}
