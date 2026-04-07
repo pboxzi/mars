@@ -455,7 +455,7 @@ const TourPage = () => {
                       onClick={() => setSelectedEvent(event)}
                       data-testid={`tickets-button-${event.id}`}
                     >
-                      Premium Access
+                      Premium Tickets
                     </button>
                   </div>
                 </div>

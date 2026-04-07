@@ -559,7 +559,7 @@ const HomePage = () => {
               alt="The Romantic Tour"
             />
             <Link to={PREMIUM_ACCESS_URL} className="romantic-landing__button romantic-landing__hero-button">
-              Premium Access
+              Premium Tickets
             </Link>
           </section>
 
