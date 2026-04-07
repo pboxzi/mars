@@ -185,6 +185,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
       .join(' • ') || 'Guest Services follow-up is shared after review.';
 
   const updateQuantity = (nextValue) => {
+  const guestServicesDisplayLine = guestServicesLine.replace(/\s*â€¢\s*/g, ' | ');
     const safeMaximum = maxQuantity > 0 ? maxQuantity : 1;
     const safeValue = Math.max(1, Math.min(safeMaximum, nextValue));
     setFormData((prev) => ({
@@ -757,7 +758,11 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
               <div className="mt-2 leading-6">
                 Confirmation details and next-step updates are shared after review.
               </div>
-              <div className="mt-2 font-medium text-[#171717]">{guestServicesLine}</div>
+              <div className="mt-2 font-medium text-[#171717]">
+                {[...guestServicesPrimaryItems, ...guestServicesDirectItems]
+                  .map(({ label, value }) => `${label}: ${value}`)
+                  .join(' | ') || 'Guest Services follow-up is shared after review.'}
+              </div>
             </div>
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -797,9 +802,9 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
           <X className="h-4 w-4" />
         </button>
 
-        <form onSubmit={handleSubmit}>
-          <div className="grid lg:h-full lg:grid-cols-[0.72fr_1.28fr]">
-            <div className="order-2 flex min-h-[380px] flex-col overflow-hidden bg-[#17110e] lg:order-1 lg:h-full">
+        <form onSubmit={handleSubmit} className="lg:h-full">
+          <div className="grid lg:h-full lg:min-h-0 lg:grid-cols-[0.72fr_1.28fr]">
+            <div className="order-2 flex min-h-[380px] flex-col overflow-hidden bg-[#17110e] lg:order-1 lg:h-full lg:min-h-0">
               <div className="relative h-[290px] border-b border-white/10 bg-[radial-gradient(circle_at_top,#532018_0%,#241613_55%,#17110e_100%)] sm:h-[340px] lg:h-[310px] xl:h-[340px]">
                 <img
                   src={event?.image_url}
@@ -885,7 +890,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
               </div>
             </div>
 
-            <div className="order-1 bg-[#fcfaf6] px-5 pb-6 pt-16 lg:order-2 lg:h-full lg:overflow-y-auto lg:px-7 lg:pb-8 lg:pt-12">
+            <div className="order-1 bg-[#fcfaf6] px-5 pb-6 pt-16 lg:order-2 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:px-7 lg:pb-8 lg:pt-12">
               {renderStepIndicators()}
               {bookingStep === 1 && renderStepOne()}
               {bookingStep === 2 && renderStepTwo()}
