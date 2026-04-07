@@ -2,7 +2,7 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'vip',
     label: 'VIP Access',
-    description: 'Dedicated VIP check-in, priority entry lane, premium reserved location, and on-site host assistance to your section.',
+    description: 'Priority VIP check-in, expedited entry, premium reserved viewing, and on-site guest support from arrival to your section.',
     priceUsd: 895,
     availableQuantity: 72,
     totalQuantity: 72
@@ -10,7 +10,7 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'meetgreet',
     label: 'Meet & Greet',
-    description: 'Meet-and-greet moment, professional photo opportunity, premium reserved location, dedicated check-in, and escorted entry.',
+    description: 'Meet-and-greet moment, professional photo opportunity, premium reserved viewing, dedicated check-in, and escorted entry handling.',
     priceUsd: 1495,
     availableQuantity: 18,
     totalQuantity: 18
@@ -18,7 +18,7 @@ export const PREMIUM_TICKET_TIERS = [
   {
     type: 'backstage',
     label: 'Backstage Pass',
-    description: 'Pre-show backstage access window, guided escort through approved backstage areas, premium reserved location, and priority check-in.',
+    description: 'Pre-show backstage access window, guided escort through approved backstage areas, premium reserved viewing, and priority check-in.',
     priceUsd: 2495,
     availableQuantity: 7,
     totalQuantity: 7
