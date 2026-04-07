@@ -787,9 +787,9 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-[120] overflow-y-auto bg-black/80 px-3 py-4 backdrop-blur-[2px] lg:overflow-hidden" onClick={onClose}>
+    <div className="fixed inset-0 z-[120] overflow-y-auto bg-black/80 px-3 py-4 backdrop-blur-[2px]" onClick={onClose}>
       <div
-        className="relative mx-auto max-w-[1280px] overflow-hidden rounded-[30px] border border-[#d9ccb9] bg-[#f7efe2] text-[#171717] shadow-[0_32px_96px_rgba(0,0,0,0.36)] lg:h-[calc(100vh-2rem)]"
+        className="relative mx-auto max-w-[1280px] overflow-hidden rounded-[30px] border border-[#d9ccb9] bg-[#f7efe2] text-[#171717] shadow-[0_32px_96px_rgba(0,0,0,0.36)]"
         onClick={(clickEvent) => clickEvent.stopPropagation()}
         data-testid="booking-modal"
       >
@@ -802,9 +802,9 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
           <X className="h-4 w-4" />
         </button>
 
-        <form onSubmit={handleSubmit} className="lg:h-full">
-          <div className="grid lg:h-full lg:min-h-0 lg:grid-cols-[0.72fr_1.28fr]">
-            <div className="order-2 flex min-h-[380px] flex-col overflow-hidden bg-[#17110e] lg:order-1 lg:h-full lg:min-h-0">
+        <form onSubmit={handleSubmit}>
+          <div className="grid lg:grid-cols-[0.78fr_1.22fr]">
+            <div className="flex min-h-[380px] flex-col overflow-hidden bg-[#17110e] lg:min-h-[820px]">
               <div className="relative h-[290px] border-b border-white/10 bg-[radial-gradient(circle_at_top,#532018_0%,#241613_55%,#17110e_100%)] sm:h-[340px] lg:h-[310px] xl:h-[340px]">
                 <img
                   src={event?.image_url}
@@ -890,7 +890,7 @@ const BookingModal = ({ event, onClose, initialTicketType = null }) => {
               </div>
             </div>
 
-            <div className="order-1 bg-[#fcfaf6] px-5 pb-6 pt-16 lg:order-2 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:px-7 lg:pb-8 lg:pt-12">
+            <div className="bg-[#fcfaf6] px-5 pb-6 pt-16 lg:max-h-[820px] lg:overflow-y-auto lg:px-7 lg:pb-8 lg:pt-12">
               {renderStepIndicators()}
               {bookingStep === 1 && renderStepOne()}
               {bookingStep === 2 && renderStepTwo()}
