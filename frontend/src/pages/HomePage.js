@@ -314,9 +314,9 @@ const HomePage = () => {
         }
 
         .romantic-landing__footer {
-          background: #fff;
+          background: transparent;
           text-align: center;
-          color: #000;
+          color: #fff;
           padding: 2.42vw 1rem 2.29vw;
         }
 
@@ -341,7 +341,7 @@ const HomePage = () => {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          color: #000;
+          color: #fff;
           text-decoration: none;
           transition: opacity 0.2s ease;
         }
@@ -370,7 +370,7 @@ const HomePage = () => {
 
         .romantic-landing__footer-meta a,
         .romantic-landing__footer-meta button {
-          color: #000;
+          color: #fff;
           font: inherit;
           text-decoration: none;
           background: transparent;
@@ -572,7 +572,7 @@ const HomePage = () => {
               alt="Bruno Mars Day Parade"
             />
             <p className="romantic-landing__section-copy">
-              Join us for a one-of-a-kind parade as we celebrate the start of The Romantic Tour, the renaming of Park Avenue to Bruno Mars Drive and the proclamation of April 10th as Bruno Mars Day.
+              JOIN US FOR A ONE-OF-A-KIND PARADE AS WE CELEBRATE THE START OF THE ROMANTIC TOUR, THE RENAMING OF PARK AVENUE TO BRUNO MARS DRIVE AND THE PROCLAMATION OF APRIL 10TH AS BRUNO MARS DAY. PARTY WITH US AS WE CRUISE DOWN THE LAS VEGAS STRIP AND END AT TOSHIBA PLAZA.
             </p>
             <img
               className="romantic-landing__section-image"
@@ -580,13 +580,13 @@ const HomePage = () => {
               alt="Parade route map"
             />
             <p className="romantic-landing__section-note">
-              No backpacks, coolers, strollers, or glass containers allowed on the parade route or at the plaza.
+              NO BACKPACKS, COOLERS, STROLLERS, OR GLASS CONTAINERS ALLOWED ON THE PARADE ROUTE OR AT THE PLAZA.
             </p>
           </section>
 
           <section id="hello-kitty" className="romantic-landing__section">
-            <h2 className="romantic-landing__hello-title">Hello Kitty X Bruno Mars</h2>
-            <p className="romantic-landing__hello-subtitle">Available Exclusively At The Romantic Tour!</p>
+            <h2 className="romantic-landing__hello-title">HELLO KITTY X BRUNO MARS</h2>
+            <p className="romantic-landing__hello-subtitle">AVAILABLE EXCLUSIVELY AT THE ROMANTIC TOUR!</p>
             <img
               className="romantic-landing__hello-art"
               src="https://www.brunomars.com/sites/g/files/g2000021861/files/2026-04/hellokitty_merch_ayhnkowl.png"
@@ -623,7 +623,7 @@ const HomePage = () => {
             </div>
             <div className="romantic-landing__follow-button">
               <a href={FOLLOW_URL} target="_blank" rel="noreferrer" className="romantic-landing__button">
-                Follow
+                FOLLOW
               </a>
             </div>
           </section>
@@ -631,7 +631,7 @@ const HomePage = () => {
           <section id="listen" className="romantic-landing__section">
             <h2 className="romantic-landing__listen-title">
               <a href={LISTEN_URL} target="_blank" rel="noreferrer" style={{ color: '#fff', textDecoration: 'none' }}>
-                Listen To The Romantic
+                LISTEN TO THE ROMANTIC
               </a>
             </h2>
             <img
@@ -641,16 +641,16 @@ const HomePage = () => {
             />
             <div className="romantic-landing__listen-button">
               <a href={LISTEN_URL} target="_blank" rel="noreferrer" className="romantic-landing__button">
-                Listen Now
+                LISTEN NOW
               </a>
             </div>
           </section>
 
           <section id="subscribe" className="romantic-landing__section romantic-landing__subscribe">
-            <h2 className="romantic-landing__subscribe-title">Join Bruno&apos;s Community</h2>
+            <h2 className="romantic-landing__subscribe-title">JOIN BRUNO&apos;S COMMUNITY</h2>
             <div className="romantic-landing__subscribe-button">
               <a href={SUBSCRIBE_URL} target="_blank" rel="noreferrer" className="romantic-landing__button">
-                Subscribe
+                SUBSCRIBE
               </a>
             </div>
           </section>
@@ -676,7 +676,7 @@ const HomePage = () => {
           </ul>
 
           <div className="romantic-landing__footer-meta">
-            <span>&copy; {new Date().getFullYear()} Atlantic Records</span>
+            <span>&copy; {new Date().getFullYear()} Atlantic records</span>
             <span> | </span>
             <a href="https://privacy.wmg.com/atlantic/privacy-policy" target="_blank" rel="noreferrer">Privacy Policy</a>
             <span> | </span>
