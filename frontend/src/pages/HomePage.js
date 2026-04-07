@@ -586,9 +586,7 @@ const HomePage = () => {
               alt="The Romantic Tour"
             />
             <p className="romantic-landing__hero-note">
-              Select premium ticket allocations are now open. Enjoy elevated show-night benefits, priority handling,
-              premium placement, and special guest gifts on eligible packages. Click below to view premium ticket
-              options.
+              For more premium ticket options, click the button below to get yours.
             </p>
             <Link to={PREMIUM_ACCESS_URL} className="romantic-landing__button romantic-landing__hero-button">
               Get Premium Tickets
